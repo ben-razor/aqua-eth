@@ -1,6 +1,6 @@
 @font-face {
     font-family: "AquaPlaygroundRegular";
-    src: url('./fonts/Lato-Regular.ttf'); 
+    src: url('../fonts/Lato-Regular.ttf'); 
 }
 
 body {

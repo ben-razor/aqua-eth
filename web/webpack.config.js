@@ -1,7 +1,9 @@
+
 const path = require('path')
+const webpack = require('webpack')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
 
-module.exports = {
+let config = {
     mode: 'development',
     entry: {
         'index': '/src/index.js',
@@ -31,14 +33,18 @@ module.exports = {
             },
             {
                 test: /\.txt$/,
-                use: ['raw-loader'],
+                type: 'asset/source'
+            },
+            {
+                test: /fish\.json$/,
+                type: 'asset/inline'
             },
             {
                 test: /\.css$/,
                 use: ['style-loader', {
                     loader: 'css-loader',
                     options: {
-                        url: false
+                        url: true 
                     }
                 }]
             },
@@ -47,50 +53,62 @@ module.exports = {
                 use: {
                     loader: 'file-loader',
                     options: {
-                        name: '[name].[hash:6].[ext]'
+                        name: '[name].[hash:6].[ext]',
+                        outputPath: 'wasm/'
                     }
                 },
                 type: 'javascript/auto'
             },
             {
                 test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-                use: [
-                  {
-                    loader: 'file-loader',
-                    options: {
-                      name: '[name].[ext]',
-                      outputPath: 'fonts/'
-                    }
-                  }
-                ]
-              },
+                type: 'asset/resource',
+                generator: { filename: 'fonts/[name][hash][ext]' }
+            },
             {
                 test: /\.(png|jpg|gif|svg)(\?v=\d+\.\d+\.\d+)?$/,
-                use: [
-                  {
-                    loader: 'file-loader',
-                    options: {
-                      name: '[name].[ext]',
-                      outputPath: 'images/'
-                    }
-                  }
-                ]
+                type: 'asset/resource',
+                generator: { filename: 'images/[name][hash][ext]' }
             }
         ],
     },
     resolve: {
         extensions: ['.js', '.ts', '.tsx'],
+        fallback: {
+            util: require.resolve('util/'),
+            path: require.resolve('path-browserify/'),
+            buffer: require.resolve("buffer")
+        }
     },
     plugins: [
+        // fix "process is not defined" error:
+        // (do "npm install process" before running the build)
+        new webpack.ProvidePlugin({
+            Buffer: ['buffer', 'Buffer'],
+        }),
+        new webpack.ProvidePlugin({
+            process: 'process/browser',
+        }),
         new HTMLWebpackPlugin({
             chunks: ['index'],
             filename: 'index.html',
+            favicon: './src/images/favicon_io/favicon.ico',
             template: path.resolve('./src/index.html')
         }),
         new HTMLWebpackPlugin({
             chunks: ['sandbox'],
             filename: 'sandbox.html',
+            favicon: './src/images/favicon_io/favicon.ico',
             template: path.resolve('./src/sandbox.html')
         })
     ]
 }
+
+let configFunc = (env, options) => {
+    if(options.mode !== 'production') {
+        config['devtool'] = 'eval-source-map';
+    }
+
+    return config;
+}
+
+module.exports = configFunc;
