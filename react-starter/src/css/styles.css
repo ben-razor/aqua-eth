@@ -1,0 +1,12 @@
+@font-face {
+    font-family: "AquaPlaygroundRegular";
+    src: url('./fonts/Lato-Regular.ttf'); 
+}
+
+body {
+    font-family: AquaPlaygroundRegular, sans-serif; 
+}
+
+h1 {
+    color: hsla(75deg, 75%, 30%);
+}
