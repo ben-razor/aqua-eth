@@ -11,6 +11,7 @@ import {
     RequestFlowBuilder
 } from '@fluencelabs/fluence/dist/internal/compilerSupport/v2';
 import { Toast } from 'react-bootstrap';
+import AquaEthReact from './AquaEthReact';
 
 // These assignments are necessary to ensure that webpack pulls in these things
 // from the modules so that they are available to the code running in the sandbox
@@ -29,6 +30,8 @@ function FluenceReact(props) {
     const [connected, setConnected] = useState();
     const [connectedNode, setConnectedNode] = useState();
     const [connectionInfo, setConnectionInfo] = useState({});
+    const [remotePeerId, setRemotePeerId] = useState('');
+    const [remoteRelayPeerId, setRemoteRelayPeerId] = useState('');
 
     useEffect(() => {
         setAttemptingConnect(true);
@@ -54,18 +57,7 @@ function FluenceReact(props) {
         connectToHost();
 
     }, []);
-
-    useEffect(() => {
-        if(connectedNode) {
-            let ma = connectedNode.multiaddr;
-            let maParts = ma.split('/');
-            if(maParts.length >= 6) {
-                ma = ma.split('/').slice(0,6).join('/');
-            }
-            toast(`Connected to ${ma}`)
-        }
-    }, [connectedNode]);
-    
+   
     function copyToClipboard(id) {
         if(id === 'peer') {
             clip(connectionInfo.peerId, toast);
@@ -76,12 +68,30 @@ function FluenceReact(props) {
     }
 
     return <div>
-        <div>Connected to Fluence!</div>
-        { connectionInfo.peerId &&
-            <div>
-                <div>PeerId: {connectionInfo.peerId} <i className="fa fa-edit" onClick={e => copyToClipboard('peer')}/></div>
-                <div>RelayId: {connectionInfo.relayPeerId} <i className="fa fa-edit" onClick={e => copyToClipboard('relay')}/></div>
-            </div>
+        { connectionInfo.peerId ?
+            <Fragment>
+                <div>
+                    <h3>Fluence connected!</h3>
+                    <div>PeerId: {connectionInfo.peerId} <i className="fa fa-edit" onClick={e => copyToClipboard('peer')}/></div>
+                    <div>RelayId: {connectionInfo.relayPeerId} <i className="fa fa-edit" onClick={e => copyToClipboard('relay')}/></div>
+                </div>
+                <div>
+                    <h3>Set Remote</h3>
+                    <div>PeerId: <input type="text" value={remotePeerId} onChange={e => setRemotePeerId(e.target.value)} /></div>
+                    <div>RelayId: <input type="text" value={remoteRelayPeerId} onChange={e => setRemoteRelayPeerId(e.target.value)} /></div>
+                </div> 
+                <div>
+                    <AquaEthReact remotePeerId={remotePeerId} remoteRelayPeerId={remoteRelayPeerId} toast={toast} />
+                </div>
+            </Fragment>
+            :
+            <Fragment>
+                { attemptingConnect ? 
+                    'Connecting...' 
+                    :
+                    'Not connected'
+                }
+            </Fragment>
         }
     </div>
 }

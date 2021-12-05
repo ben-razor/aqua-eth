@@ -21,7 +21,7 @@ export function cloneObj(obj) {
 
 export function clip(text, toaster) {
     navigator.clipboard.writeText(text).then(function() {
-        toaster('Copy to clipboard was successful!', 'success');
+        toaster('Copied to clipboard', 'success');
     }, function(err) {
         toaster('Copy to clipbard failed, bummer!', 'error');
         console.log(err);
