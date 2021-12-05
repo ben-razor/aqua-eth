@@ -13,11 +13,6 @@ import {
     registerService,
 } from '@fluencelabs/fluence/dist/internal/compilerSupport/v2';
 
-
-// Services
-
-
-
 export function registerEthereum(...args) {
     registerService(
         args,
@@ -30,6 +25,14 @@ export function registerEthereum(...args) {
             ],
             "returnType" : {
                 "tag" : "void"
+            }
+        },
+        {
+            "functionName" : "getAccounts",
+            "argDefs" : [
+            ],
+            "returnType" : {
+                "tag" : "primitive"
             }
         }
     ]
@@ -86,6 +89,65 @@ export function enable(...args) {
     "functionName" : "enable",
     "returnType" : {
         "tag" : "void"
+    },
+    "argDefs" : [
+        {
+            "name" : "peerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function getAccounts(...args) {
+
+    let script = `
+                    (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                         (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                        )
+                        (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                       )
+                       (call %init_peer_id% ("ethereum" "getAccounts") [] stuff)
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [stuff])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "getAccounts",
+    "returnType" : {
+        "tag" : "primitive"
     },
     "argDefs" : [
         {

@@ -22,6 +22,15 @@ export default class AquaEthClient {
             this._triggerEvent('enable', 'connect', error, false, 'error-connection-error');
           }
         });
+      },
+      getAccounts: async() => {
+        let accounts = [];
+
+        try {
+            accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        } catch(e) {}
+
+        return accounts;
       }
     });
   }

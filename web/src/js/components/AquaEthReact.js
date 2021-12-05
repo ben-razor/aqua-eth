@@ -1,5 +1,5 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
-import { registerEthereum, enable } from '../compiled/aquaEth.js';
+import { registerEthereum, enable, getAccounts } from '../compiled/aquaEth.js';
 import AqexButton from './AqexButton';
 import AquaEthClient from '../aquaEthClient.js';
 
@@ -36,6 +36,8 @@ export default function AquaEthReact(props) {
   function testEthereum() {
     (async () => {
       await enable(remotePeerId, remoteRelayPeerId);
+      let accounts = await getAccounts(remotePeerId, remoteRelayPeerId);
+      toast('Got these accounts from remote host: ' + JSON.stringify(accounts));
     })();
   }
 
