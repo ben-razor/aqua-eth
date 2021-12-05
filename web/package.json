@@ -31,6 +31,7 @@
     "react-dom": "^17.0.2",
     "react-modal": "^3.14.4",
     "react-toast-notifications": "^2.5.1",
+    "stream": "^0.0.2",
     "util": "^0.12.4"
   }
 }

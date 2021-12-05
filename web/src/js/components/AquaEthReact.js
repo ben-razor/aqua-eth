@@ -1,34 +1,36 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
-import { registerEthereum, enable } from '../aqua_compiled/aquaEth';
+import { registerEthereum, enable } from '../compiled/aquaEth.js';
 import AqexButton from './AqexButton';
+import AquaEthClient from '../aquaEthClient.js';
 
 export default function AquaEthReact(props) {
   const remotePeerId = props.remotePeerId;
   const remoteRelayPeerId = props.remoteRelayPeerId;
   const toast = props.toast;
+  const [aquaEthClientCreated, setAquaEthClientCreated] = useState();
+
+
+  function aquaEthHandler(msg) {
+    if(msg.method === 'enable') {
+      if(msg.success) {
+        toast('Ethereum is connected!!\n' + JSON.stringify(msg.data));
+        console.log('Boo!!!');
+      }
+      else {
+        if(reason === 'error-user-rejected') {
+          toast('Please connect with MetaMask');
+        }
+        else {
+          toast('Error connecting to ethereum');
+          console.error(error);
+        }
+      }
+    }
+  }
 
   useEffect(() => {
-   registerEthereum({
-      enable: async () => {
-        console.log('Enabling');
-          
-        window.ethereum.request({ method: 'eth_requestAccounts' })
-        .then((accounts) => {
-          toast('Ethereum is connected!!\n' + JSON.stringify(accounts));
-        })
-        .catch((error) => {
-          if (error.code === 4001) {
-            // EIP-1193 userRejectedRequest error
-            toast('Please connect with MetaMask');
-            console.error(error);
-          } else {
-            console.error(error);
-          }
-        });
-
-        console.log('After enable')
-      }
-    });
+    let aquaEthClient = new AquaEthClient(aquaEthHandler);
+    setAquaEthClientCreated(true);
   }, []);
 
   function testEthereum() {
