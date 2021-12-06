@@ -17,7 +17,7 @@ export default function AquaEthReact(props) {
         console.log('Boo!!!');
       }
       else {
-        if(reason === 'error-user-rejected') {
+        if(msg.reason === 'error-user-rejected') {
           toast('Please connect with MetaMask');
         }
         else {
@@ -36,8 +36,8 @@ export default function AquaEthReact(props) {
   function testEthereum() {
     (async () => {
       await enable(remotePeerId, remoteRelayPeerId);
-      let accounts = await getAccounts(remotePeerId, remoteRelayPeerId);
-      toast('Got these accounts from remote host: ' + JSON.stringify(accounts));
+      // let accounts = await getAccounts(remotePeerId, remoteRelayPeerId);
+      // toast('Got these accounts from remote host: ' + JSON.stringify(accounts));
     })();
   }
 

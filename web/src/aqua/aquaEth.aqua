@@ -1,11 +1,31 @@
 import "@fluencelabs/aqua-dht/dht.aqua"
 import "@fluencelabs/aqua-lib/builtin.aqua"
 
+data Result:
+    success: bool
+    reason: string
+    code: u32
+    message: string
+
+data ResultString:
+    info: Result
+    data: string
+
+data ResultAddresses:
+    info: Result
+    data: []string
+
 service Ethereum("ethereum"):
     enable()
+    
     getAccounts() -> []string
+    
     registerListenerNode(listenerPeerId: string, listenerRelayId: string)
+    
     receiveAccounts(accounts: []string)
+    
+    getBalance(address: string) -> ResultString
+    
 
 func enable(peerId: string, relayId: string):
     on peerId via relayId:
@@ -23,5 +43,9 @@ func registerListenerNode(peerId: string, relayId: string, listenerPeerId: strin
 func listenerNodeCallback(peerId: string, relayId: string, accounts: []string):
     on peerId via relayId:
         Ethereum.receiveAccounts(accounts)
-    
-    
+
+func getBalance(peerId: string, relayId: string, address: string) -> ResultString:
+    on peerId via relayId:
+        res <- Ethereum.getBalance(address)
+    <- res
+        

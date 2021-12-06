@@ -10,6 +10,8 @@ export default class AquaEthClient {
   init() {
     registerEthereum({
       enable: async () => {
+        let accounts = [];
+
         window.ethereum.request({ method: 'eth_requestAccounts' })
         .then((accounts) => {
           this._triggerEvent('enable', 'connect', accounts);
@@ -41,6 +43,25 @@ export default class AquaEthClient {
       },
       receiveAccounts: async(accounts) => {
           console.log(accounts);
+      },
+      getBalance: async(account) => {
+        let success = true;
+        let reason = 'ok';
+        let message = '';
+        let code = 0;
+        let balance = 0;
+        
+        try {
+            balance = await ethereum.request({ method: 'eth_getBalance', params: [account, 'latest'] });
+        }
+        catch(e) {
+            console.log(e);
+            code = e.code;
+            message = e.message;
+            reason = 'error-eth-rpc';
+        }
+        
+        return {success, reason, code, message, data: balance};
       }
     });
   }
