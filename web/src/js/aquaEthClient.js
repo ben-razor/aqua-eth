@@ -2,6 +2,26 @@ import { registerEthereum } from './compiled/aquaEth.js';
 import Web3 from 'web3';
 
 export default class AquaEthClient {
+  /**
+   * This class contains the implementation for a Fluence service that wraps
+   * window.ethereum (as injected by MetaMask).
+   * 
+   * An event listener callback can be passed to trigger updates on the remote
+   * side of process (the client whose MetaMask is being used).
+   * 
+   * The event listener will be passed an object as its only parameter.
+   *  
+   * this.eventListener({ method, type, success, reason, data });
+   * 
+   * E.g. 
+   * 
+   * this._triggerEvent('requestAccounts', 'connect', accounts);
+   * 
+   * This will send an event from the requestAccounts service method, it happened
+   * in the "connect" part of the process. accounts is an array of eth accounts
+   * 
+   * @param {function} eventListener  
+   */
   constructor(eventListener) {
     this.eventListener = eventListener;
     this.init();
@@ -16,6 +36,7 @@ export default class AquaEthClient {
     if(!window.ethereum) {
       success = false;
       reason = 'error-no-ethereum';
+      this._triggerEvent('', '', {}, success, reason);
     }
 
     return { success, reason, message, code };
@@ -23,14 +44,14 @@ export default class AquaEthClient {
 
   init() {
     registerEthereum({
-      enable: async () => {
+      requestAccounts: async () => {
         let { success, reason, message, code } = this.checkEthStatus();
         let accounts = [];
 
         if(success) {
           window.ethereum.request({ method: 'eth_requestAccounts' })
           .then((accounts) => {
-            this._triggerEvent('enable', 'connect', accounts);
+            this._triggerEvent('requestAccounts', 'connect', accounts);
           })
           .catch((error) => {
             success = false;
@@ -39,11 +60,10 @@ export default class AquaEthClient {
             code = error.code;
 
             if (error.code === 4001) {
-              // EIP-1193 userRejectedRequest error
-              this._triggerEvent('enable', 'connect', error, false, 'error-user-rejected');
+              this._triggerEvent('requestAccounts', 'connect', error, false, 'error-user-rejected');
             } 
             else {
-              this._triggerEvent('enable', 'connect', error, false, 'error-connection-error');
+              this._triggerEvent('requestAccounts', 'connect', error, false, 'error-connection-error');
             }
 
             console.log(error);

@@ -1,5 +1,5 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
-import { registerEthereum, enable, getAccounts } from '../compiled/aquaEth.js';
+import { registerEthereum, requestAccounts, getAccounts } from '../compiled/aquaEth.js';
 import AqexButton from './AqexButton';
 import AquaEthClient from '../aquaEthClient.js';
 
@@ -9,20 +9,23 @@ export default function AquaEthReact(props) {
   const toast = props.toast;
   const [aquaEthClientCreated, setAquaEthClientCreated] = useState();
 
-
   function aquaEthHandler(msg) {
-    if(msg.method === 'enable') {
-      if(msg.success) {
-        toast('Ethereum is connected!!\n' + JSON.stringify(msg.data));
-        console.log('Boo!!!');
-      }
-      else {
-        if(msg.reason === 'error-user-rejected') {
-          toast('Please connect with MetaMask');
+    if(!msg.success && msg.reason === 'error-no-ethereum') {
+      toast(<div>This browser has no ethereum<br />Try MetaMask!</div>);
+    }
+    else {
+      if(msg.method === 'requestAccounts') {
+        if(msg.success) {
+          toast('Ethereum is connected!!\n' + JSON.stringify(msg.data));
         }
         else {
-          toast('Error connecting to ethereum');
-          console.error(error);
+          if(msg.reason === 'error-user-rejected') {
+            toast('Please connect with MetaMask');
+          }
+          else {
+            toast('Error connecting to ethereum');
+            console.error(error);
+          }
         }
       }
     }
@@ -35,7 +38,7 @@ export default function AquaEthReact(props) {
 
   function testEthereum() {
     (async () => {
-      await enable(remotePeerId, remoteRelayPeerId);
+      await requestAccounts(remotePeerId, remoteRelayPeerId);
       // let accounts = await getAccounts(remotePeerId, remoteRelayPeerId);
       // toast('Got these accounts from remote host: ' + JSON.stringify(accounts));
     })();

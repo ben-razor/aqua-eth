@@ -25,14 +25,6 @@ export function registerEthereum(...args) {
     "defaultServiceId" : "ethereum",
     "functions" : [
         {
-            "functionName" : "enable",
-            "argDefs" : [
-            ],
-            "returnType" : {
-                "tag" : "primitive"
-            }
-        },
-        {
             "functionName" : "getAccounts",
             "argDefs" : [
             ],
@@ -87,6 +79,14 @@ export function registerEthereum(...args) {
             "returnType" : {
                 "tag" : "void"
             }
+        },
+        {
+            "functionName" : "requestAccounts",
+            "argDefs" : [
+            ],
+            "returnType" : {
+                "tag" : "primitive"
+            }
         }
     ]
 }
@@ -94,89 +94,6 @@ export function registerEthereum(...args) {
 }
       
 // Functions
-
-export function enable(...args) {
-
-    let script = `
-                    (xor
-                     (seq
-                      (seq
-                       (seq
-                        (seq
-                         (seq
-                          (seq
-                           (seq
-                            (seq
-                             (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
-                             (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
-                            )
-                            (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
-                           )
-                           (call -relay- ("op" "noop") [])
-                          )
-                          (call relayId ("op" "noop") [])
-                         )
-                         (xor
-                          (call peerId ("ethereum" "enable") [] res)
-                          (seq
-                           (seq
-                            (seq
-                             (call relayId ("op" "noop") [])
-                             (call -relay- ("op" "noop") [])
-                            )
-                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
-                           )
-                           (call -relay- ("op" "noop") [])
-                          )
-                         )
-                        )
-                        (call relayId ("op" "noop") [])
-                       )
-                       (call -relay- ("op" "noop") [])
-                      )
-                      (xor
-                       (call %init_peer_id% ("callbackSrv" "response") [res])
-                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
-                      )
-                     )
-                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
-                    )
-    `
-    return callFunction(
-        args,
-        {
-    "functionName" : "enable",
-    "returnType" : {
-        "tag" : "primitive"
-    },
-    "argDefs" : [
-        {
-            "name" : "peerId",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        },
-        {
-            "name" : "relayId",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        }
-    ],
-    "names" : {
-        "relay" : "-relay-",
-        "getDataSrv" : "getDataSrv",
-        "callbackSrv" : "callbackSrv",
-        "responseSrv" : "callbackSrv",
-        "responseFnName" : "response",
-        "errorHandlingSrv" : "errorHandlingSrv",
-        "errorFnName" : "error"
-    }
-},
-        script
-    )
-}
-
 
 export function getAccounts(...args) {
 
@@ -229,6 +146,89 @@ export function getAccounts(...args) {
         args,
         {
     "functionName" : "getAccounts",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "peerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function requestAccounts(...args) {
+
+    let script = `
+                    (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (seq
+                          (seq
+                           (seq
+                            (seq
+                             (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                             (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                            )
+                            (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                          (call relayId ("op" "noop") [])
+                         )
+                         (xor
+                          (call peerId ("ethereum" "requestAccounts") [] res)
+                          (seq
+                           (seq
+                            (seq
+                             (call relayId ("op" "noop") [])
+                             (call -relay- ("op" "noop") [])
+                            )
+                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                         )
+                        )
+                        (call relayId ("op" "noop") [])
+                       )
+                       (call -relay- ("op" "noop") [])
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [res])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "requestAccounts",
     "returnType" : {
         "tag" : "primitive"
     },
