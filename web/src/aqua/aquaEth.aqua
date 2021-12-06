@@ -16,7 +16,7 @@ data ResultAddresses:
     data: []string
 
 service Ethereum("ethereum"):
-    enable()
+    enable() -> ResultAddresses
     
     getAccounts() -> []string
     
@@ -27,9 +27,10 @@ service Ethereum("ethereum"):
     getBalance(address: string) -> ResultString
     
 
-func enable(peerId: string, relayId: string):
+func enable(peerId: string, relayId: string) -> ResultAddresses:
     on peerId via relayId:
-        Ethereum.enable()
+        res <- Ethereum.enable()
+    <- res
         
 func getAccounts(peerId: string, relayId: string) -> []string:
     on peerId via relayId:

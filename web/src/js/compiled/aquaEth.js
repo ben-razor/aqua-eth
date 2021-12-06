@@ -29,7 +29,7 @@ export function registerEthereum(...args) {
             "argDefs" : [
             ],
             "returnType" : {
-                "tag" : "void"
+                "tag" : "primitive"
             }
         },
         {
@@ -104,36 +104,42 @@ export function enable(...args) {
                        (seq
                         (seq
                          (seq
-                          (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
-                          (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
-                         )
-                         (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
-                        )
-                        (call -relay- ("op" "noop") [])
-                       )
-                       (call relayId ("op" "noop") [])
-                      )
-                      (xor
-                       (call peerId ("ethereum" "enable") [])
-                       (seq
-                        (seq
-                         (seq
+                          (seq
+                           (seq
+                            (seq
+                             (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                             (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                            )
+                            (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
                           (call relayId ("op" "noop") [])
-                          (call -relay- ("op" "noop") [])
                          )
-                         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                         (xor
+                          (call peerId ("ethereum" "enable") [] res)
+                          (seq
+                           (seq
+                            (seq
+                             (call relayId ("op" "noop") [])
+                             (call -relay- ("op" "noop") [])
+                            )
+                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                         )
                         )
-                        (call -relay- ("op" "noop") [])
+                        (call relayId ("op" "noop") [])
                        )
-                      )
-                     )
-                     (seq
-                      (seq
-                       (call relayId ("op" "noop") [])
                        (call -relay- ("op" "noop") [])
                       )
-                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [res])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      )
                      )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
                     )
     `
     return callFunction(
@@ -141,7 +147,7 @@ export function enable(...args) {
         {
     "functionName" : "enable",
     "returnType" : {
-        "tag" : "void"
+        "tag" : "primitive"
     },
     "argDefs" : [
         {
