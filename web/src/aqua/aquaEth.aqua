@@ -1,0 +1,27 @@
+import "@fluencelabs/aqua-dht/dht.aqua"
+import "@fluencelabs/aqua-lib/builtin.aqua"
+
+service Ethereum("ethereum"):
+    enable()
+    getAccounts() -> []string
+    registerListenerNode(listenerPeerId: string, listenerRelayId: string)
+    receiveAccounts(accounts: []string)
+
+func enable(peerId: string, relayId: string):
+    on peerId via relayId:
+        Ethereum.enable()
+        
+func getAccounts(peerId: string, relayId: string) -> []string:
+    on peerId via relayId:
+        stuff <- Ethereum.getAccounts()
+    <- stuff
+    
+func registerListenerNode(peerId: string, relayId: string, listenerPeerId: string, listenerRelayId: string):
+    on peerId via relayId:
+        Ethereum.registerListenerNode(listenerPeerId, listenerRelayId)
+    
+func listenerNodeCallback(peerId: string, relayId: string, accounts: []string):
+    on peerId via relayId:
+        Ethereum.receiveAccounts(accounts)
+    
+    

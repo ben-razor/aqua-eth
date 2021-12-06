@@ -1,4 +1,5 @@
 import { registerEthereum } from './compiled/aquaEth.js';
+import Web3 from 'web3';
 
 export default class AquaEthClient {
   constructor(eventListener) {
@@ -31,6 +32,15 @@ export default class AquaEthClient {
         } catch(e) {}
 
         return accounts;
+      },
+      registerListenerNode: async(listenerPeerId, listenerRelayId) => {
+        ethereum.on('accountsChanged', (accounts) => {
+            console.log('cba ', accounts);
+            listenerNodeCallback(listenerPeerId, listenerRelayId, accounts);
+        });
+      },
+      receiveAccounts: async(accounts) => {
+          console.log(accounts);
       }
     });
   }
