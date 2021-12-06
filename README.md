@@ -2,6 +2,14 @@
 
 A wrapper around web3.js for interacting with Ethereum compatible blockchains using Fluence Aqua.
 
+For the Gitcoin Hackathon task:
+
+[Use The Fluence Js Node Example To Wrap And Expose A Web3 JS/TS Library](https://gitcoin.co/issue/fluencelabs/gitcoin-gr12-hackathon/1/100027204)
+
+May be useful for the task:
+
+[Enable Interactive Signing Of Arbitrary Data](https://gitcoin.co/issue/fluencelabs/gitcoin-gr12-hackathon/2/100027205)
+
 ## Fluence Network
 > [Fluence Network](https://fluence.network/) is an open application platform where apps can build on each other, share data and users.
 
