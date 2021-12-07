@@ -34,3 +34,7 @@ Nodes may be specially configured servers, or lightweight nodes running in the b
 It enables connections to be made to nodes to consume their services, and for new APIs to be exposed to the network.
 
 Importantly, **Aqua** can be compiled to JS so that rich applications can be written in JS.
+
+## Useful Links
+
+[MetaMask ui test harness with ethers.js](https://github.com/MetaMask/test-dapp/blob/main/src/index.js)
