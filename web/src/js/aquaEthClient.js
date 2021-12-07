@@ -1,10 +1,12 @@
 import { registerEthereum } from './compiled/aquaEthCompiled.js';
 import Web3 from 'web3';
 
-export default class AquaEthClient {
+/**
+ * This class contains the implementation for a Fluence service that wraps
+ * window.ethereum (as injected by MetaMask).
+ */
+ class AquaEthClient {
   /**
-   * This class contains the implementation for a Fluence service that wraps
-   * window.ethereum (as injected by MetaMask).
    * 
    * An event listener callback can be passed to trigger updates on the remote
    * side of process (the client whose MetaMask is being used).
@@ -49,11 +51,11 @@ export default class AquaEthClient {
         let accounts = [];
 
         if(success) {
-          window.ethereum.request({ method: 'eth_requestAccounts' })
-          .then((accounts) => {
+          try {
+            accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             this._triggerEvent('requestAccounts', 'connect', accounts);
-          })
-          .catch((error) => {
+          }
+          catch(error) {
             success = false;
             reason = 'error-eth-rpc';
             message = error.message;
@@ -67,14 +69,13 @@ export default class AquaEthClient {
             }
 
             console.log(error);
-          });
+          }
         }
 
         return { success, reason, code, message, data: accounts};
       },
       registerListenerNode: async(listenerPeerId, listenerRelayId) => {
         ethereum.on('accountsChanged', (accounts) => {
-            console.log('cba ', accounts);
             listenerNodeCallback(listenerPeerId, listenerRelayId, accounts);
         });
       },
@@ -110,3 +111,5 @@ export default class AquaEthClient {
     }
   }
 }
+
+export default AquaEthClient;
