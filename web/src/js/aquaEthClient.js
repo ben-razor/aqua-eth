@@ -1,4 +1,4 @@
-import { registerEthereum } from './compiled/aquaEth.js';
+import { registerEthereum } from './compiled/aquaEthCompiled.js';
 import Web3 from 'web3';
 
 export default class AquaEthClient {
@@ -71,15 +71,6 @@ export default class AquaEthClient {
         }
 
         return { success, reason, code, message, data: accounts};
-      },
-      getAccounts: async() => {
-        let accounts = [];
-
-        try {
-            accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-        } catch(e) {}
-
-        return accounts;
       },
       registerListenerNode: async(listenerPeerId, listenerRelayId) => {
         ethereum.on('accountsChanged', (accounts) => {

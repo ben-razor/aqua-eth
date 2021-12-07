@@ -1,5 +1,5 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
-import { registerEthereum, requestAccounts, getAccounts } from '../compiled/aquaEth.js';
+import { registerEthereum, requestAccounts, getAccounts } from '../compiled/aquaEthCompiled.js';
 import AqexButton from './AqexButton';
 import AquaEthClient from '../aquaEthClient.js';
 

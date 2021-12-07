@@ -16,9 +16,7 @@ data ResultAddresses:
     data: []string
 
 service Ethereum("ethereum"):
-    enable() -> ResultAddresses
-    
-    getAccounts() -> []string
+    requestAccounts() -> ResultAddresses
     
     registerListenerNode(listenerPeerId: string, listenerRelayId: string)
     
@@ -27,15 +25,10 @@ service Ethereum("ethereum"):
     getBalance(address: string) -> ResultString
     
 
-func enable(peerId: string, relayId: string) -> ResultAddresses:
+func requestAccounts(peerId: string, relayId: string) -> ResultAddresses:
     on peerId via relayId:
-        res <- Ethereum.enable()
+        res <- Ethereum.requestAccounts()
     <- res
-        
-func getAccounts(peerId: string, relayId: string) -> []string:
-    on peerId via relayId:
-        stuff <- Ethereum.getAccounts()
-    <- stuff
     
 func registerListenerNode(peerId: string, relayId: string, listenerPeerId: string, listenerRelayId: string):
     on peerId via relayId:
