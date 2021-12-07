@@ -28,6 +28,14 @@ export default function AquaEthReact(props) {
           }
         }
       }
+      else if(msg.method === 'registerListenerNode' && msg.success) {
+        toast(<div>
+          A remote peer registered to receive ethereum events<br />
+        </div>)
+      }
+      else {
+        console.log('Unhandled message (just letting you know)', msg);
+      }
     }
   }
 

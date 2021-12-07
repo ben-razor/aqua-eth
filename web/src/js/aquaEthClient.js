@@ -113,6 +113,25 @@ import Web3 from 'web3';
               data: JSON.stringify(chainId)
           });
         });
+        ethereum.on('connect', (connectInfo) => {
+          listenerNodeCallback(listenerPeerId, listenerRelayId, {
+              type: 'connect',
+              data: JSON.stringify(connectInfo)
+          });
+        });
+        ethereum.on('disconnect', (providerRPCError) => {
+          listenerNodeCallback(listenerPeerId, listenerRelayId, {
+              type: 'disconnect',
+              data: JSON.stringify(providerRPCError)
+          });
+        });
+        ethereum.on('message', (providerMessage) => {
+          listenerNodeCallback(listenerPeerId, listenerRelayId, {
+              type: 'message',
+              data: JSON.stringify(providerMessage)
+          });
+        });
+
         this._triggerEvent('registerListenerNode', 'registered', { 
           peerId: listenerPeerId, relayId: listenerRelayId
         });
