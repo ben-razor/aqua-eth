@@ -1,4 +1,4 @@
-import { registerEthereum } from './compiled/aquaEthCompiled.js';
+import { registerEthereum, listenerNodeCallback } from './compiled/aquaEthCompiled.js';
 import Web3 from 'web3';
 
 /**
@@ -74,14 +74,6 @@ import Web3 from 'web3';
 
         return { success, reason, code, message, data: accounts};
       },
-      registerListenerNode: async(listenerPeerId, listenerRelayId) => {
-        ethereum.on('accountsChanged', (accounts) => {
-            listenerNodeCallback(listenerPeerId, listenerRelayId, accounts);
-        });
-      },
-      receiveAccounts: async(accounts) => {
-          console.log(accounts);
-      },
       getBalance: async(account) => {
         let { success, reason, message, code } = this.checkEthStatus();
         let balance = 0;
@@ -101,8 +93,40 @@ import Web3 from 'web3';
         }
        
         return { success, reason, code, message, data: balance};
-      }
-    });
+      },
+      /**
+       * Register a node to receive callbacks from window.ethereum events.
+       * 
+       * @param {string} listenerPeerId 
+       * @param {string} listenerRelayId 
+       */
+      registerListenerNode: async(listenerPeerId, listenerRelayId) => {
+        ethereum.on('accountsChanged', (accounts) => {
+          listenerNodeCallback(listenerPeerId, listenerRelayId, {
+              type: 'accountsChanged',
+              data: JSON.stringify(accounts)
+          });
+        });
+        ethereum.on('chainChanged', (chainId) => {
+          listenerNodeCallback(listenerPeerId, listenerRelayId, {
+              type: 'chainChanged',
+              data: JSON.stringify(chainId)
+          });
+        });
+        this._triggerEvent('registerListenerNode', 'registered', { 
+          peerId: listenerPeerId, relayId: listenerRelayId
+        });
+      },
+      receiveData: async(jsonPacket) => {
+          try {
+            let data = JSON.parse(jsonPacket.data);
+            this._triggerEvent('receiveData', jsonPacket.type, data);
+          }
+          catch(e) {
+            this._triggerEvent('receiveData', jsonPacket.type, jsonPacket.data, false, 'error-decoding-json');
+        }
+    },
+  });
   }
 
   _triggerEvent(method, type, data={}, success=true, reason='ok') {

@@ -39,10 +39,10 @@ export function registerEthereum(...args) {
             }
         },
         {
-            "functionName" : "receiveAccounts",
+            "functionName" : "receiveData",
             "argDefs" : [
                 {
-                    "name" : "accounts",
+                    "name" : "packet",
                     "argType" : {
                         "tag" : "primitive"
                     }
@@ -280,14 +280,14 @@ export function listenerNodeCallback(...args) {
                           )
                           (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
                          )
-                         (call %init_peer_id% ("getDataSrv" "accounts") [] accounts)
+                         (call %init_peer_id% ("getDataSrv" "jsonPacket") [] jsonPacket)
                         )
                         (call -relay- ("op" "noop") [])
                        )
                        (call relayId ("op" "noop") [])
                       )
                       (xor
-                       (call peerId ("ethereum" "receiveAccounts") [accounts])
+                       (call peerId ("ethereum" "receiveData") [jsonPacket])
                        (seq
                         (seq
                          (seq
@@ -330,7 +330,7 @@ export function listenerNodeCallback(...args) {
             }
         },
         {
-            "name" : "accounts",
+            "name" : "jsonPacket",
             "argType" : {
                 "tag" : "primitive"
             }
