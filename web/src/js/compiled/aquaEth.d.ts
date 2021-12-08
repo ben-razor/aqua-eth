@@ -25,7 +25,7 @@ export interface EthereumDef {
     receiveData: (packet: { data: string; type: string; }, callParams: CallParams<'packet'>) => void | Promise<void>;
     registerListenerNode: (listenerPeerId: string, listenerRelayId: string, callParams: CallParams<'listenerPeerId' | 'listenerRelayId'>) => void | Promise<void>;
     requestAccounts: (callParams: CallParams<null>) => { data: string[]; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string[]; info: { code: number; message: string; reason: string; success: boolean; }; }>;
-    sendTransaction: (transactionRequest: { chainId: number; data: string; from: string; gasLimit: string; gasPrice: string; maxFeePerGas: string; maxPriorityFeePerGas: string; nonce: number; to: string; transactionRequest: number; value: string; }, callParams: CallParams<'transactionRequest'>) => { blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; } | Promise<{ blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; }>;
+    sendTransaction: (transactionRequest: { chainId: number; data: string; from: string; gasLimit: string; gasPrice: string; maxFeePerGas: string; maxPriorityFeePerGas: string; nonce: number; to: string; transactionRequest: number; value: string; }, callParams: CallParams<'transactionRequest'>) => { data: { blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; }; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: { blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; }; info: { code: number; message: string; reason: string; success: boolean; }; }>;
 }
 export function registerEthereum(service: EthereumDef): void;
 export function registerEthereum(serviceId: string, service: EthereumDef): void;
@@ -43,6 +43,11 @@ export type IdentityResultChainArgVal = { data: { chainId: number; currency: { d
 export type IdentityResultChainResult = { data: { chainId: number; currency: { decimals: number; name: string; symbol: string; }; name: string; network: string; networkId: number; shortName: string; }; info: { code: number; message: string; reason: string; success: boolean; }; }
 export function identityResultChain(val: IdentityResultChainArgVal, config?: {ttl?: number}): Promise<IdentityResultChainResult>;
 export function identityResultChain(peer: FluencePeer, val: IdentityResultChainArgVal, config?: {ttl?: number}): Promise<IdentityResultChainResult>;
+
+export type SendTransactionArgTransactionRequest = { chainId: number; data: string; from: string; gasLimit: string; gasPrice: string; maxFeePerGas: string; maxPriorityFeePerGas: string; nonce: number; to: string; transactionRequest: number; value: string; } 
+export type SendTransactionResult = { data: { blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; }; info: { code: number; message: string; reason: string; success: boolean; }; }
+export function sendTransaction(peerId: string, relayId: string, transactionRequest: SendTransactionArgTransactionRequest, config?: {ttl?: number}): Promise<SendTransactionResult>;
+export function sendTransaction(peer: FluencePeer, peerId: string, relayId: string, transactionRequest: SendTransactionArgTransactionRequest, config?: {ttl?: number}): Promise<SendTransactionResult>;
 
  
 export type GetBalanceResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }

@@ -150,7 +150,7 @@ func parseEther(peerId: string, relayId: string, amount: string) -> ResultString
         res <- Ethereum.parseEther(amount)
     <- res
 
-func sendTransaction(TransactionRequest: transactionRequest) -> ResultTransaction
+func sendTransaction(peerId: string, relayId: string, transactionRequest: TransactionRequest) -> ResultTransaction:
     on peerId via relayId:
         res <- Ethereum.sendTransaction(transactionRequest)
     <- res
