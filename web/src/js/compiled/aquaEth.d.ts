@@ -16,6 +16,7 @@ import {
 
 // Services
 export interface EthereumDef {
+    formatEther: (amount: string, callParams: CallParams<'amount'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     getBalance: (address: string, callParams: CallParams<'address'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     getBlockNumber: (callParams: CallParams<null>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     receiveData: (packet: { data: string; type: string; }, callParams: CallParams<'packet'>) => void | Promise<void>;
@@ -45,6 +46,11 @@ export function getBalance(peerId: string, relayId: string, address: string, con
 export function getBalance(peer: FluencePeer, peerId: string, relayId: string, address: string, config?: {ttl?: number}): Promise<GetBalanceResult>;
 
  
+export type FormatEtherResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
+export function formatEther(peerId: string, relayId: string, amount: string, config?: {ttl?: number}): Promise<FormatEtherResult>;
+export function formatEther(peer: FluencePeer, peerId: string, relayId: string, amount: string, config?: {ttl?: number}): Promise<FormatEtherResult>;
+
+ 
 
 export function registerListenerNode(peerId: string, relayId: string, listenerPeerId: string, listenerRelayId: string, config?: {ttl?: number}): Promise<void>;
 export function registerListenerNode(peer: FluencePeer, peerId: string, relayId: string, listenerPeerId: string, listenerRelayId: string, config?: {ttl?: number}): Promise<void>;
@@ -53,3 +59,8 @@ export type ListenerNodeCallbackArgJsonPacket = { data: string; type: string; }
 
 export function listenerNodeCallback(peerId: string, relayId: string, jsonPacket: ListenerNodeCallbackArgJsonPacket, config?: {ttl?: number}): Promise<void>;
 export function listenerNodeCallback(peer: FluencePeer, peerId: string, relayId: string, jsonPacket: ListenerNodeCallbackArgJsonPacket, config?: {ttl?: number}): Promise<void>;
+
+export type IdentityResultStringArgVal = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } 
+export type IdentityResultStringResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
+export function identityResultString(val: IdentityResultStringArgVal, config?: {ttl?: number}): Promise<IdentityResultStringResult>;
+export function identityResultString(peer: FluencePeer, val: IdentityResultStringArgVal, config?: {ttl?: number}): Promise<IdentityResultStringResult>;

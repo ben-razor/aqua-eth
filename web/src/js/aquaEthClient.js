@@ -1,12 +1,16 @@
 import { registerEthereum, listenerNodeCallback } from './compiled/aquaEth.js';
-import { ethers } from 'ethers';
+import { ethers, BigNumber } from 'ethers';
 
 let provider;
 let signer;
 
-provider = new ethers.providers.Web3Provider(window.ethereum);
+provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
 if(provider) {
   signer = provider.getSigner();
+}
+
+function result(success, reason, code, message, data) {
+  return { info: { success, reason, code, message }, data};
 }
 
 /**
@@ -34,6 +38,7 @@ if(provider) {
    */
   constructor(eventListener) {
     this.eventListener = eventListener;
+    this.registeredRemoteListeners = [];
     this.init();
   }
 
@@ -85,7 +90,7 @@ if(provider) {
           }
         }
 
-        return { success, reason, code, message, data: accounts};
+        return result(success, reason, code, message, accounts);
       },
       getBalance: async(account) => {
         let { success, reason, message, code } = this.checkEthStatus();
@@ -93,7 +98,9 @@ if(provider) {
 
         if(success) {
           try {
-              balance = await ethereum.request({ method: 'eth_getBalance', params: [account, 'latest'] });
+            let res = await provider.getBalance(account);
+            console.log('CHAIN', await provider.getNetwork());
+            balance = res.toHexString();
           }
           catch(e) {
               success = false;
@@ -105,7 +112,7 @@ if(provider) {
           }
         }
        
-        return { success, reason, code, message, data: balance};
+        return result(success, reason, code, message, balance);
       },
       getBlockNumber: async() => {
         let { success, reason, message, code } = this.checkEthStatus();
@@ -125,7 +132,27 @@ if(provider) {
           }
         }
 
-        return { success, reason, code, message, data: blockNumber};
+        return result(success, reason, code, message, blockNumber);
+      },
+      formatEther: async(amount) => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let amountOut = 0;
+      
+        if(success) {
+          try {
+            amountOut = ethers.utils.formatEther(amount)
+          }
+          catch(e) {
+            success = false;
+            code = e.code;
+            message = e.message;
+            reason = 'error-ethers';
+      
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, amountOut);
       },
       /**
        * Register a node to receive callbacks from window.ethereum events.
@@ -134,7 +161,15 @@ if(provider) {
        * @param {string} listenerRelayId 
        */
       registerListenerNode: async(listenerPeerId, listenerRelayId) => {
+        ethereum
+        .removeAllListeners('accountsChanged')
+        .removeAllListeners('chainChanged')
+        .removeAllListeners('connect')
+        .removeAllListeners('disconnect')
+        .removeAllListeners('message')
+
         ethereum.on('accountsChanged', (accounts) => {
+          console.log('Local: account changed', listenerPeerId, listenerRelayId);
           listenerNodeCallback(listenerPeerId, listenerRelayId, {
               type: 'accountsChanged',
               data: JSON.stringify(accounts)
@@ -170,12 +205,13 @@ if(provider) {
         });
       },
       receiveData: async(jsonPacket) => {
-          try {
-            let data = JSON.parse(jsonPacket.data);
-            this._triggerEvent('receiveData', jsonPacket.type, data);
-          }
-          catch(e) {
-            this._triggerEvent('receiveData', jsonPacket.type, jsonPacket.data, false, 'error-decoding-json');
+        console.log('RECEIVE', jsonPacket);
+        try {
+          let data = JSON.parse(jsonPacket.data);
+          this._triggerEvent('receiveData', jsonPacket.type, data);
+        }
+        catch(e) {
+          this._triggerEvent('receiveData', jsonPacket.type, jsonPacket.data, false, 'error-decoding-json');
         }
     },
   });

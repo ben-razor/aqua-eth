@@ -8,6 +8,9 @@ data ResultString:
     info: Result
     data: string
 
+func identityResultString(val: ResultString) -> ResultString:
+    <- val 
+
 data ResultAddresses:
     info: Result
     data: []string
@@ -20,8 +23,9 @@ service Ethereum("ethereum"):
     -- Methods that execute on the remote client (The one with MetaMask)
     requestAccounts() -> ResultAddresses
     getBalance(address: string) -> ResultString
-
     getBlockNumber() -> ResultString
+
+    formatEther(amount: string) -> ResultString
     
     -- Methods to register a listener for window.ethereum events on the
     -- local node
@@ -42,11 +46,23 @@ func listenerNodeCallback(peerId: string, relayId: string, jsonPacket: JSONPacke
         Ethereum.receiveData(jsonPacket)
 
 func getBalance(peerId: string, relayId: string, address: string) -> ResultString:
+    resBox: *ResultString
+
     on peerId via relayId:
-        res <- Ethereum.getBalance(address)
-    <- res
+        blockRes <- Ethereum.getBalance(address)
+        if blockRes.info.success:
+            resBox <- Ethereum.formatEther(blockRes.data)
+        else:
+            resBox <- identityResultString(blockRes)
+            
+    <- resBox! 
 
 func getBlockNumber(peerId: string, relayId: string) -> ResultString:
     on peerId via relayId:
         res <- Ethereum.getBlockNumber()
+    <- res
+
+func formatEther(peerId: string, relayId: string, amount: string) -> ResultString:
+    on peerId via relayId:
+        res <- Ethereum.formatEther(amount)
     <- res

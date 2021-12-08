@@ -1,5 +1,7 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
-import { registerEthereum, requestAccounts, getBalance, getBlockNumber } from '../compiled/aquaEth.js';
+import { registerEthereum, requestAccounts, getBalance, getBlockNumber,
+         formatEther, 
+         registerListenerNode} from '../compiled/aquaEth.js';
 import AqexButton from './AqexButton';
 import AquaEthClient from '../aquaEthClient.js';
 
@@ -15,7 +17,11 @@ export default function AquaEthReact(props) {
   const [aquaEthClientCreated, setAquaEthClientCreated] = useState();
   const [submitting, setSubmitting] = useState({});
   const [accounts, setAccounts] = useState();
+  const [balanceAccount, setBalanceAccount] = useState('');
   const [blockNumber, setBlockNumber] = useState();
+  const [balance, setBalance] = useState();
+  const [formatEtherAmount, setFormatEtherAmount] = useState(0);
+  const [etherAmount, setEtherAmount] = useState();
 
   function aquaEthHandler(msg) {
     if(!msg.success && msg.reason === 'error-no-ethereum') {
@@ -41,6 +47,11 @@ export default function AquaEthReact(props) {
           A remote peer registered to receive ethereum events<br />
         </div>)
       }
+      else if(msg.type === 'accountsChanged' && msg.success) {
+        let accounts = msg.data;
+        toast(<div>Received account changed message</div>);
+        setAccounts(accounts);
+      }
       else {
         console.log('Unhandled message (just letting you know)', msg);
       }
@@ -53,41 +64,38 @@ export default function AquaEthReact(props) {
   }, []);
 
   function handleError(res) {
-    toast('Error ' + res.reason);
+    toast('Error ' + res.message);
     console.log(res);
   }
 
-  function testEthereum() {
-    setButtonSubmitting('testEthereum', true);
-    (async () => {
-      try {
-        let res = await requestAccounts(remotePeerId, remoteRelayPeerId);
-
-        if(res.success) {
-          setAccounts(res.data);
-        }
-        else {
-          handleError(res);
-        }
-      }
-      catch(e) {
-        toast(e.toString(), 'error');
-        console.log(e);
-      }
-      finally {
-        setButtonSubmitting('testEthereum', false);
-      }
-    })();
-  }
-
-  function handleGetBlockNumber() {
-    setButtonSubmitting('getBlockNumber', true);
+  function handleFeature(id, data) {
+    setButtonSubmitting(id, true);
     (async() => {
       try {
-        let res = await getBlockNumber(remotePeerId, remoteRelayPeerId);
+        let res = {};
 
-        if(res.success) {
-          setBlockNumber(res.data);
+        if(id === 'requestAccounts') {
+          res = await requestAccounts(remotePeerId, remoteRelayPeerId);
+        }
+        else if(id === 'getBalance') {
+          res = await getBalance(remotePeerId, remoteRelayPeerId, data);
+        }
+        else if(id === 'getBlockNumber') {
+          res = await getBlockNumber(remotePeerId, remoteRelayPeerId);
+        }
+        else if(id === 'formatEther') {
+          res = await formatEther(remotePeerId, remoteRelayPeerId, data);
+        }
+
+        if(res.info.success) {
+          if(id === 'requestAccounts') {
+            setAccounts(res.data);
+
+            registerListenerNode(remotePeerId, remoteRelayPeerId, connectionInfo.peerId, connectionInfo.relayPeerId);
+          }
+          if(id === 'getBalance') { setBalance(res.data); }
+          else if(id === 'getBlockNumber') { setBlockNumber(res.data); }
+          else if(id === 'formatEther') { setEtherAmount(res.data); }
         }
         else {
           handleError(res);
@@ -98,10 +106,17 @@ export default function AquaEthReact(props) {
         console.log(e);
       }
       finally {
-        setButtonSubmitting('getBlockNumber', false);
+        setButtonSubmitting(id, false);
       }
     })();
   }
+  
+  useEffect(() => {
+    if(accounts && accounts.length) {
+      setBalanceAccount(accounts[0])
+      setBalance();
+    }
+  }, [accounts]);
 
   function setButtonSubmitting(id, sub) {
     let _submitting = {...submitting };
@@ -146,16 +161,40 @@ export default function AquaEthReact(props) {
   return <Fragment>
     <div className="er-features">
       { featurePanel( '', 
-          <AqexButton label="Get Accounts" id="testEthereum" className="playground-button playground-icon-button"
-            onClick={() => testEthereum()} isSubmitting={submitting['testEthereum']}
+          <AqexButton label="Get Accounts" id="requestAccounts" className="playground-button playground-icon-button"
+            onClick={() => handleFeature('requestAccounts')} isSubmitting={submitting['requestAccounts']}
             timeout={BUTTON_TIMEOUT} setUIMsg={handleUIMessage} />,
           formatAccounts(accounts)
       )}
       { featurePanel( '', 
           <AqexButton label="Block Number" id="getBlockNumber" className="playground-button playground-icon-button"
-            onClick={() => handleGetBlockNumber()} isSubmitting={submitting['getBlockNumber']} timeout={BUTTON_TIMEOUT}
+            onClick={() => handleFeature('getBlockNumber')} isSubmitting={submitting['getBlockNumber']} timeout={BUTTON_TIMEOUT}
             setUIMsg={handleUIMessage} />,
           blockNumber
+      )}
+      { featurePanel( '', 
+          <Fragment>
+            <div className="er-form-row">
+              <div className="er-form-label">Account</div>
+              <input type="text" value={ balanceAccount } onChange={e => setBalanceAccount(e.target.value)} />
+            </div>
+            <AqexButton label="Get Balance" id="getBalance" className="playground-button playground-icon-button"
+              onClick={() => handleFeature('getBalance', balanceAccount)} isSubmitting={submitting['getBalance']} timeout={BUTTON_TIMEOUT}
+              setUIMsg={handleUIMessage} />
+          </Fragment>,
+          balance 
+      )}
+      { featurePanel( '', 
+          <Fragment>
+            <div className="er-form-row">
+              <div className="er-form-label">Account</div>
+              <input type="text" value={ formatEtherAmount } onChange={e => setFormatEtherAmount(e.target.value)} />
+            </div>
+            <AqexButton label="Wei To Eth" id="formatEther" className="playground-button playground-icon-button"
+              onClick={() => handleFeature('formatEther', formatEtherAmount)} isSubmitting={submitting['formatEther']} timeout={BUTTON_TIMEOUT}
+              setUIMsg={handleUIMessage} />
+          </Fragment>,
+          etherAmount
       )}
     </div>
   </Fragment>

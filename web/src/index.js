@@ -28,6 +28,7 @@ function App(props) {
     connect.addHandler('fluence-connect', (data) => {
       setConnected(data.connected);
       setConnectionInfo({...data.connectionInfo});
+      setRemotePeerId(data.connectionInfo.peerId);
       setRemoteRelayPeerId(data.connectionInfo.relayPeerId);
     })
   }, []);
