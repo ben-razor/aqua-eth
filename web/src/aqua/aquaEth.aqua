@@ -20,6 +20,8 @@ service Ethereum("ethereum"):
     -- Methods that execute on the remote client (The one with MetaMask)
     requestAccounts() -> ResultAddresses
     getBalance(address: string) -> ResultString
+
+    getBlockNumber() -> ResultString
     
     -- Methods to register a listener for window.ethereum events on the
     -- local node
@@ -42,4 +44,9 @@ func listenerNodeCallback(peerId: string, relayId: string, jsonPacket: JSONPacke
 func getBalance(peerId: string, relayId: string, address: string) -> ResultString:
     on peerId via relayId:
         res <- Ethereum.getBalance(address)
+    <- res
+
+func getBlockNumber(peerId: string, relayId: string) -> ResultString:
+    on peerId via relayId:
+        res <- Ethereum.getBlockNumber()
     <- res

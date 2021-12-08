@@ -1,13 +1,16 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
-import { registerEthereum, requestAccounts, getAccounts } from '../compiled/aquaEthCompiled.js';
+import { registerEthereum, requestAccounts, getBalance, getBlockNumber } from '../compiled/aquaEth.js';
 import AqexButton from './AqexButton';
 import AquaEthClient from '../aquaEthClient.js';
+
+const BUTTON_TIMEOUT = 10000;
 
 export default function AquaEthReact(props) {
   const remotePeerId = props.remotePeerId;
   const remoteRelayPeerId = props.remoteRelayPeerId;
   const toast = props.toast;
   const [aquaEthClientCreated, setAquaEthClientCreated] = useState();
+  const [submitting, setSubmitting] = useState({});
 
   function aquaEthHandler(msg) {
     if(!msg.success && msg.reason === 'error-no-ethereum') {
@@ -52,6 +55,37 @@ export default function AquaEthReact(props) {
     })();
   }
 
+  function handleGetBlockNumber() {
+    setButtonSubmitting('getBlockNumber', true);
+    (async() => {
+      try {
+        let res = await getBlockNumber(remotePeerId, remoteRelayPeerId);
+        console.log(res);
+        setButtonSubmitting('getBlockNumber', false);
+      }
+      catch(e) {
+        toast(e.toString(), 'error');
+        console.log(e);
+      }
+      finally {
+        setButtonSubmitting('getBlockNumber', false);
+      }
+    })();
+  }
+
+  function setButtonSubmitting(id, sub) {
+    let _submitting = {...submitting };
+    _submitting[id] = sub;
+    setSubmitting(_submitting);
+  }
+
+  function handleUIMessage(msg) {
+    if(msg.type === 'ui-button-timeout') {
+      let buttonId = msg.data.id;
+      setButtonSubmitting(buttonId, false);
+    }
+  }
+
   return <Fragment>
     <AqexButton
       label={<i className="fas fa-magic" />}
@@ -59,6 +93,16 @@ export default function AquaEthReact(props) {
       hideLabelDuringSubmit={true}
       onClick={() => testEthereum()}
     />
+    <AqexButton
+      label="getBlockNumber"
+      id="getBlockNumber"
+      className="playground-button playground-icon-button"
+      onClick={() => handleGetBlockNumber()}
+      isSubmitting={submitting['getBlockNumber']}
+      timeout={BUTTON_TIMEOUT}
+      setUIMsg={handleUIMessage}
+    />
+
   </Fragment>
   
 }

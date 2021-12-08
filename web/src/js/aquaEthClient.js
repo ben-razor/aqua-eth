@@ -1,5 +1,13 @@
-import { registerEthereum, listenerNodeCallback } from './compiled/aquaEthCompiled.js';
-import Web3 from 'web3';
+import { registerEthereum, listenerNodeCallback } from './compiled/aquaEth.js';
+import { ethers } from 'ethers';
+
+let provider;
+let signer;
+
+provider = new ethers.providers.Web3Provider(window.ethereum);
+if(provider) {
+  signer = provider.getSigner();
+}
 
 /**
  * This class contains the implementation for a Fluence service that wraps
@@ -38,6 +46,11 @@ import Web3 from 'web3';
     if(!window.ethereum) {
       success = false;
       reason = 'error-no-ethereum';
+      this._triggerEvent('', '', {}, success, reason);
+    }
+    else if(!provider || !signer) {
+      success = false;
+      reason = 'error-no-ethers-init';
       this._triggerEvent('', '', {}, success, reason);
     }
 
@@ -93,6 +106,26 @@ import Web3 from 'web3';
         }
        
         return { success, reason, code, message, data: balance};
+      },
+      getBlockNumber: async() => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let blockNumber = 0;
+
+        if(success) {
+          try {
+            blockNumber = await provider.getBlockNumber();
+          }
+          catch(e) {
+              success = false;
+              code = e.code;
+              message = e.message;
+              reason = 'error-ethers';
+
+              console.log(e);
+          }
+        }
+
+        return { success, reason, code, message, data: blockNumber};
       },
       /**
        * Register a node to receive callbacks from window.ethereum events.
