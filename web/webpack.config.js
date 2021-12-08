@@ -36,8 +36,8 @@ let config = {
                 type: 'asset/source'
             },
             {
-                test: /fish\.json$/,
-                type: 'asset/inline'
+                test: /\.json$/,
+                type: 'asset/source'
             },
             {
                 test: /\.css$/,

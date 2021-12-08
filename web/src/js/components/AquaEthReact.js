@@ -1,5 +1,5 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
-import { registerEthereum, requestAccounts, getBalance, getBlockNumber,
+import { registerEthereum, requestAccounts, getChainInfo, getBalance, getBlockNumber,
          formatEther, parseEther,
          registerListenerNode} from '../compiled/aquaEth.js';
 import AqexButton from './AqexButton';
@@ -17,6 +17,7 @@ export default function AquaEthReact(props) {
   const [aquaEthClientCreated, setAquaEthClientCreated] = useState();
   const [submitting, setSubmitting] = useState({});
   const [accounts, setAccounts] = useState();
+  const [chainInfo, setChainInfo] = useState();
   const [balanceAccount, setBalanceAccount] = useState('');
   const [blockNumber, setBlockNumber] = useState();
   const [balance, setBalance] = useState();
@@ -54,6 +55,14 @@ export default function AquaEthReact(props) {
         toast(<div>Received account changed message</div>);
         setAccounts(accounts);
       }
+      else if(msg.type === 'chainChanged' && msg.success) {
+        let chainInfo = msg.data;
+        try {
+          setChainInfo(chainInfo);
+        }
+        catch(e) { };
+        toast(<div>Received chain changed message</div>);
+      }
       else {
         console.log('Unhandled message (just letting you know)', msg);
       }
@@ -79,6 +88,9 @@ export default function AquaEthReact(props) {
         if(id === 'requestAccounts') {
           res = await requestAccounts(remotePeerId, remoteRelayPeerId);
         }
+        else if(id === 'getChainInfo') {
+          res = await getChainInfo(remotePeerId, remoteRelayPeerId);
+        }
         else if(id === 'getBalance') {
           res = await getBalance(remotePeerId, remoteRelayPeerId, data);
         }
@@ -93,13 +105,14 @@ export default function AquaEthReact(props) {
           console.log('pe', res);
         }
 
-        if(res.info.success) {
+        setButtonSubmitting(id, false);
+        if(res && res.info.success) {
           if(id === 'requestAccounts') {
             setAccounts(res.data);
-
             registerListenerNode(remotePeerId, remoteRelayPeerId, connectionInfo.peerId, connectionInfo.relayPeerId);
           }
-          if(id === 'getBalance') { setBalance(res.data); }
+          else if(id === 'getChainInfo') { setChainInfo(res.data); }
+          else if(id === 'getBalance') { setBalance(res.data); }
           else if(id === 'getBlockNumber') { setBlockNumber(res.data); }
           else if(id === 'formatEther') { setEtherAmount(res.data); }
           else if(id === 'parseEther') { setWeiAmount(res.data); }
@@ -122,6 +135,7 @@ export default function AquaEthReact(props) {
     if(accounts && accounts.length) {
       setBalanceAccount(accounts[0])
       setBalance();
+      handleFeature('getChainInfo');
     }
   }, [accounts]);
 
@@ -165,6 +179,26 @@ export default function AquaEthReact(props) {
     </div>
   }
 
+  function formatChain(chainInfo) {
+    let chainUI;
+
+    if(chainInfo) {
+      chainUI = <Fragment>
+        <div className="er-form-row">
+          <div className="er-form-label">Name</div><div>{chainInfo.name}</div>
+        </div>
+        <div className="er-form-row">
+          <div className="er-form-label">Chain ID</div><div>{chainInfo.chainId}</div>
+        </div>
+        <div className="er-form-row">
+          <div className="er-form-label">Currency</div><div>{chainInfo.currency.name}</div>
+        </div>
+      </Fragment> 
+    }
+
+    return chainUI;
+  }
+
   return <Fragment>
     <div className="er-features">
       { featurePanel( '', 
@@ -173,6 +207,7 @@ export default function AquaEthReact(props) {
             timeout={BUTTON_TIMEOUT} setUIMsg={handleUIMessage} />,
           formatAccounts(accounts)
       )}
+      { featurePanel('Chain Info', '', formatChain(chainInfo)) }
       { featurePanel( '', 
           <AqexButton label="Block Number" id="getBlockNumber" className="playground-button playground-icon-button"
             onClick={() => handleFeature('getBlockNumber')} isSubmitting={submitting['getBlockNumber']} timeout={BUTTON_TIMEOUT}

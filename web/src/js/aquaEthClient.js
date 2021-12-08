@@ -1,5 +1,8 @@
 import { registerEthereum, listenerNodeCallback } from './compiled/aquaEth.js';
 import { ethers, BigNumber } from 'ethers';
+import { cloneObj } from './helpersHTML.js';
+import chainsJSON from '../data/chains.json';
+let chains;
 
 let provider;
 let signer;
@@ -11,6 +14,46 @@ if(provider) {
 
 function result(success, reason, code, message, data) {
   return { info: { success, reason, code, message }, data};
+}
+
+function getChainInfo(chainsJSON, id) {
+  if(!chains) {
+    try {
+      chains = JSON.parse(chainsJSON);
+    }
+    catch(e) {
+      console.log(e);
+    };
+  }
+
+  let chainInfo = {
+    name: 'Unknown',
+    chainId: id,
+    currency: {
+      name: 'Unknown'
+    }
+  };
+
+  for(let chain of chains) {
+    if(chain.chainId === id) {
+      let rawInfo = cloneObj(chain);
+      chainInfo = {
+        name: rawInfo.name,
+        chainId: rawInfo.chainId,
+        shortName: rawInfo.shortName, 
+        network: rawInfo.network, 
+        networkId: rawInfo.networkId, 
+        currency: {
+          name: rawInfo.nativeCurrency.name,
+          symbol: rawInfo.nativeCurrency.symbol,
+          decimals: rawInfo.nativeCurrency.decimals,
+        } 
+      }
+      break;
+    }
+  }
+
+  return chainInfo;
 }
 
 /**
@@ -91,6 +134,28 @@ function result(success, reason, code, message, data) {
         }
 
         return result(success, reason, code, message, accounts);
+      },
+      getChainInfo: async() => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let chainInfo = {};
+      
+        if(success) {
+          try {
+            let res = await provider.getNetwork();
+            let chainId = res.chainId;
+            chainInfo = getChainInfo(chainsJSON, chainId);
+          }
+          catch(e) {
+            success = false;
+            code = e.code;
+            message = e.message;
+            reason = 'error-ethers';
+      
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, chainInfo);
       },
       getBalance: async(account) => {
         let { success, reason, message, code } = this.checkEthStatus();
@@ -197,9 +262,11 @@ function result(success, reason, code, message, data) {
           });
         });
         ethereum.on('chainChanged', (chainId) => {
+          let intChainId = parseInt(chainId);
+          let chainInfo = getChainInfo(chainsJSON, intChainId);
           listenerNodeCallback(listenerPeerId, listenerRelayId, {
               type: 'chainChanged',
-              data: JSON.stringify(chainId)
+              data: JSON.stringify(chainInfo)
           });
         });
         ethereum.on('connect', (connectInfo) => {

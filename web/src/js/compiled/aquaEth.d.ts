@@ -19,6 +19,7 @@ export interface EthereumDef {
     formatEther: (amount: string, callParams: CallParams<'amount'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     getBalance: (address: string, callParams: CallParams<'address'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     getBlockNumber: (callParams: CallParams<null>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
+    getChainInfo: (callParams: CallParams<null>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     parseEther: (amount: string, callParams: CallParams<'amount'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     receiveData: (packet: { data: string; type: string; }, callParams: CallParams<'packet'>) => void | Promise<void>;
     registerListenerNode: (listenerPeerId: string, listenerRelayId: string, callParams: CallParams<'listenerPeerId' | 'listenerRelayId'>) => void | Promise<void>;
@@ -35,11 +36,6 @@ export function registerEthereum(peer: FluencePeer, serviceId: string, service: 
 export type GetBlockNumberResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
 export function getBlockNumber(peerId: string, relayId: string, config?: {ttl?: number}): Promise<GetBlockNumberResult>;
 export function getBlockNumber(peer: FluencePeer, peerId: string, relayId: string, config?: {ttl?: number}): Promise<GetBlockNumberResult>;
-
- 
-export type RequestAccountsResult = { data: string[]; info: { code: number; message: string; reason: string; success: boolean; }; }
-export function requestAccounts(peerId: string, relayId: string, config?: {ttl?: number}): Promise<RequestAccountsResult>;
-export function requestAccounts(peer: FluencePeer, peerId: string, relayId: string, config?: {ttl?: number}): Promise<RequestAccountsResult>;
 
  
 export type GetBalanceResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
@@ -70,3 +66,13 @@ export type IdentityResultStringArgVal = { data: string; info: { code: number; m
 export type IdentityResultStringResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
 export function identityResultString(val: IdentityResultStringArgVal, config?: {ttl?: number}): Promise<IdentityResultStringResult>;
 export function identityResultString(peer: FluencePeer, val: IdentityResultStringArgVal, config?: {ttl?: number}): Promise<IdentityResultStringResult>;
+
+ 
+export type RequestAccountsResult = { data: string[]; info: { code: number; message: string; reason: string; success: boolean; }; }
+export function requestAccounts(peerId: string, relayId: string, config?: {ttl?: number}): Promise<RequestAccountsResult>;
+export function requestAccounts(peer: FluencePeer, peerId: string, relayId: string, config?: {ttl?: number}): Promise<RequestAccountsResult>;
+
+ 
+export type GetChainInfoResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
+export function getChainInfo(peerId: string, relayId: string, config?: {ttl?: number}): Promise<GetChainInfoResult>;
+export function getChainInfo(peer: FluencePeer, peerId: string, relayId: string, config?: {ttl?: number}): Promise<GetChainInfoResult>;

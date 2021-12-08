@@ -8,6 +8,11 @@ data ResultString:
     info: Result
     data: string
 
+-- Same as result string but the user knows to parse JSON string
+data ResultJSONString:
+    info: Result
+    data: string
+
 func identityResultString(val: ResultString) -> ResultString:
     <- val 
 
@@ -19,9 +24,27 @@ data JSONPacket:
     type: string
     data: string
 
+data Currency:
+    name: string
+    symbol: string
+    decimals: u32 
+
+data Chain:
+    name: string
+    chainId: u32
+    shortName: string
+    network: string
+    networkId: u32
+    currency: Currency
+
+data ResultChain
+    info: Result
+    data: Chain
+
 service Ethereum("ethereum"):
     -- Methods that execute on the remote client (The one with MetaMask)
     requestAccounts() -> ResultAddresses
+    getChainInfo() -> ResultChain
     getBalance(address: string) -> ResultString
     getBlockNumber() -> ResultString
 
@@ -40,6 +63,11 @@ func requestAccounts(peerId: string, relayId: string) -> ResultAddresses:
         res <- Ethereum.requestAccounts()
     <- res
     
+func getChainInfo(peerId: string, relayId: string) -> ResultJSONString:
+    on peerId via relayId:
+        res <- Ethereum.getChainInfo()
+    <- res
+
 func registerListenerNode(peerId: string, relayId: string, listenerPeerId: string, listenerRelayId: string):
     on peerId via relayId:
         Ethereum.registerListenerNode(listenerPeerId, listenerRelayId)
