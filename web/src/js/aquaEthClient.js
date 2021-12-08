@@ -135,7 +135,7 @@ function getChainInfo(chainsJSON, id) {
 
         return result(success, reason, code, message, accounts);
       },
-      getChainInfo: async() => {
+      getConnectedChainInfo: async() => {
         let { success, reason, message, code } = this.checkEthStatus();
         let chainInfo = {};
       
@@ -143,6 +143,27 @@ function getChainInfo(chainsJSON, id) {
           try {
             let res = await provider.getNetwork();
             let chainId = res.chainId;
+            chainInfo = getChainInfo(chainsJSON, chainId);
+            console.log('CI', chainInfo)
+          }
+          catch(e) {
+            success = false;
+            code = e.code;
+            message = e.message;
+            reason = 'error-ethers';
+      
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, chainInfo);
+      },
+      getChainInfo: async(chainId) => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let chainInfo = {};
+      
+        if(success) {
+          try {
             chainInfo = getChainInfo(chainsJSON, chainId);
           }
           catch(e) {
@@ -239,6 +260,26 @@ function getChainInfo(chainsJSON, id) {
         }
       
         return result(success, reason, code, message, amountOut);
+      },
+      sendTransaction: async(transactionRequest) => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let transactionResult = 0;
+      
+        if(success) {
+          try {
+            transactionResult = await sendTransaction(transactionRequest)
+          }
+          catch(e) {
+            success = false;
+            code = e.code;
+            message = e.message;
+            reason = 'error-ethers';
+      
+            console.log(e);
+          }
+        }
+      
+        return { success, reason, code, message, data: transactionResult};
       },
       /**
        * Register a node to receive callbacks from window.ethereum events.

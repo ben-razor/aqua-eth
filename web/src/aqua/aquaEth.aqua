@@ -13,12 +13,13 @@ data ResultJSONString:
     info: Result
     data: string
 
-func identityResultString(val: ResultString) -> ResultString:
-    <- val 
-
 data ResultAddresses:
     info: Result
     data: []string
+
+data ResultU32:
+    info: Result
+    data: u32
 
 data JSONPacket:
     type: string
@@ -37,14 +38,54 @@ data Chain:
     networkId: u32
     currency: Currency
 
-data ResultChain
+data ResultChain:
     info: Result
     data: Chain
+
+data TransactionRequest:
+    to: string
+    from: string
+    nonce: u32
+    data: string
+    value: string
+    gasLimit: string
+    gasPrice: string
+    maxFeePerGas: string
+    maxPriorityFeePerGas: string
+    chainId: u32
+    transactionRequest: u32
+
+data TransactionResponse:
+    blockNumber: u32
+    blockHash: string
+    timestamp: u32
+    confirmation: u32
+    raw: string
+    type: u32
+
+alias BigNumber: string 
+
+data TransactionReceipt:
+    to: string
+    from: string
+    contractAddress: string
+    transactionIndex: u32
+    type: u32
+    gasUsed: BigNumber
+    transactionHash: string
+    status: bool 
+
+func identityResultString(val: ResultString) -> ResultString:
+    <- val 
+
+func identityResultChain(val: ResultChain) -> ResultChain:
+    <- val 
 
 service Ethereum("ethereum"):
     -- Methods that execute on the remote client (The one with MetaMask)
     requestAccounts() -> ResultAddresses
-    getChainInfo() -> ResultChain
+    getConnectedChainInfo() -> ResultChain
+    getChainInfo(chainId: u32) -> ResultChain
     getBalance(address: string) -> ResultString
     getBlockNumber() -> ResultString
 
@@ -53,6 +94,8 @@ service Ethereum("ethereum"):
     -- Eth to Wei
     parseEther(amount: string) -> ResultString
     
+    sendTransaction(transactionRequest: TransactionRequest) -> TransactionResponse
+
     -- Methods to register a listener for window.ethereum events on the
     -- local node
     registerListenerNode(listenerPeerId: string, listenerRelayId: string)
@@ -63,9 +106,9 @@ func requestAccounts(peerId: string, relayId: string) -> ResultAddresses:
         res <- Ethereum.requestAccounts()
     <- res
     
-func getChainInfo(peerId: string, relayId: string) -> ResultJSONString:
+func getChainInfo(peerId: string, relayId: string) -> ResultChain:
     on peerId via relayId:
-        res <- Ethereum.getChainInfo()
+        res <- Ethereum.getConnectedChainInfo()
     <- res
 
 func registerListenerNode(peerId: string, relayId: string, listenerPeerId: string, listenerRelayId: string):

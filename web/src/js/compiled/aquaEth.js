@@ -63,6 +63,20 @@ export function registerEthereum(...args) {
         {
             "functionName" : "getChainInfo",
             "argDefs" : [
+                {
+                    "name" : "chainId",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                }
+            ],
+            "returnType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "functionName" : "getConnectedChainInfo",
+            "argDefs" : [
             ],
             "returnType" : {
                 "tag" : "primitive"
@@ -119,6 +133,20 @@ export function registerEthereum(...args) {
         {
             "functionName" : "requestAccounts",
             "argDefs" : [
+            ],
+            "returnType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "functionName" : "sendTransaction",
+            "argDefs" : [
+                {
+                    "name" : "transactionRequest",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                }
             ],
             "returnType" : {
                 "tag" : "primitive"
@@ -194,6 +222,53 @@ export function getBlockNumber(...args) {
         },
         {
             "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function identityResultChain(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                       (call %init_peer_id% ("getDataSrv" "val") [] val)
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [val])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "identityResultChain",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "val",
             "argType" : {
                 "tag" : "primitive"
             }
@@ -852,7 +927,7 @@ export function getChainInfo(...args) {
                           (call relayId ("op" "noop") [])
                          )
                          (xor
-                          (call peerId ("ethereum" "getChainInfo") [] res)
+                          (call peerId ("ethereum" "getConnectedChainInfo") [] res)
                           (seq
                            (seq
                             (seq

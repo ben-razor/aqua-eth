@@ -111,11 +111,10 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 
 .er-header-details {
     display: flex;
-    align-items: baseline;
+    align-items: center;
 }
 
 .er-header-title {
-    margin-right: 1em;
 }
 
 .er-sub-title {
@@ -158,12 +157,13 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 .er-feature {
     box-sizing: border-box;
     flex: 1;
-    border: 1px solid hsl(0deg, 0%, 20%);
+    border: 1px solid hsl(0deg, 0%, 40%);
     border-radius: 0.5em;
     padding: 0.5em;
     margin: 0.2em;
     min-width: 32%;
     max-width: 32%;
+    box-shadow: 2px 0px 4px hsl(0deg, 0%, 80%);
 }
 
 .er-feature-title {
@@ -177,6 +177,11 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 .er-feature-output {
     padding: 0.5em 0;
     word-break: break-all;
+}
+
+.er-header-logo {
+    width: 3em;
+    height: 3em;
 }
 
 @media (max-width: 992px) {

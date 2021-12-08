@@ -5,6 +5,7 @@ import { ToastProvider, useToasts } from 'react-toast-notifications';
 import FluenceReact from './js/components/FluenceReact';
 import connect from './js/components/Connect';
 import AquaEthReact from './js/components/AquaEthReact';
+import logo from '../src/images/aqua-eth-1.png';
 
 const TOAST_TIMEOUT = 4000;
 
@@ -37,7 +38,8 @@ function App(props) {
     <Fragment>
       <div className="er-header">
         <div className="er-header-details">
-          <h1 className="er-header-title">Eth Remote</h1>
+          <h2 className="er-header-title">Eth Remote</h2>
+          <img className="er-header-logo" alt="Logo" src={logo} />
           <h3>Powered by Fluence Network</h3>
         </div>
         <div className="er-header-controls">
