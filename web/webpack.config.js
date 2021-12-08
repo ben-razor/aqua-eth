@@ -65,7 +65,7 @@ let config = {
                 generator: { filename: 'fonts/[name][hash][ext]' }
             },
             {
-                test: /\.(png|jpg|gif|svg)(\?v=\d+\.\d+\.\d+)?$/,
+                test: /\.(png|jpg|gif|svg|ico)(\?v=\d+\.\d+\.\d+)?$/,
                 type: 'asset/resource',
                 generator: { filename: 'images/[name][hash][ext]' }
             }

@@ -56,6 +56,13 @@ function getChainInfo(chainsJSON, id) {
   return chainInfo;
 }
 
+function callbackAllListeners(o, type, data) {
+  for(let peerId of Object.keys(o.registeredRemoteListeners)) {
+    let relayId = o.registeredRemoteListeners[peerId].relayId;
+    listenerNodeCallback(peerId, relayId, { type, data });
+  }
+}
+
 /**
  * This class contains the implementation for a Fluence service that wraps
  * window.ethereum (as injected by MetaMask).
@@ -81,7 +88,7 @@ function getChainInfo(chainsJSON, id) {
    */
   constructor(eventListener) {
     this.eventListener = eventListener;
-    this.registeredRemoteListeners = [];
+    this.registeredRemoteListeners = {};
     this.init();
   }
 
@@ -261,13 +268,34 @@ function getChainInfo(chainsJSON, id) {
       
         return result(success, reason, code, message, amountOut);
       },
+      tellListener: async(type, data) => {
+        for(let peerId in Object.keys(this.registeredRemoteListeners)) {
+          let relayId = this.registeredRemoteListeners[peerId].relayId;
+          listenerNodeCallback(peerId, relayId, { type, data: JSON.stringify(data) });
+        }
+      },
       sendTransaction: async(transactionRequest) => {
         let { success, reason, message, code } = this.checkEthStatus();
         let transactionResult = 0;
       
         if(success) {
           try {
-            transactionResult = await sendTransaction(transactionRequest)
+            transactionRequest.value = ethers.utils.parseEther(transactionRequest.value);
+            transactionResult = await signer.sendTransaction(transactionRequest)
+            console.log('tr', transactionResult);
+            console.log('listeners', this.registeredRemoteListeners);
+
+            callbackAllListeners(this, 'transactionCreated', transactionResult);
+
+            console.log('af1');
+
+            let superfly = this;
+            provider.once(transactionResult.hash, function(transaction) {
+              console.log('Transaction Mined: ' + transaction.hash);
+              console.log(transaction);
+              callbackAllListeners(superfly, 'transactionMined', transaction);
+            });
+            let conf = await transactionResult.wait;
           }
           catch(e) {
             success = false;
@@ -288,6 +316,12 @@ function getChainInfo(chainsJSON, id) {
        * @param {string} listenerRelayId 
        */
       registerListenerNode: async(listenerPeerId, listenerRelayId) => {
+        if(!(listenerPeerId in this.registeredRemoteListeners)) {
+          this.registeredRemoteListeners[listenerPeerId] = {
+            relayId: listenerRelayId
+          }
+        }
+
         ethereum
         .removeAllListeners('accountsChanged')
         .removeAllListeners('chainChanged')
@@ -296,7 +330,6 @@ function getChainInfo(chainsJSON, id) {
         .removeAllListeners('message')
 
         ethereum.on('accountsChanged', (accounts) => {
-          console.log('Local: account changed', listenerPeerId, listenerRelayId);
           listenerNodeCallback(listenerPeerId, listenerRelayId, {
               type: 'accountsChanged',
               data: JSON.stringify(accounts)

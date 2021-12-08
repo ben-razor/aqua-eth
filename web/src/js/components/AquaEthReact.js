@@ -1,6 +1,6 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
 import { registerEthereum, requestAccounts, getChainInfo, getBalance, getBlockNumber,
-         formatEther, parseEther,
+         formatEther, parseEther, sendTransaction,
          registerListenerNode} from '../compiled/aquaEth.js';
 import AqexButton from './AqexButton';
 import AquaEthClient from '../aquaEthClient.js';
@@ -25,6 +25,9 @@ export default function AquaEthReact(props) {
   const [etherAmount, setEtherAmount] = useState();
   const [parseEtherAmount, setParseEtherAmount] = useState(0);
   const [weiAmount, setWeiAmount] = useState();
+  const [sendTransactionTo, setSendTransactionTo] = useState('');
+  const [sendTransactionAmount, setSendTransactionAmount] = useState('');
+  const [sendTransactionResult, setSendTransactionResult] = useState('');
 
   function aquaEthHandler(msg) {
     if(!msg.success && msg.reason === 'error-no-ethereum') {
@@ -102,7 +105,10 @@ export default function AquaEthReact(props) {
         }
         else if(id === 'parseEther') {
           res = await parseEther(remotePeerId, remoteRelayPeerId, data);
-          console.log('pe', res);
+        }
+        else if(id === 'sendTransaction') {
+          res = await sendTransaction(remotePeerId, remoteRelayPeerId, data);
+          console.log('sendTransaction', res);
         }
 
         setButtonSubmitting(id, false);
@@ -116,6 +122,7 @@ export default function AquaEthReact(props) {
           else if(id === 'getBlockNumber') { setBlockNumber(res.data); }
           else if(id === 'formatEther') { setEtherAmount(res.data); }
           else if(id === 'parseEther') { setWeiAmount(res.data); }
+          else if(id === 'sendTransaction') { setSendTransactionResult(JSON.stringify(res.data)); }
         }
         else {
           handleError(res);
@@ -214,6 +221,13 @@ export default function AquaEthReact(props) {
     return balanceUI;
   }
 
+  function createTransactionRequest() {
+    return {
+      to: sendTransactionTo,
+      value: sendTransactionAmount
+    }
+  }
+
   return <Fragment>
     <div className="er-features">
       { featurePanel( '', 
@@ -264,6 +278,22 @@ export default function AquaEthReact(props) {
               setUIMsg={handleUIMessage} />
           </Fragment>,
           weiAmount
+      )}
+      { featurePanel( '', 
+          <Fragment>
+            <div className="er-form-row">
+              <div className="er-form-label">To</div>
+              <input type="text" value={ sendTransactionTo } onChange={e => setSendTransactionTo(e.target.value)} />
+            </div>
+            <div className="er-form-row">
+              <div className="er-form-label">Amount</div>
+              <input type="text" value={ sendTransactionAmount } onChange={e => setSendTransactionAmount(e.target.value)} />
+            </div>
+            <AqexButton label="Send Currency" id="sendTransaction" className="playground-button playground-icon-button"
+              onClick={() => handleFeature('sendTransaction', createTransactionRequest())} isSubmitting={submitting['sendTransaction']} timeout={BUTTON_TIMEOUT}
+              setUIMsg={handleUIMessage} />
+          </Fragment>,
+          sendTransactionResult 
       )}
     </div>
   </Fragment>
