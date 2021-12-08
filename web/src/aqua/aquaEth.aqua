@@ -75,6 +75,10 @@ data TransactionReceipt:
     transactionHash: string
     status: bool 
 
+data ResultTransaction:
+    info: Result
+    data: TransactionResponse
+
 func identityResultString(val: ResultString) -> ResultString:
     <- val 
 
@@ -94,7 +98,7 @@ service Ethereum("ethereum"):
     -- Eth to Wei
     parseEther(amount: string) -> ResultString
     
-    sendTransaction(transactionRequest: TransactionRequest) -> TransactionResponse
+    sendTransaction(transactionRequest: TransactionRequest) -> ResultTransaction
 
     -- Methods to register a listener for window.ethereum events on the
     -- local node
@@ -144,4 +148,9 @@ func formatEther(peerId: string, relayId: string, amount: string) -> ResultStrin
 func parseEther(peerId: string, relayId: string, amount: string) -> ResultString:
     on peerId via relayId:
         res <- Ethereum.parseEther(amount)
+    <- res
+
+func sendTransaction(TransactionRequest: transactionRequest) -> ResultTransaction
+    on peerId via relayId:
+        res <- Ethereum.sendTransaction(transactionRequest)
     <- res
