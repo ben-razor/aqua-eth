@@ -25,7 +25,10 @@ service Ethereum("ethereum"):
     getBalance(address: string) -> ResultString
     getBlockNumber() -> ResultString
 
+    -- Wei to Eth
     formatEther(amount: string) -> ResultString
+    -- Eth to Wei
+    parseEther(amount: string) -> ResultString
     
     -- Methods to register a listener for window.ethereum events on the
     -- local node
@@ -65,4 +68,9 @@ func getBlockNumber(peerId: string, relayId: string) -> ResultString:
 func formatEther(peerId: string, relayId: string, amount: string) -> ResultString:
     on peerId via relayId:
         res <- Ethereum.formatEther(amount)
+    <- res
+
+func parseEther(peerId: string, relayId: string, amount: string) -> ResultString:
+    on peerId via relayId:
+        res <- Ethereum.parseEther(amount)
     <- res

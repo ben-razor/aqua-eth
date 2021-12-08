@@ -137,7 +137,7 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 }
 
 .er-form-label {
-    min-width: 8em;
+    min-width: 6em;
 }
 
 .er-remote-panel {

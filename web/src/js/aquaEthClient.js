@@ -154,6 +154,27 @@ function result(success, reason, code, message, data) {
       
         return result(success, reason, code, message, amountOut);
       },
+      parseEther: async(amount) => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let amountOut = 0;
+      
+        if(success) {
+          try {
+            let res = ethers.utils.parseEther(amount)
+            amountOut = res.toString();
+          }
+          catch(e) {
+            success = false;
+            code = e.code;
+            message = e.message;
+            reason = 'error-ethers';
+      
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, amountOut);
+      },
       /**
        * Register a node to receive callbacks from window.ethereum events.
        * 

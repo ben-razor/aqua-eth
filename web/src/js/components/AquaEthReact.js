@@ -1,6 +1,6 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
 import { registerEthereum, requestAccounts, getBalance, getBlockNumber,
-         formatEther, 
+         formatEther, parseEther,
          registerListenerNode} from '../compiled/aquaEth.js';
 import AqexButton from './AqexButton';
 import AquaEthClient from '../aquaEthClient.js';
@@ -22,6 +22,8 @@ export default function AquaEthReact(props) {
   const [balance, setBalance] = useState();
   const [formatEtherAmount, setFormatEtherAmount] = useState(0);
   const [etherAmount, setEtherAmount] = useState();
+  const [parseEtherAmount, setParseEtherAmount] = useState(0);
+  const [weiAmount, setWeiAmount] = useState();
 
   function aquaEthHandler(msg) {
     if(!msg.success && msg.reason === 'error-no-ethereum') {
@@ -86,6 +88,10 @@ export default function AquaEthReact(props) {
         else if(id === 'formatEther') {
           res = await formatEther(remotePeerId, remoteRelayPeerId, data);
         }
+        else if(id === 'parseEther') {
+          res = await parseEther(remotePeerId, remoteRelayPeerId, data);
+          console.log('pe', res);
+        }
 
         if(res.info.success) {
           if(id === 'requestAccounts') {
@@ -96,6 +102,7 @@ export default function AquaEthReact(props) {
           if(id === 'getBalance') { setBalance(res.data); }
           else if(id === 'getBlockNumber') { setBlockNumber(res.data); }
           else if(id === 'formatEther') { setEtherAmount(res.data); }
+          else if(id === 'parseEther') { setWeiAmount(res.data); }
         }
         else {
           handleError(res);
@@ -187,7 +194,7 @@ export default function AquaEthReact(props) {
       { featurePanel( '', 
           <Fragment>
             <div className="er-form-row">
-              <div className="er-form-label">Account</div>
+              <div className="er-form-label">Wei</div>
               <input type="text" value={ formatEtherAmount } onChange={e => setFormatEtherAmount(e.target.value)} />
             </div>
             <AqexButton label="Wei To Eth" id="formatEther" className="playground-button playground-icon-button"
@@ -195,6 +202,18 @@ export default function AquaEthReact(props) {
               setUIMsg={handleUIMessage} />
           </Fragment>,
           etherAmount
+      )}
+      { featurePanel( '', 
+          <Fragment>
+            <div className="er-form-row">
+              <div className="er-form-label">Ether</div>
+              <input type="text" value={ parseEtherAmount } onChange={e => setParseEtherAmount(e.target.value)} />
+            </div>
+            <AqexButton label="Eth to Wei" id="parseEther" className="playground-button playground-icon-button"
+              onClick={() => handleFeature('parseEther', parseEtherAmount)} isSubmitting={submitting['parseEther']} timeout={BUTTON_TIMEOUT}
+              setUIMsg={handleUIMessage} />
+          </Fragment>,
+          weiAmount
       )}
     </div>
   </Fragment>

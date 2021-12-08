@@ -61,6 +61,20 @@ export function registerEthereum(...args) {
             }
         },
         {
+            "functionName" : "parseEther",
+            "argDefs" : [
+                {
+                    "name" : "amount",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                }
+            ],
+            "returnType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
             "functionName" : "receiveData",
             "argDefs" : [
                 {
@@ -649,6 +663,98 @@ export function listenerNodeCallback(...args) {
         },
         {
             "name" : "jsonPacket",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function parseEther(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (seq
+                          (seq
+                           (seq
+                            (seq
+                             (seq
+                              (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                              (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                             )
+                             (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                            )
+                            (call %init_peer_id% ("getDataSrv" "amount") [] amount)
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                          (call relayId ("op" "noop") [])
+                         )
+                         (xor
+                          (call peerId ("ethereum" "parseEther") [amount] res)
+                          (seq
+                           (seq
+                            (seq
+                             (call relayId ("op" "noop") [])
+                             (call -relay- ("op" "noop") [])
+                            )
+                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                         )
+                        )
+                        (call relayId ("op" "noop") [])
+                       )
+                       (call -relay- ("op" "noop") [])
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [res])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "parseEther",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "peerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "amount",
             "argType" : {
                 "tag" : "primitive"
             }
