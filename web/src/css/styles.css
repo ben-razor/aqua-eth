@@ -1,3 +1,4 @@
+
 @font-face {
     font-family: "AquaPlaygroundRegular";
     src: url('../fonts/Lato-Regular.ttf'); 
@@ -7,6 +8,195 @@ body {
     font-family: AquaPlaygroundRegular, sans-serif; 
 }
 
-h1 {
-    color: hsla(75deg, 75%, 30%);
+h1,h2,h3,h4,h5,h6 {
+    margin: 0 0 0.25em 0;
+}
+
+p {
+    margin: 0 0 0.25em 0;
+}
+
+button, select, input {
+    font-family: AquaPlaygroundRegular, sans-serif; 
+}
+
+input[type=text], textarea {
+    padding: 0.25em;
+    border-radius: 0.5em;
+    border: 2px solid grey;
+    width: 100%;
+}
+
+input[type=checkbox] {
+    width: 1.28em;
+    height: 1.28em;
+}
+
+textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {  
+    font-family: AquaPlaygroundRegular, sans-serif; 
+    outline: 1px solid hsl(342deg, 48%, 42%);
+}
+
+@keyframes loading-fade-in {
+    0% { opacity: 0; }
+    10% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes loading-fade-in-instant {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes loading-fade-in-delay-50 {
+    0% { opacity: 0; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes fade-in-with-grow {
+    0% { opacity: 0; transform: scaleY(0)}
+    100% { opacity: 1; transform: scaleY(1)}
+}
+
+@keyframes spin {
+    from {transform:rotate(0deg);}
+    to {transform:rotate(359deg);}
+}
+
+.spin {
+    animation: spin 1.5s;
+    animation-iteration-count: infinite;
+    animation-timing-function: steps(40);
+}
+
+.loading-fade-in {
+    animation: loading-fade-in 7s;
+}
+
+.loading-fade-in-fast {
+    animation: loading-fade-in-instant 3s;
+}
+
+.loading-fade-in-delay-50-fast {
+    animation: loading-fade-in-delay-50 3s;
+}
+
+.fade-in-with-grow-fast {
+    transform-origin: bottom center;
+    animation: fade-in-with-grow 1s;
+}
+
+.playground-button {
+    position: relative;
+    z-index: 10;
+    min-width: 7em;
+    padding: 0.2em 0.8em;
+    margin: 0 0.05em;
+    border-radius: 0.4em;
+    border-width: 1px 0 0 1px;
+    font-size: 0.9em;
+    min-height: 2.5em;
+    background-image: linear-gradient(0deg, transparent 0%, hsl(342deg, 100%, 50%, 0.8) 100%);
+    background-color: hsl(342deg 70% 43%);
+    border-color: hsl(342deg, 50%, 50%);
+    color: white;
+}
+
+.er-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1em;
+}
+
+.er-header-details {
+    display: flex;
+    align-items: baseline;
+}
+
+.er-header-title {
+    margin-right: 1em;
+}
+
+.er-sub-title {
+
+}
+
+.er-header-controls {
+    color: hsla(340deg, 75%, 30%);
+}
+
+.er-fluence-connect {
+    display: flex;
+    flex-direction: column;
+}
+
+.er-form-row {
+    display: flex;
+    margin-bottom: 0.25em;
+}
+
+.er-form-label {
+    min-width: 8em;
+}
+
+.er-remote-panel {
+    width: 50%;
+}
+
+.er-remote-controls {
+    border-radius: 1em;
+    border: 1px solid grey;
+    padding: 1em;
+}
+
+.er-features {
+    display: flex;
+}
+
+.er-feature {
+    flex: 1;
+    border: 1px solid hsl(0deg, 0%, 20%);
+    border-radius: 0.5em;
+    padding: 0.5em;
+    margin: 0 0.1em;
+}
+
+.er-feature-title {
+    text-transform: uppercase;
+    padding-bottom: 0.25em;
+}
+
+.er-feature-controls {
+
+}
+
+.er-feature-output {
+    padding: 0.5em 0;
+}
+
+@media (max-width: 992px) {
+    .er-header {
+        font-size: 0.9em;
+        flex-direction: column;
+    }
+    .tiny-hide {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        font-size: 0.9em;
+    }
+    .er-remote-panel {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .er-header {
+        flex-direction: column;
+        font-size: 0.9em;
+    }
 }

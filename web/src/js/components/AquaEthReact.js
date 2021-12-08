@@ -9,8 +9,13 @@ export default function AquaEthReact(props) {
   const remotePeerId = props.remotePeerId;
   const remoteRelayPeerId = props.remoteRelayPeerId;
   const toast = props.toast;
+  const connected = props.connected;
+  const connectionInfo = props.connectionInfo;
+
   const [aquaEthClientCreated, setAquaEthClientCreated] = useState();
   const [submitting, setSubmitting] = useState({});
+  const [accounts, setAccounts] = useState();
+  const [blockNumber, setBlockNumber] = useState();
 
   function aquaEthHandler(msg) {
     if(!msg.success && msg.reason === 'error-no-ethereum') {
@@ -47,11 +52,31 @@ export default function AquaEthReact(props) {
     setAquaEthClientCreated(true);
   }, []);
 
+  function handleError(res) {
+    toast('Error ' + res.reason);
+    console.log(res);
+  }
+
   function testEthereum() {
+    setButtonSubmitting('testEthereum', true);
     (async () => {
-      await requestAccounts(remotePeerId, remoteRelayPeerId);
-      // let accounts = await getAccounts(remotePeerId, remoteRelayPeerId);
-      // toast('Got these accounts from remote host: ' + JSON.stringify(accounts));
+      try {
+        let res = await requestAccounts(remotePeerId, remoteRelayPeerId);
+
+        if(res.success) {
+          setAccounts(res.data);
+        }
+        else {
+          handleError(res);
+        }
+      }
+      catch(e) {
+        toast(e.toString(), 'error');
+        console.log(e);
+      }
+      finally {
+        setButtonSubmitting('testEthereum', false);
+      }
     })();
   }
 
@@ -60,8 +85,13 @@ export default function AquaEthReact(props) {
     (async() => {
       try {
         let res = await getBlockNumber(remotePeerId, remoteRelayPeerId);
-        console.log(res);
-        setButtonSubmitting('getBlockNumber', false);
+
+        if(res.success) {
+          setBlockNumber(res.data);
+        }
+        else {
+          handleError(res);
+        }
       }
       catch(e) {
         toast(e.toString(), 'error');
@@ -86,23 +116,40 @@ export default function AquaEthReact(props) {
     }
   }
 
-  return <Fragment>
-    <AqexButton
-      label={<i className="fas fa-magic" />}
-      className="playground-button playground-icon-button"
-      hideLabelDuringSubmit={true}
-      onClick={() => testEthereum()}
-    />
-    <AqexButton
-      label="getBlockNumber"
-      id="getBlockNumber"
-      className="playground-button playground-icon-button"
-      onClick={() => handleGetBlockNumber()}
-      isSubmitting={submitting['getBlockNumber']}
-      timeout={BUTTON_TIMEOUT}
-      setUIMsg={handleUIMessage}
-    />
+  function formatAccounts(accounts) {
+    let accountsUI = [];
 
+    for(let account of accounts) {
+      accountsUI.push(<div key={account}>{account}</div>)
+    }
+
+    return accountsUI;
+  }
+
+  return <Fragment>
+    <div className="er-features">
+      <div className="er-feature">
+        <div className="er-feature-controls">
+          <AqexButton label="Get Accounts" id="testEthereum" className="playground-button playground-icon-button"
+            onClick={() => testEthereum()} isSubmitting={submitting['testEthereum']}
+            timeout={BUTTON_TIMEOUT} setUIMsg={handleUIMessage} />
+        </div>
+        { accounts &&
+          <div className="er-feature-output">{ formatAccounts(accounts) }</div>
+        }
+      </div>
+      <div className="er-feature">
+        <div className="er-feature-controls">
+          <AqexButton label="Block Number" id="getBlockNumber" className="playground-button playground-icon-button"
+            onClick={() => handleGetBlockNumber()} isSubmitting={submitting['getBlockNumber']} timeout={BUTTON_TIMEOUT}
+            setUIMsg={handleUIMessage}
+          />
+        </div>
+        { blockNumber && 
+          <div className="er-feature-output">{ blockNumber }</div>
+        }
+      </div>
+    </div>
   </Fragment>
   
 }

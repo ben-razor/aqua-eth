@@ -2,6 +2,7 @@ import React, {useState, useEffect, createRef, Fragment} from 'react';
 import { Fluence, FluencePeer } from "@fluencelabs/fluence";
 import { krasnodar } from "@fluencelabs/fluence-network-environment";
 import { clip } from '../helpersHTML';
+import connect from './Connect';
 
 import {
     ResultCodes,
@@ -27,36 +28,41 @@ window['krasnodar'] = krasnodar;
 function FluenceReact(props) {
     const toast = props.toast;
     const [attemptingConnect, setAttemptingConnect] = useState();
-    const [connected, setConnected] = useState();
+    const [connected, setConnected] = useState(false);
     const [connectedNode, setConnectedNode] = useState();
     const [connectionInfo, setConnectionInfo] = useState({});
-    const [remotePeerId, setRemotePeerId] = useState('');
-    const [remoteRelayPeerId, setRemoteRelayPeerId] = useState('');
 
     useEffect(() => {
-        setAttemptingConnect(true);
+        if(!connected) {
+            setAttemptingConnect(true);
 
-        async function connectToHost() {
-            setConnected(false);
+            async function connectToHost() {
+                setConnected(false);
 
-            for(let node of krasnodar) {
-                try {
-                    await Fluence.start({ connectTo: node });
-                    setConnected(true);
-                    setConnectedNode(node);
-                    console.log(Fluence.getStatus());
-                    setConnectionInfo(Fluence.getStatus());
-                    break;
+                for(let node of krasnodar) {
+                    try {
+                        let res = await Fluence.start({ connectTo: node });
+                        setConnected(true);
+                        setConnectedNode(node);
+                        let _connectionInfo = Fluence.getStatus();
+                        setConnectionInfo(_connectionInfo);
+
+                        connect.msg('fluence-connect', {
+                            connected: true,
+                            connectionInfo: { ..._connectionInfo }
+                        });
+
+                        break;
+                    }
+                    catch(e) { 
+                        await Fluence.stop();
+                    } 
                 }
-                catch(e) { 
-                    await Fluence.stop();
-                } 
             }
+
+            connectToHost();
         }
-
-        connectToHost();
-
-    }, []);
+    }, [connected]);
    
     function copyToClipboard(id) {
         if(id === 'peer') {
@@ -70,18 +76,9 @@ function FluenceReact(props) {
     return <div>
         { connectionInfo.peerId ?
             <Fragment>
-                <div>
-                    <h3>Fluence connected!</h3>
+                <div className="er-fluence-connect">
                     <div>PeerId: {connectionInfo.peerId} <i className="fa fa-edit" onClick={e => copyToClipboard('peer')}/></div>
                     <div>RelayId: {connectionInfo.relayPeerId} <i className="fa fa-edit" onClick={e => copyToClipboard('relay')}/></div>
-                </div>
-                <div>
-                    <h3>Set Remote</h3>
-                    <div>PeerId: <input type="text" value={remotePeerId} onChange={e => setRemotePeerId(e.target.value)} /></div>
-                    <div>RelayId: <input type="text" value={remoteRelayPeerId} onChange={e => setRemoteRelayPeerId(e.target.value)} /></div>
-                </div> 
-                <div>
-                    <AquaEthReact remotePeerId={remotePeerId} remoteRelayPeerId={remoteRelayPeerId} toast={toast} />
                 </div>
             </Fragment>
             :
