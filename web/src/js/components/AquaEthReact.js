@@ -117,38 +117,46 @@ export default function AquaEthReact(props) {
   }
 
   function formatAccounts(accounts) {
-    let accountsUI = [];
+    let accountsUI;
 
-    for(let account of accounts) {
-      accountsUI.push(<div key={account}>{account}</div>)
+    if(accounts) {
+      accountsUI = [];
+
+      for(let account of accounts) {
+        accountsUI.push(<div key={account}>{account}</div>)
+      }
     }
-
     return accountsUI;
+  }
+
+  function featurePanel(title, controls, output) {
+    return <div className="er-feature">
+      {title && 
+        <div className="er-feature-title"></div>
+      }
+      <div className="er-feature-controls">
+        {controls}
+      </div>
+      { output &&
+        <div className="er-feature-output">{output}</div>
+      }
+    </div>
   }
 
   return <Fragment>
     <div className="er-features">
-      <div className="er-feature">
-        <div className="er-feature-controls">
+      { featurePanel( '', 
           <AqexButton label="Get Accounts" id="testEthereum" className="playground-button playground-icon-button"
             onClick={() => testEthereum()} isSubmitting={submitting['testEthereum']}
-            timeout={BUTTON_TIMEOUT} setUIMsg={handleUIMessage} />
-        </div>
-        { accounts &&
-          <div className="er-feature-output">{ formatAccounts(accounts) }</div>
-        }
-      </div>
-      <div className="er-feature">
-        <div className="er-feature-controls">
+            timeout={BUTTON_TIMEOUT} setUIMsg={handleUIMessage} />,
+          formatAccounts(accounts)
+      )}
+      { featurePanel( '', 
           <AqexButton label="Block Number" id="getBlockNumber" className="playground-button playground-icon-button"
             onClick={() => handleGetBlockNumber()} isSubmitting={submitting['getBlockNumber']} timeout={BUTTON_TIMEOUT}
-            setUIMsg={handleUIMessage}
-          />
-        </div>
-        { blockNumber && 
-          <div className="er-feature-output">{ blockNumber }</div>
-        }
-      </div>
+            setUIMsg={handleUIMessage} />,
+          blockNumber
+      )}
     </div>
   </Fragment>
   
