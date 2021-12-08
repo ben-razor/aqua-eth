@@ -1,6 +1,3 @@
-import "@fluencelabs/aqua-dht/dht.aqua"
-import "@fluencelabs/aqua-lib/builtin.aqua"
-
 data Result:
     success: bool
     reason: string
