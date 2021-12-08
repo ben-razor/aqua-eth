@@ -199,6 +199,21 @@ export default function AquaEthReact(props) {
     return chainUI;
   }
 
+  function formatBalance(balance, chainInfo) {
+    let balanceUI;
+
+    if(typeof balance !== 'undefined') {
+      balanceUI = balance;
+
+      let currency = chainInfo?.currency?.name;
+
+      if(currency) {
+        balanceUI = `${balance} ${currency}`;
+      }
+    }
+    return balanceUI;
+  }
+
   return <Fragment>
     <div className="er-features">
       { featurePanel( '', 
@@ -224,7 +239,7 @@ export default function AquaEthReact(props) {
               onClick={() => handleFeature('getBalance', balanceAccount)} isSubmitting={submitting['getBalance']} timeout={BUTTON_TIMEOUT}
               setUIMsg={handleUIMessage} />
           </Fragment>,
-          balance 
+          formatBalance(balance, chainInfo)
       )}
       { featurePanel( '', 
           <Fragment>
