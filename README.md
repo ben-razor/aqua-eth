@@ -1,6 +1,6 @@
 # Aqua Eth
 
-A wrapper around web3.js for interacting with Ethereum compatible blockchains using Fluence Aqua.
+A wrapper around ethers.js and Metamask for interacting with Ethereum compatible blockchains remotely using Fluence Aqua.
 
 For the Gitcoin Hackathon task:
 
