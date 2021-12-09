@@ -36,6 +36,8 @@ export default function AquaEthReact(props) {
   const [signTypedDataResult, setSignTypedDataResult] = useState('');
   const [erc20Balance, setErc20Balance] = useState('');
   const [erc20BalanceOfEntry, setErc20BalanceOfEntry] = useState({ contractAddress: '', address: ''});
+  const [erc20TransferOutput, setErc20TransferOutput] = useState('');
+  const [erc20TransferEntry, setErc20TransferEntry] = useState({ contractAddress: '', to: '', amount: ''});
 
   function aquaEthHandler(msg) {
     if(!msg.success && msg.reason === 'error-no-ethereum') {
@@ -143,6 +145,9 @@ export default function AquaEthReact(props) {
         else if(id === 'erc20BalanceOf') {
           res = await erc20BalanceOf(remotePeerId, remoteRelayPeerId, data.contractAddress, data.address);
         }
+        else if(id === 'erc20Transfer') {
+          res = await erc20Transfer(remotePeerId, remoteRelayPeerId, data.contractAddress, data.to, data.amount);
+        }
 
         setButtonSubmitting(id, false);
         if(res && res.info.success) {
@@ -158,6 +163,7 @@ export default function AquaEthReact(props) {
           else if(id === 'sendTransaction') { setSendTransactionResult(JSON.stringify(res.data)); }
           else if(id === 'signTypedData') { setSignTypedDataResult(JSON.stringify(res.data)); }
           else if(id === 'erc20BalanceOf') { setErc20Balance(res.data); }
+          else if(id === 'erc20Transfer') { setErc20TransferOutput(JSON.stringify(res.data)); }
         }
         else {
           handleError(res);
@@ -286,6 +292,12 @@ export default function AquaEthReact(props) {
     setErc20BalanceOfEntry(_erc20BalanceOfEntry);
   }
 
+  function handleErc20TransferEntry(field, value) {
+    let _erc20TransferEntry = { ...erc20TransferEntry };
+    _erc20TransferEntry[field] = value;
+    setErc20TransferEntry(_erc20TransferEntry);
+  }
+
   return <Fragment>
     <div className="er-features">
       { featurePanel( '', 
@@ -388,6 +400,26 @@ export default function AquaEthReact(props) {
               setUIMsg={handleUIMessage} />
           </Fragment>,
           erc20Balance
+      )},
+      { featurePanel( '', 
+          <Fragment>
+            <div className="er-form-row">
+              <div className="er-form-label">Contract</div>
+              <input type="text" value={ erc20TransferEntry.contractAddress } onChange={e => handleErc20TransferEntry('contractAddress', e.target.value) } />
+            </div>
+            <div className="er-form-row">
+              <div className="er-form-label">To</div>
+              <input type="text" value={ erc20TransferEntry.to } onChange={e => handleErc20TransferEntry('to', e.target.value)} />
+            </div>
+            <div className="er-form-row">
+              <div className="er-form-label">Amount</div>
+              <input type="text" value={ erc20TransferEntry.amount } onChange={e => handleErc20TransferEntry('amount', e.target.value)} />
+            </div>
+            <AqexButton label="ERC-20 Transfer" id="erc20Transfer" className="playground-button playground-icon-button"
+              onClick={() => handleFeature('erc20Transfer', erc20TransferEntry ) } isSubmitting={submitting['erc20Transfer']} timeout={BUTTON_TIMEOUT}
+              setUIMsg={handleUIMessage} />
+          </Fragment>,
+          erc20TransferOutput
       )}
     </div>
   </Fragment>

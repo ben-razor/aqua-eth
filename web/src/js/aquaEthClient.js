@@ -328,7 +328,6 @@ function callbackAllListeners(o, type, data) {
  
         if(success) {
           try {
-            console.log('acc', contractAddress, account, erc20Abi);
             let contract = new ethers.Contract(contractAddress, erc20Abi, signer); 
             let res = await contract.balanceOf(account);
             balance = res.toHexString();
@@ -352,8 +351,8 @@ function callbackAllListeners(o, type, data) {
         if(success) {
           try {
             let contract = new ethers.Contract(contractAddress, erc20Abi, signer); 
-            contract.on('Transfer', (data))
-            txSuccess = await contract.transfer(to, BigInt(amount));
+            let res = await contract.transfer(to, BigInt(amount));
+            console.log('erc transfer res', res);
           }
           catch(e) {
             success = false;
