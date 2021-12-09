@@ -87,13 +87,18 @@ func identityResultString(val: ResultString) -> ResultString:
 func identityResultChain(val: ResultChain) -> ResultChain:
     <- val 
 
+func identityU32(val: u32) -> u32:
+    <- val
+
 service Ethereum("ethereum"):
-    -- Methods that execute on the remote client (The one with MetaMask)
+
+    -- Methods that execute on the signer (The one with MetaMask)
     requestAccounts() -> ResultAddresses
     getConnectedChainInfo() -> ResultChain
     getChainInfo(chainId: u32) -> ResultChain
     getBalance(address: string) -> ResultString
     getBlockNumber() -> ResultString
+    getTransactionCount() -> ResultU32 
 
     -- Wei to Eth
     formatEther(amount: string) -> ResultString
@@ -103,10 +108,13 @@ service Ethereum("ethereum"):
     sendTransaction(transactionRequest: TransactionRequest) -> ResultTransaction
     signTypedData(domain: JSONString, types: JSONString, value: JSONString) -> RawSignature
 
-    -- Methods to register a listener for window.ethereum events on the
-    -- local node
+    -- Methods to register a listener for events on the local client 
     registerListenerNode(listenerPeerId: string, listenerRelayId: string)
     receiveData(packet: JSONPacket)
+
+    -- Helper methods
+    castErrorResultU32ToTransaction(result: ResultU32) -> ResultTransaction
+    changeTransactionRequestNonce(transaction: TransactionRequest, nonce: u32) -> TransactionRequest
 
 func requestAccounts(peerId: string, relayId: string) -> ResultAddresses:
     on peerId via relayId:
@@ -141,6 +149,11 @@ func getBalance(peerId: string, relayId: string, address: string) -> ResultStrin
 func getBlockNumber(peerId: string, relayId: string) -> ResultString:
     on peerId via relayId:
         res <- Ethereum.getBlockNumber()
+    <- res
+
+func getTransactionCount(peerId: string, relayId: string) -> ResultU32:
+    on peerId via relayId:
+        res <- Ethereum.getTransactionCount()
     <- res
 
 func formatEther(peerId: string, relayId: string, amount: string) -> ResultString:

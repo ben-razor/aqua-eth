@@ -227,6 +227,26 @@ function callbackAllListeners(o, type, data) {
 
         return result(success, reason, code, message, blockNumber);
       },
+      getTransactionCount: async() => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let transactionCount = 0;
+
+        if(success) {
+          try {
+            transactionCount = await signer.getTransactionCount();
+          }
+          catch(e) {
+              success = false;
+              code = e.code;
+              message = e.message;
+              reason = 'error-ethers';
+
+              console.log(e);
+          }
+        }
+
+        return result(success, reason, code, message, transactionCount);
+      },
       formatEther: async(amount) => {
         let { success, reason, message, code } = this.checkEthStatus();
         let amountOut = 0;
@@ -409,8 +429,19 @@ function callbackAllListeners(o, type, data) {
           this._triggerEvent('receiveData', jsonPacket.type, jsonPacket.data, false, 'error-json-parse');
           console.log(e);
         }
-    },
-  });
+      },
+      castErrorResultU32ToTransaction: async(resultU32) => {
+        let resultTransction = { 
+          info: { ...resultU32.info },
+          data: { }
+        }
+        return resultTransction;
+      },
+      changeTransactionRequestNonce: async(transactionRequest, nonce) => {
+        transactionRequest.nonce = nonce;
+        return transactionRequest;
+      }
+    });
   }
 
   _triggerEvent(method, type, data={}, success=true, reason='ok') {
