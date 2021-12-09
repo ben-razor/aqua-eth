@@ -79,6 +79,11 @@ export default function AquaEthReact(props) {
         toast(<div>Transaction with hash <div className="er-break-long-word">{msg.data.transactionHash}</div> completed</div>);
         console.log(msg);
       }
+      else if(msg.type === 'signedTypedData' && msg.success) { 
+        toast(<div>A message was signed</div>);
+        setSignTypedDataResult(msg.data); 
+        console.log(msg);
+      }
       else {
         console.log('Unhandled message (just letting you know)', msg);
       }
@@ -257,6 +262,16 @@ export default function AquaEthReact(props) {
     setSignTypedEntry(_signTypedEntry);
   }
 
+  function formatSignature(signature) {
+    let signatureUI;
+
+    if(signature) {
+      signatureUI = <div className="er-break-long-word">{signTypedDataResult}</div>
+    }
+
+    return signatureUI;
+  }
+
   return <Fragment>
     <div className="er-features">
       { featurePanel( '', 
@@ -342,7 +357,7 @@ export default function AquaEthReact(props) {
               onClick={() => handleFeature('signTypedData', signTypedEntry ) } isSubmitting={submitting['signTypedData']} timeout={BUTTON_TIMEOUT}
               setUIMsg={handleUIMessage} />
           </Fragment>,
-          
+          formatSignature(signTypedDataResult)
       )}
     </div>
   </Fragment>
