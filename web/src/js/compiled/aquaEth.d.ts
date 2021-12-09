@@ -18,6 +18,8 @@ import {
 export interface EthereumDef {
     castErrorResultU32ToTransaction: (result: { data: number; info: { code: number; message: string; reason: string; success: boolean; }; }, callParams: CallParams<'result'>) => { data: { blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; }; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: { blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; }; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     changeTransactionRequestNonce: (transaction: { chainId: number; data: string; from: string; gasLimit: string; gasPrice: string; maxFeePerGas: string; maxPriorityFeePerGas: string; nonce: number; to: string; transactionRequest: number; value: string; }, nonce: number, callParams: CallParams<'transaction' | 'nonce'>) => { chainId: number; data: string; from: string; gasLimit: string; gasPrice: string; maxFeePerGas: string; maxPriorityFeePerGas: string; nonce: number; to: string; transactionRequest: number; value: string; } | Promise<{ chainId: number; data: string; from: string; gasLimit: string; gasPrice: string; maxFeePerGas: string; maxPriorityFeePerGas: string; nonce: number; to: string; transactionRequest: number; value: string; }>;
+    erc20BalanceOf: (contractAddress: string, address: string, callParams: CallParams<'contractAddress' | 'address'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
+    erc20Transfer: (contractAddress: string, to: string, amount: string, callParams: CallParams<'contractAddress' | 'to' | 'amount'>) => { data: { blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; }; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: { blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; }; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     formatEther: (amount: string, callParams: CallParams<'amount'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     getBalance: (address: string, callParams: CallParams<'address'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     getBlockNumber: (callParams: CallParams<null>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
@@ -38,6 +40,11 @@ export function registerEthereum(peer: FluencePeer, serviceId: string, service: 
        
 
 // Functions
+ 
+export type Erc20BalanceOfResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
+export function erc20BalanceOf(peerId: string, relayId: string, contractAddress: string, address: string, config?: {ttl?: number}): Promise<Erc20BalanceOfResult>;
+export function erc20BalanceOf(peer: FluencePeer, peerId: string, relayId: string, contractAddress: string, address: string, config?: {ttl?: number}): Promise<Erc20BalanceOfResult>;
+
  
 export type GetBlockNumberResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
 export function getBlockNumber(peerId: string, relayId: string, config?: {ttl?: number}): Promise<GetBlockNumberResult>;
@@ -67,11 +74,6 @@ export type ListenerNodeCallbackArgJsonPacket = { data: string; type: string; }
 
 export function listenerNodeCallback(peerId: string, relayId: string, jsonPacket: ListenerNodeCallbackArgJsonPacket, config?: {ttl?: number}): Promise<void>;
 export function listenerNodeCallback(peer: FluencePeer, peerId: string, relayId: string, jsonPacket: ListenerNodeCallbackArgJsonPacket, config?: {ttl?: number}): Promise<void>;
-
- 
-export type GetTransactionCountResult = { data: number; info: { code: number; message: string; reason: string; success: boolean; }; }
-export function getTransactionCount(peerId: string, relayId: string, config?: {ttl?: number}): Promise<GetTransactionCountResult>;
-export function getTransactionCount(peer: FluencePeer, peerId: string, relayId: string, config?: {ttl?: number}): Promise<GetTransactionCountResult>;
 
  
 export type ParseEtherResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
@@ -107,3 +109,13 @@ export function requestAccounts(peer: FluencePeer, peerId: string, relayId: stri
 export type GetChainInfoResult = { data: { chainId: number; currency: { decimals: number; name: string; symbol: string; }; name: string; network: string; networkId: number; shortName: string; }; info: { code: number; message: string; reason: string; success: boolean; }; }
 export function getChainInfo(peerId: string, relayId: string, config?: {ttl?: number}): Promise<GetChainInfoResult>;
 export function getChainInfo(peer: FluencePeer, peerId: string, relayId: string, config?: {ttl?: number}): Promise<GetChainInfoResult>;
+
+ 
+export type Erc20TransferResult = { data: { blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; }; info: { code: number; message: string; reason: string; success: boolean; }; }
+export function erc20Transfer(peerId: string, relayId: string, contractAddress: string, to: string, amount: string, config?: {ttl?: number}): Promise<Erc20TransferResult>;
+export function erc20Transfer(peer: FluencePeer, peerId: string, relayId: string, contractAddress: string, to: string, amount: string, config?: {ttl?: number}): Promise<Erc20TransferResult>;
+
+ 
+export type GetTransactionCountResult = { data: number; info: { code: number; message: string; reason: string; success: boolean; }; }
+export function getTransactionCount(peerId: string, relayId: string, config?: {ttl?: number}): Promise<GetTransactionCountResult>;
+export function getTransactionCount(peer: FluencePeer, peerId: string, relayId: string, config?: {ttl?: number}): Promise<GetTransactionCountResult>;

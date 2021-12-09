@@ -1,6 +1,7 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
 import { registerEthereum, requestAccounts, getChainInfo, getBalance, getBlockNumber,
          formatEther, parseEther, sendTransaction, signTypedData,
+         erc20BalanceOf, erc20Transfer,
          registerListenerNode} from '../compiled/aquaEth.js';
 import AqexButton from './AqexButton';
 import AquaEthClient from '../aquaEthClient.js';
@@ -33,6 +34,8 @@ export default function AquaEthReact(props) {
     domain: textUI.signTypedDataDomain, types: textUI.signTypedDataTypes, value: textUI.signTypedDataValue
   });
   const [signTypedDataResult, setSignTypedDataResult] = useState('');
+  const [erc20Balance, setErc20Balance] = useState('');
+  const [erc20BalanceOfEntry, setErc20BalanceOfEntry] = useState({ contractAddress: '', address: ''});
 
   function aquaEthHandler(msg) {
     if(!msg.success && msg.reason === 'error-no-ethereum') {
@@ -137,6 +140,9 @@ export default function AquaEthReact(props) {
           res = await signTypedData(remotePeerId, remoteRelayPeerId, data.domain, data.types, data.value);
           console.log('signTypedData', res);
         }
+        else if(id === 'erc20BalanceOf') {
+          res = await erc20BalanceOf(remotePeerId, remoteRelayPeerId, data.contractAddress, data.address);
+        }
 
         setButtonSubmitting(id, false);
         if(res && res.info.success) {
@@ -151,6 +157,7 @@ export default function AquaEthReact(props) {
           else if(id === 'parseEther') { setWeiAmount(res.data); }
           else if(id === 'sendTransaction') { setSendTransactionResult(JSON.stringify(res.data)); }
           else if(id === 'signTypedData') { setSignTypedDataResult(JSON.stringify(res.data)); }
+          else if(id === 'erc20BalanceOf') { setErc20Balance(res.data); }
         }
         else {
           handleError(res);
@@ -169,6 +176,7 @@ export default function AquaEthReact(props) {
   useEffect(() => {
     if(accounts && accounts.length) {
       setBalanceAccount(accounts[0])
+      handleErc20BalanceOfEntry('address', accounts[0]);
       setBalance();
       handleFeature('getChainInfo');
     }
@@ -272,6 +280,12 @@ export default function AquaEthReact(props) {
     return signatureUI;
   }
 
+  function handleErc20BalanceOfEntry(field, value) {
+    let _erc20BalanceOfEntry = { ...erc20BalanceOfEntry };
+    _erc20BalanceOfEntry[field] = value;
+    setErc20BalanceOfEntry(_erc20BalanceOfEntry);
+  }
+
   return <Fragment>
     <div className="er-features">
       { featurePanel( '', 
@@ -358,6 +372,22 @@ export default function AquaEthReact(props) {
               setUIMsg={handleUIMessage} />
           </Fragment>,
           formatSignature(signTypedDataResult)
+      )}
+      { featurePanel( '', 
+          <Fragment>
+            <div className="er-form-row">
+              <div className="er-form-label">Contract</div>
+              <input type="text" value={ erc20BalanceOfEntry.contractAddress } onChange={e => handleErc20BalanceOfEntry('contractAddress', e.target.value) } />
+            </div>
+            <div className="er-form-row">
+              <div className="er-form-label">Account</div>
+              <input type="text" value={ erc20BalanceOfEntry.address } onChange={e => handleErc20BalanceOfEntry('address', e.target.value)} />
+            </div>
+            <AqexButton label="ERC-20 Balance" id="erc20BalanceOf" className="playground-button playground-icon-button"
+              onClick={() => handleFeature('erc20BalanceOf', erc20BalanceOfEntry ) } isSubmitting={submitting['erc20BalanceOf']} timeout={BUTTON_TIMEOUT}
+              setUIMsg={handleUIMessage} />
+          </Fragment>,
+          erc20Balance
       )}
     </div>
   </Fragment>

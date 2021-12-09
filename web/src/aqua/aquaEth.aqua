@@ -100,6 +100,9 @@ service Ethereum("ethereum"):
     getBlockNumber() -> ResultString
     getTransactionCount() -> ResultU32 
 
+    erc20BalanceOf(contractAddress: string, address: string) -> ResultString
+    erc20Transfer(contractAddress: string, to: string, amount: string) -> ResultTransaction
+
     -- Wei to Eth
     formatEther(amount: string) -> ResultString
     -- Eth to Wei
@@ -175,4 +178,22 @@ func signTypedData(peerId: string, relayId: string,
                    domain: JSONString, types: JSONString, value: JSONString) -> RawSignature:
     on peerId via relayId:
         res <- Ethereum.signTypedData(domain, types, value)
+    <- res
+
+func erc20BalanceOf(peerId: string, relayId: string, contractAddress: string, address: string) -> ResultString:
+    resBox: *ResultString
+
+    on peerId via relayId:
+        blockRes <- Ethereum.erc20BalanceOf(contractAddress, address)
+        if blockRes.info.success:
+            resBox <- Ethereum.formatEther(blockRes.data)
+        else:
+            resBox <- identityResultString(blockRes)
+            
+    <- resBox! 
+
+func erc20Transfer(peerId: string, relayId: string, 
+                   contractAddress: string, to: string, amount: string) -> ResultTransaction:
+    on peerId via relayId:
+        res <- Ethereum.erc20Transfer(contractAddress, to, amount)
     <- res

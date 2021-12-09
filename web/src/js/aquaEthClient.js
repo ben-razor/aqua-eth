@@ -2,6 +2,7 @@ import { registerEthereum, listenerNodeCallback } from './compiled/aquaEth.js';
 import { ethers, BigNumber } from 'ethers';
 import { cloneObj } from './helpersHTML.js';
 import chainsJSON from '../data/chains.json';
+import { erc20Abi } from '../data/contractData.js';
 let chains;
 
 let provider;
@@ -192,7 +193,6 @@ function callbackAllListeners(o, type, data) {
         if(success) {
           try {
             let res = await provider.getBalance(account);
-            console.log('CHAIN', await provider.getNetwork());
             balance = res.toHexString();
           }
           catch(e) {
@@ -321,6 +321,51 @@ function callbackAllListeners(o, type, data) {
         }
       
         return result(success, reason, code, message, transactionResult);
+      },
+      erc20BalanceOf: async(contractAddress, account) => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let balance = 0;
+ 
+        if(success) {
+          try {
+            console.log('acc', contractAddress, account, erc20Abi);
+            let contract = new ethers.Contract(contractAddress, erc20Abi, signer); 
+            let res = await contract.balanceOf(account);
+            balance = res.toHexString();
+          }
+          catch(e) {
+            success = false;
+            code = e.code;
+            message = e.message;
+            reason = 'error-ethers';
+      
+            console.log(e);
+          }
+        }
+
+        return result(success, reason, code, message, balance);
+      },
+      erc20Transfer: async(contractAddress, to, amount) => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let txSuccess = false;
+      
+        if(success) {
+          try {
+            let contract = new ethers.Contract(contractAddress, erc20Abi, signer); 
+            contract.on('Transfer', (data))
+            txSuccess = await contract.transfer(to, BigInt(amount));
+          }
+          catch(e) {
+            success = false;
+            code = e.code;
+            message = e.message;
+            reason = 'error-ethers';
+      
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, txSuccess);
       },
       signTypedData: async(domainJSON, typesJSON, valueJSON) => {
         let { success, reason, message, code } = this.checkEthStatus();
