@@ -59,7 +59,7 @@ function getChainInfo(chainsJSON, id) {
 function callbackAllListeners(o, type, data) {
   for(let peerId of Object.keys(o.registeredRemoteListeners)) {
     let relayId = o.registeredRemoteListeners[peerId].relayId;
-    listenerNodeCallback(peerId, relayId, { type, data });
+    listenerNodeCallback(peerId, relayId, { type, data: JSON.stringify(data) });
   }
 }
 
@@ -282,17 +282,10 @@ function callbackAllListeners(o, type, data) {
           try {
             transactionRequest.value = ethers.utils.parseEther(transactionRequest.value);
             transactionResult = await signer.sendTransaction(transactionRequest)
-            console.log('tr', transactionResult);
-            console.log('listeners', this.registeredRemoteListeners);
-
             callbackAllListeners(this, 'transactionCreated', transactionResult);
-
-            console.log('af1');
 
             let superfly = this;
             provider.once(transactionResult.hash, function(transaction) {
-              console.log('Transaction Mined: ' + transaction.hash);
-              console.log(transaction);
               callbackAllListeners(superfly, 'transactionMined', transaction);
             });
             let conf = await transactionResult.wait;
@@ -307,7 +300,47 @@ function callbackAllListeners(o, type, data) {
           }
         }
       
-        return { success, reason, code, message, data: transactionResult};
+        return result(success, reason, code, message, transactionResult);
+      },
+      signTypedData: async(domainJSON, typesJSON, valueJSON) => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let signature = '';
+        let domain, types, value;
+      
+        if(success) {
+          try {
+            console.log('dom', domainJSON);
+            domain = JSON.parse(domainJSON);
+            console.log('types', typesJSON);
+            types = JSON.parse(typesJSON);
+            console.log('value', valueJSON);
+            value = JSON.parse(valueJSON);
+          }
+          catch(e) {
+            success = false;
+            reason = 'error-json-parse';
+            message = e.toString();
+          }
+        }
+
+        if(success) {
+          try {
+            console.log('pre sig');
+            signature = await signer._signTypedData(domain, types, value);
+            console.log('post sig');
+            callbackAllListeners(this, 'signedTypedData', signature);
+          }
+          catch(e) {
+            success = false;
+            code = e.code;
+            message = e.message;
+            reason = 'error-ethers';
+      
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, signature);
       },
       /**
        * Register a node to receive callbacks from window.ethereum events.
@@ -373,7 +406,8 @@ function callbackAllListeners(o, type, data) {
           this._triggerEvent('receiveData', jsonPacket.type, data);
         }
         catch(e) {
-          this._triggerEvent('receiveData', jsonPacket.type, jsonPacket.data, false, 'error-decoding-json');
+          this._triggerEvent('receiveData', jsonPacket.type, jsonPacket.data, false, 'error-json-parse');
+          console.log(e);
         }
     },
   });

@@ -184,6 +184,10 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
     height: 3em;
 }
 
+.er-break-long-word {
+    word-break: break-all;
+}
+
 @media (max-width: 992px) {
     .er-header {
         font-size: 0.9em;

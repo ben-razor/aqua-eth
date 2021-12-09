@@ -1,9 +1,10 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
 import { registerEthereum, requestAccounts, getChainInfo, getBalance, getBlockNumber,
-         formatEther, parseEther, sendTransaction,
+         formatEther, parseEther, sendTransaction, signTypedData,
          registerListenerNode} from '../compiled/aquaEth.js';
 import AqexButton from './AqexButton';
 import AquaEthClient from '../aquaEthClient.js';
+import { textUI } from '../text.js';
 
 const BUTTON_TIMEOUT = 10000;
 
@@ -28,6 +29,10 @@ export default function AquaEthReact(props) {
   const [sendTransactionTo, setSendTransactionTo] = useState('');
   const [sendTransactionAmount, setSendTransactionAmount] = useState('');
   const [sendTransactionResult, setSendTransactionResult] = useState('');
+  const [signTypedEntry, setSignTypedEntry] = useState({ 
+    domain: textUI.signTypedDataDomain, types: textUI.signTypedDataTypes, value: textUI.signTypedDataValue
+  });
+  const [signTypedDataResult, setSignTypedDataResult] = useState('');
 
   function aquaEthHandler(msg) {
     if(!msg.success && msg.reason === 'error-no-ethereum') {
@@ -36,7 +41,7 @@ export default function AquaEthReact(props) {
     else {
       if(msg.method === 'requestAccounts') {
         if(msg.success) {
-          toast('Ethereum is connected!!\n' + JSON.stringify(msg.data));
+          toast(<div>Ethereum is connected!!<div className="er-break-long-word">{JSON.stringify(msg.data)}</div></div>);
         }
         else {
           if(msg.reason === 'error-user-rejected') {
@@ -66,6 +71,14 @@ export default function AquaEthReact(props) {
         catch(e) { };
         toast(<div>Received chain changed message</div>);
       }
+      else if(msg.type === 'transactionCreated' && msg.success) {
+        toast(<div>Transaction created with hash <div className="er-break-long-word">{msg.data.hash}</div></div>);
+        console.log(msg);
+      }
+      else if(msg.type === 'transactionMined' && msg.success) {
+        toast(<div>Transaction with hash <div className="er-break-long-word">{msg.data.transactionHash}</div> completed</div>);
+        console.log(msg);
+      }
       else {
         console.log('Unhandled message (just letting you know)', msg);
       }
@@ -78,7 +91,12 @@ export default function AquaEthReact(props) {
   }, []);
 
   function handleError(res) {
-    toast('Error ' + res.message);
+    if(res.info.reason === 'error-json-parse') {
+      toast('Error parsing JSON ' + res.info.message);
+    }
+    else {
+      toast('Error ' + res.info.message);
+    }
     console.log(res);
   }
 
@@ -108,7 +126,11 @@ export default function AquaEthReact(props) {
         }
         else if(id === 'sendTransaction') {
           res = await sendTransaction(remotePeerId, remoteRelayPeerId, data);
-          console.log('sendTransaction', res);
+        }
+        else if(id === 'signTypedData') {
+          console.log('signreq', data);
+          res = await signTypedData(remotePeerId, remoteRelayPeerId, data.domain, data.types, data.value);
+          console.log('signTypedData', res);
         }
 
         setButtonSubmitting(id, false);
@@ -123,13 +145,14 @@ export default function AquaEthReact(props) {
           else if(id === 'formatEther') { setEtherAmount(res.data); }
           else if(id === 'parseEther') { setWeiAmount(res.data); }
           else if(id === 'sendTransaction') { setSendTransactionResult(JSON.stringify(res.data)); }
+          else if(id === 'signTypedData') { setSignTypedDataResult(JSON.stringify(res.data)); }
         }
         else {
           handleError(res);
         }
       }
       catch(e) {
-        toast(e.toString(), 'error');
+        toast("Error making request. Check the console for details.", 'error');
         console.log(e);
       }
       finally {
@@ -228,6 +251,12 @@ export default function AquaEthReact(props) {
     }
   }
 
+  function handleSignTypedEntry(field, jsonString) {
+    let _signTypedEntry = { ...signTypedEntry };
+    _signTypedEntry[field] = jsonString;
+    setSignTypedEntry(_signTypedEntry);
+  }
+
   return <Fragment>
     <div className="er-features">
       { featurePanel( '', 
@@ -294,6 +323,26 @@ export default function AquaEthReact(props) {
               setUIMsg={handleUIMessage} />
           </Fragment>,
           sendTransactionResult 
+      )}
+      { featurePanel( '', 
+          <Fragment>
+            <div className="er-form-row">
+              <div className="er-form-label">Domain</div>
+              <input type="text" value={ signTypedEntry.domain } onChange={e => handleSignTypedEntry('domain', e.target.value)} />
+            </div>
+            <div className="er-form-row">
+              <div className="er-form-label">Types</div>
+              <input type="text" value={ signTypedEntry.types } onChange={e => handleSignTypedEntry('types', e.target.value)} />
+            </div>
+            <div className="er-form-row">
+              <div className="er-form-label">Value</div>
+              <input type="text" value={ signTypedEntry.value} onChange={e => handleSignTypedEntry('value', e.target.value)} />
+            </div>
+            <AqexButton label="Sign Typed Data" id="signTypedData" className="playground-button playground-icon-button"
+              onClick={() => handleFeature('signTypedData', signTypedEntry ) } isSubmitting={submitting['signTypedData']} timeout={BUTTON_TIMEOUT}
+              setUIMsg={handleUIMessage} />
+          </Fragment>,
+          
       )}
     </div>
   </Fragment>

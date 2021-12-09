@@ -1,3 +1,7 @@
+alias BigNumber: string 
+alias JSONString: string
+alias RawSignature: string
+
 data Result:
     success: bool
     reason: string
@@ -8,10 +12,10 @@ data ResultString:
     info: Result
     data: string
 
--- Same as result string but the user knows to parse JSON string
+-- Same as result string but the user knows to parse data as a JSON string
 data ResultJSONString:
     info: Result
-    data: string
+    data: JSONString
 
 data ResultAddresses:
     info: Result
@@ -23,7 +27,7 @@ data ResultU32:
 
 data JSONPacket:
     type: string
-    data: string
+    data: JSONString 
 
 data Currency:
     name: string
@@ -63,8 +67,6 @@ data TransactionResponse:
     raw: string
     type: u32
 
-alias BigNumber: string 
-
 data TransactionReceipt:
     to: string
     from: string
@@ -99,6 +101,7 @@ service Ethereum("ethereum"):
     parseEther(amount: string) -> ResultString
     
     sendTransaction(transactionRequest: TransactionRequest) -> ResultTransaction
+    signTypedData(domain: JSONString, types: JSONString, value: JSONString) -> RawSignature
 
     -- Methods to register a listener for window.ethereum events on the
     -- local node
@@ -153,4 +156,10 @@ func parseEther(peerId: string, relayId: string, amount: string) -> ResultString
 func sendTransaction(peerId: string, relayId: string, transactionRequest: TransactionRequest) -> ResultTransaction:
     on peerId via relayId:
         res <- Ethereum.sendTransaction(transactionRequest)
+    <- res
+
+func signTypedData(peerId: string, relayId: string,
+                   domain: JSONString, types: JSONString, value: JSONString) -> RawSignature:
+    on peerId via relayId:
+        res <- Ethereum.signTypedData(domain, types, value)
     <- res
