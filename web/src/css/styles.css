@@ -157,13 +157,13 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 .er-feature {
     box-sizing: border-box;
     flex: 1;
-    border: 1px solid hsl(0deg, 0%, 40%);
+    border: 1px solid hsl(0deg, 0%, 70%);
     border-radius: 0.5em;
     padding: 0.5em;
     margin: 0.2em;
     min-width: 32%;
     max-width: 32%;
-    box-shadow: 2px 0px 4px hsl(0deg, 0%, 80%);
+    box-shadow: 2px 0px 4px hsl(0deg, 0%, 85%);
 }
 
 .er-feature-title {
@@ -182,6 +182,23 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 .er-header-logo {
     width: 3em;
     height: 3em;
+}
+
+.er-tabs {
+    display: flex;
+    border-bottom: 2px solid hsl(342deg 70% 83%);
+    margin: 0.5em 0.5em;
+    user-select: none;
+}
+
+.er-tab {
+    padding: 1em 2em;
+    color: white;
+    background-color: hsl(342deg 0% 43%);
+}
+
+.er-tab-active {
+    background-color: hsl(342deg 70% 43%);
 }
 
 .er-break-long-word {

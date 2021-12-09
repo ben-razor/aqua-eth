@@ -308,7 +308,6 @@ function callbackAllListeners(o, type, data) {
             provider.once(transactionResult.hash, function(transaction) {
               callbackAllListeners(superfly, 'transactionMined', transaction);
             });
-            let conf = await transactionResult.wait;
           }
           catch(e) {
             success = false;
@@ -351,8 +350,13 @@ function callbackAllListeners(o, type, data) {
         if(success) {
           try {
             let contract = new ethers.Contract(contractAddress, erc20Abi, signer); 
-            let res = await contract.transfer(to, BigInt(amount));
-            console.log('erc transfer res', res);
+            let transactionResult = await contract.transfer(to, BigInt(amount));
+            callbackAllListeners(this, 'transactionCreated', transactionResult);
+
+            let superfly = this;
+            provider.once(transactionResult.hash, function(transaction) {
+              callbackAllListeners(superfly, 'transactionMined', transaction);
+            });
           }
           catch(e) {
             success = false;

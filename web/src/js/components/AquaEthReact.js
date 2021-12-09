@@ -16,6 +16,7 @@ export default function AquaEthReact(props) {
   const connected = props.connected;
   const connectionInfo = props.connectionInfo;
 
+  const [activePanel, setActivePanel] = useState('account');
   const [aquaEthClientCreated, setAquaEthClientCreated] = useState();
   const [submitting, setSubmitting] = useState({});
   const [accounts, setAccounts] = useState();
@@ -298,21 +299,22 @@ export default function AquaEthReact(props) {
     setErc20TransferEntry(_erc20TransferEntry);
   }
 
-  return <Fragment>
-    <div className="er-features">
-      { featurePanel( '', 
-          <AqexButton label="Get Accounts" id="requestAccounts" className="playground-button playground-icon-button"
-            onClick={() => handleFeature('requestAccounts')} isSubmitting={submitting['requestAccounts']}
-            timeout={BUTTON_TIMEOUT} setUIMsg={handleUIMessage} />,
-          formatAccounts(accounts)
-      )}
-      { featurePanel('Chain Info', '', formatChain(chainInfo)) }
-      { featurePanel( '', 
-          <AqexButton label="Block Number" id="getBlockNumber" className="playground-button playground-icon-button"
-            onClick={() => handleFeature('getBlockNumber')} isSubmitting={submitting['getBlockNumber']} timeout={BUTTON_TIMEOUT}
-            setUIMsg={handleUIMessage} />,
-          blockNumber
-      )}
+  function getTab(id, title, activePanel) {
+      return <div className={"er-tab " + (activePanel === id ? 'er-tab-active' : '')}
+                  onClick={e => setActivePanel(id)}>{title}</div>
+  }
+
+  function getTabs(activePanel) {
+    return <div className="er-tabs">
+      { getTab('account', 'Account', activePanel) }
+      { getTab('signing', 'Signing', activePanel) }
+      { getTab('tokens', 'Tokens', activePanel) }
+    </div>
+  }
+
+  function getAccountPanels() {
+    return <Fragment>
+      <div className="er-features">
       { featurePanel( '', 
           <Fragment>
             <div className="er-form-row">
@@ -325,6 +327,27 @@ export default function AquaEthReact(props) {
           </Fragment>,
           formatBalance(balance, chainInfo)
       )}
+
+      { featurePanel( '', 
+          <Fragment>
+            <div className="er-form-row">
+              <div className="er-form-label">To</div>
+              <input type="text" value={ sendTransactionTo } onChange={e => setSendTransactionTo(e.target.value)} />
+            </div>
+            <div className="er-form-row">
+              <div className="er-form-label">Amount</div>
+              <input type="text" value={ sendTransactionAmount } onChange={e => setSendTransactionAmount(e.target.value)} />
+            </div>
+            <AqexButton label="Send Currency" id="sendTransaction" className="playground-button playground-icon-button"
+              onClick={() => handleFeature('sendTransaction', createTransactionRequest())} isSubmitting={submitting['sendTransaction']} timeout={BUTTON_TIMEOUT}
+              setUIMsg={handleUIMessage} />
+          </Fragment>,
+          sendTransactionResult 
+      )}
+
+      </div> 
+      <div className="er-features">
+      
       { featurePanel( '', 
           <Fragment>
             <div className="er-form-row">
@@ -350,41 +373,42 @@ export default function AquaEthReact(props) {
           weiAmount
       )}
       { featurePanel( '', 
-          <Fragment>
-            <div className="er-form-row">
-              <div className="er-form-label">To</div>
-              <input type="text" value={ sendTransactionTo } onChange={e => setSendTransactionTo(e.target.value)} />
-            </div>
-            <div className="er-form-row">
-              <div className="er-form-label">Amount</div>
-              <input type="text" value={ sendTransactionAmount } onChange={e => setSendTransactionAmount(e.target.value)} />
-            </div>
-            <AqexButton label="Send Currency" id="sendTransaction" className="playground-button playground-icon-button"
-              onClick={() => handleFeature('sendTransaction', createTransactionRequest())} isSubmitting={submitting['sendTransaction']} timeout={BUTTON_TIMEOUT}
-              setUIMsg={handleUIMessage} />
-          </Fragment>,
-          sendTransactionResult 
+          <AqexButton label="Block Number" id="getBlockNumber" className="playground-button playground-icon-button"
+            onClick={() => handleFeature('getBlockNumber')} isSubmitting={submitting['getBlockNumber']} timeout={BUTTON_TIMEOUT}
+            setUIMsg={handleUIMessage} />,
+          blockNumber
       )}
-      { featurePanel( '', 
-          <Fragment>
-            <div className="er-form-row">
-              <div className="er-form-label">Domain</div>
-              <input type="text" value={ signTypedEntry.domain } onChange={e => handleSignTypedEntry('domain', e.target.value)} />
-            </div>
-            <div className="er-form-row">
-              <div className="er-form-label">Types</div>
-              <input type="text" value={ signTypedEntry.types } onChange={e => handleSignTypedEntry('types', e.target.value)} />
-            </div>
-            <div className="er-form-row">
-              <div className="er-form-label">Value</div>
-              <input type="text" value={ signTypedEntry.value} onChange={e => handleSignTypedEntry('value', e.target.value)} />
-            </div>
-            <AqexButton label="Sign Typed Data" id="signTypedData" className="playground-button playground-icon-button"
-              onClick={() => handleFeature('signTypedData', signTypedEntry ) } isSubmitting={submitting['signTypedData']} timeout={BUTTON_TIMEOUT}
-              setUIMsg={handleUIMessage} />
-          </Fragment>,
-          formatSignature(signTypedDataResult)
-      )}
+      </div>
+    </Fragment>
+  }
+
+  function getSigningPanels() {
+    return <div className="er-features">
+    { featurePanel( '', 
+        <Fragment>
+          <div className="er-form-row">
+            <div className="er-form-label">Domain</div>
+            <input type="text" value={ signTypedEntry.domain } onChange={e => handleSignTypedEntry('domain', e.target.value)} />
+          </div>
+          <div className="er-form-row">
+            <div className="er-form-label">Types</div>
+            <input type="text" value={ signTypedEntry.types } onChange={e => handleSignTypedEntry('types', e.target.value)} />
+          </div>
+          <div className="er-form-row">
+            <div className="er-form-label">Value</div>
+            <input type="text" value={ signTypedEntry.value} onChange={e => handleSignTypedEntry('value', e.target.value)} />
+          </div>
+          <AqexButton label="Sign Typed Data" id="signTypedData" className="playground-button playground-icon-button"
+            onClick={() => handleFeature('signTypedData', signTypedEntry ) } isSubmitting={submitting['signTypedData']} timeout={BUTTON_TIMEOUT}
+            setUIMsg={handleUIMessage} />
+        </Fragment>,
+        formatSignature(signTypedDataResult)
+    )}
+    </div>
+  }
+
+  function getTokenPanels() {
+    return <div className="er-features">
       { featurePanel( '', 
           <Fragment>
             <div className="er-form-row">
@@ -422,6 +446,28 @@ export default function AquaEthReact(props) {
           erc20TransferOutput
       )}
     </div>
+  }
+
+  return <Fragment>
+    <div className="er-features">
+      { featurePanel( '', 
+          <AqexButton label="Connect" id="requestAccounts" className="playground-button playground-icon-button"
+            onClick={() => handleFeature('requestAccounts')} isSubmitting={submitting['requestAccounts']}
+            timeout={BUTTON_TIMEOUT} setUIMsg={handleUIMessage} />,
+          formatAccounts(accounts)
+      )}
+      { featurePanel('Chain Info', '', formatChain(chainInfo)) }
+    </div>
+    
+    { accounts && 
+      <Fragment>
+        { getTabs(activePanel) }
+        { activePanel === 'account' && getAccountPanels() }
+        { activePanel === 'signing' && getSigningPanels() }
+        { activePanel === 'tokens' && getTokenPanels() }
+      </Fragment>
+    }
+    
   </Fragment>
   
 }

@@ -62,7 +62,6 @@ function App(props) {
             </div> 
 
             <div className="er-remote-controls">
-            <h3>Controls</h3>
               <AquaEthReact connected={connected} connectionInfo={connectionInfo} 
                             remotePeerId={remotePeerId} remoteRelayPeerId={remoteRelayPeerId} toast={toast} />
             </div>
