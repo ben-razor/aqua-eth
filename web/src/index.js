@@ -5,7 +5,7 @@ import { ToastProvider, useToasts } from 'react-toast-notifications';
 import FluenceReact from './js/components/FluenceReact';
 import connect from './js/components/Connect';
 import AquaEthReact from './js/components/AquaEthReact';
-import logo from '../src/images/aqua-eth-1.png';
+import logo from '../src/images/aqua-eth-2.png';
 
 const TOAST_TIMEOUT = 4000;
 

@@ -199,7 +199,7 @@ export default function AquaEthReact(props) {
         }
         else {
           if(res.info.code === 'CALL_EXCEPTION' && id === 'erc20Contract') {
-            toast('Contract connection failed. Check token is an ERC20 on selected Chain.')
+            toast('Contract connection failed. Check address is for an ERC20 token on selected Chain.')
             console.log(res);
           }
           else {
