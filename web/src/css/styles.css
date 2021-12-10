@@ -155,6 +155,9 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 }
 
 .er-feature {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     box-sizing: border-box;
     flex: 1;
     border: 1px solid hsl(0deg, 0%, 70%);

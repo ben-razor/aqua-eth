@@ -81,6 +81,16 @@ data ResultTransaction:
     info: Result
     data: TransactionResponse
 
+data TokenInfo:
+    address: string
+    name: string
+    symbol: string
+    decimals: u32
+
+data ResultTokenInfo:
+    info: Result
+    data: TokenInfo
+
 func identityResultString(val: ResultString) -> ResultString:
     <- val 
 
@@ -100,6 +110,7 @@ service Ethereum("ethereum"):
     getBlockNumber() -> ResultString
     getTransactionCount() -> ResultU32 
 
+    erc20Connect(contractAddress: string) -> ResultTokenInfo
     erc20BalanceOf(contractAddress: string, address: string) -> ResultString
     erc20Transfer(contractAddress: string, to: string, amount: string) -> ResultTransaction
 
@@ -178,6 +189,11 @@ func signTypedData(peerId: string, relayId: string,
                    domain: JSONString, types: JSONString, value: JSONString) -> RawSignature:
     on peerId via relayId:
         res <- Ethereum.signTypedData(domain, types, value)
+    <- res
+
+func erc20Connect(peerId: string, relayId: string, contractAddress: string) -> ResultTokenInfo:
+    on peerId via relayId:
+        res <- Ethereum.erc20Connect(contractAddress)
     <- res
 
 func erc20BalanceOf(peerId: string, relayId: string, contractAddress: string, address: string) -> ResultString:

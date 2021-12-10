@@ -122,22 +122,23 @@ function callbackAllListeners(o, type, data) {
         if(success) {
           try {
             accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            console.log('acc', accounts);
             this._triggerEvent('requestAccounts', 'connect', accounts);
           }
-          catch(error) {
+          catch(e) {
             success = false;
             reason = 'error-eth-rpc';
-            message = error.message;
-            code = error.code;
+            message = e.message;
+            code = e.code;
 
-            if (error.code === 4001) {
-              this._triggerEvent('requestAccounts', 'connect', error, false, 'error-user-rejected');
+            if (e.code === 4001) {
+              this._triggerEvent('requestAccounts', 'connect', e, false, 'error-user-rejected');
             } 
             else {
-              this._triggerEvent('requestAccounts', 'connect', error, false, 'error-connection-error');
+              this._triggerEvent('requestAccounts', 'connect', e, false, 'error-connection-error');
             }
 
-            console.log(error);
+            console.log(e);
           }
         }
 
@@ -320,6 +321,31 @@ function callbackAllListeners(o, type, data) {
         }
       
         return result(success, reason, code, message, transactionResult);
+      },
+      erc20Connect: async(contractAddress) => {
+        console.log('erc20 1');
+        let { success, reason, message, code } = this.checkEthStatus();
+        let info = {};
+ 
+        if(success) {
+          try {
+            let contract = new ethers.Contract(contractAddress, erc20Abi, signer); 
+            let name = await contract.name();
+            let symbol = await contract.symbol();
+            let decimals = await contract.decimals();
+            info = { name, symbol, decimals, address: contractAddress };
+          }
+          catch(e) {
+            success = false;
+            code = e.code;
+            message = e.message;
+            reason = 'error-ethers';
+      
+            console.log(e);
+          }
+        }
+
+        return result(success, reason, code, message, info);
       },
       erc20BalanceOf: async(contractAddress, account) => {
         let { success, reason, message, code } = this.checkEthStatus();
