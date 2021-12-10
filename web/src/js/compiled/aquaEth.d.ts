@@ -21,13 +21,16 @@ export interface EthereumDef {
     erc20BalanceOf: (contractAddress: string, address: string, callParams: CallParams<'contractAddress' | 'address'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     erc20Connect: (contractAddress: string, callParams: CallParams<'contractAddress'>) => { data: { address: string; decimals: number; name: string; symbol: string; }; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: { address: string; decimals: number; name: string; symbol: string; }; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     erc20Transfer: (contractAddress: string, to: string, amount: string, callParams: CallParams<'contractAddress' | 'to' | 'amount'>) => { data: { blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; }; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: { blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; }; info: { code: number; message: string; reason: string; success: boolean; }; }>;
-    formatEther: (amount: string, callParams: CallParams<'amount'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
+    formatEther: (value: string, callParams: CallParams<'value'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
+    formatUnits: (value: string, unit: string, callParams: CallParams<'value' | 'unit'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     getBalance: (address: string, callParams: CallParams<'address'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     getBlockNumber: (callParams: CallParams<null>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     getChainInfo: (chainId: number, callParams: CallParams<'chainId'>) => { data: { chainId: number; currency: { decimals: number; name: string; symbol: string; }; name: string; network: string; networkId: number; shortName: string; }; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: { chainId: number; currency: { decimals: number; name: string; symbol: string; }; name: string; network: string; networkId: number; shortName: string; }; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     getConnectedChainInfo: (callParams: CallParams<null>) => { data: { chainId: number; currency: { decimals: number; name: string; symbol: string; }; name: string; network: string; networkId: number; shortName: string; }; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: { chainId: number; currency: { decimals: number; name: string; symbol: string; }; name: string; network: string; networkId: number; shortName: string; }; info: { code: number; message: string; reason: string; success: boolean; }; }>;
+    getFeeData: (callParams: CallParams<null>) => { data: { gasPrice: string; maxFeePerGas: string; maxPriorityFeePerGas: string; }; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: { gasPrice: string; maxFeePerGas: string; maxPriorityFeePerGas: string; }; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     getTransactionCount: (callParams: CallParams<null>) => { data: number; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: number; info: { code: number; message: string; reason: string; success: boolean; }; }>;
-    parseEther: (amount: string, callParams: CallParams<'amount'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
+    parseEther: (value: string, callParams: CallParams<'value'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
+    parseUnits: (value: string, unit: string, callParams: CallParams<'value' | 'unit'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     receiveData: (packet: { data: string; type: string; }, callParams: CallParams<'packet'>) => void | Promise<void>;
     registerListenerNode: (listenerPeerId: string, listenerRelayId: string, callParams: CallParams<'listenerPeerId' | 'listenerRelayId'>) => void | Promise<void>;
     requestAccounts: (callParams: CallParams<null>) => { data: string[]; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string[]; info: { code: number; message: string; reason: string; success: boolean; }; }>;
@@ -57,14 +60,19 @@ export function identityResultChain(val: IdentityResultChainArgVal, config?: {tt
 export function identityResultChain(peer: FluencePeer, val: IdentityResultChainArgVal, config?: {ttl?: number}): Promise<IdentityResultChainResult>;
 
  
+export type GetFeeDataResult = { data: { gasPrice: string; maxFeePerGas: string; maxPriorityFeePerGas: string; }; info: { code: number; message: string; reason: string; success: boolean; }; }
+export function getFeeData(peerId: string, relayId: string, config?: {ttl?: number}): Promise<GetFeeDataResult>;
+export function getFeeData(peer: FluencePeer, peerId: string, relayId: string, config?: {ttl?: number}): Promise<GetFeeDataResult>;
+
+ 
 export type GetBalanceResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
 export function getBalance(peerId: string, relayId: string, address: string, config?: {ttl?: number}): Promise<GetBalanceResult>;
 export function getBalance(peer: FluencePeer, peerId: string, relayId: string, address: string, config?: {ttl?: number}): Promise<GetBalanceResult>;
 
  
 export type FormatEtherResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
-export function formatEther(peerId: string, relayId: string, amount: string, config?: {ttl?: number}): Promise<FormatEtherResult>;
-export function formatEther(peer: FluencePeer, peerId: string, relayId: string, amount: string, config?: {ttl?: number}): Promise<FormatEtherResult>;
+export function formatEther(peerId: string, relayId: string, value: string, config?: {ttl?: number}): Promise<FormatEtherResult>;
+export function formatEther(peer: FluencePeer, peerId: string, relayId: string, value: string, config?: {ttl?: number}): Promise<FormatEtherResult>;
 
  
 
@@ -78,13 +86,18 @@ export function listenerNodeCallback(peer: FluencePeer, peerId: string, relayId:
 
  
 export type ParseEtherResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
-export function parseEther(peerId: string, relayId: string, amount: string, config?: {ttl?: number}): Promise<ParseEtherResult>;
-export function parseEther(peer: FluencePeer, peerId: string, relayId: string, amount: string, config?: {ttl?: number}): Promise<ParseEtherResult>;
+export function parseEther(peerId: string, relayId: string, value: string, config?: {ttl?: number}): Promise<ParseEtherResult>;
+export function parseEther(peer: FluencePeer, peerId: string, relayId: string, value: string, config?: {ttl?: number}): Promise<ParseEtherResult>;
 
 export type IdentityResultStringArgVal = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } 
 export type IdentityResultStringResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
 export function identityResultString(val: IdentityResultStringArgVal, config?: {ttl?: number}): Promise<IdentityResultStringResult>;
 export function identityResultString(peer: FluencePeer, val: IdentityResultStringArgVal, config?: {ttl?: number}): Promise<IdentityResultStringResult>;
+
+ 
+export type FormatUnitsResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
+export function formatUnits(peerId: string, relayId: string, value: string, unit: string, config?: {ttl?: number}): Promise<FormatUnitsResult>;
+export function formatUnits(peer: FluencePeer, peerId: string, relayId: string, value: string, unit: string, config?: {ttl?: number}): Promise<FormatUnitsResult>;
 
  
 
@@ -115,6 +128,11 @@ export function getChainInfo(peer: FluencePeer, peerId: string, relayId: string,
 export type Erc20ConnectResult = { data: { address: string; decimals: number; name: string; symbol: string; }; info: { code: number; message: string; reason: string; success: boolean; }; }
 export function erc20Connect(peerId: string, relayId: string, contractAddress: string, config?: {ttl?: number}): Promise<Erc20ConnectResult>;
 export function erc20Connect(peer: FluencePeer, peerId: string, relayId: string, contractAddress: string, config?: {ttl?: number}): Promise<Erc20ConnectResult>;
+
+ 
+export type ParseUnitsResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
+export function parseUnits(peerId: string, relayId: string, value: string, unit: string, config?: {ttl?: number}): Promise<ParseUnitsResult>;
+export function parseUnits(peer: FluencePeer, peerId: string, relayId: string, value: string, unit: string, config?: {ttl?: number}): Promise<ParseUnitsResult>;
 
  
 export type Erc20TransferResult = { data: { blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; }; info: { code: number; message: string; reason: string; success: boolean; }; }

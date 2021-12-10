@@ -50,6 +50,7 @@ function App(props) {
         { connected &&
           <Fragment>
             <div className="er-remote-panel">
+              <div className="er-remote-panel-controls">
                 <h3>Set Remote</h3>
                 <div className="er-form-row">
                   <div className="er-form-label">PeerId:</div>
@@ -59,6 +60,20 @@ function App(props) {
                   <div className="er-form-label">RelayId:</div>
                   <input type="text" value={remoteRelayPeerId} onChange={e => setRemoteRelayPeerId(e.target.value)} />
                 </div>
+              </div>
+              <div className="er-remote-panel-info">
+                {
+                  (remotePeerId === connectionInfo.peerId) ?
+                  <div className="er-help-panel">
+                    <h4>Remote peer is currently set to this browser.</h4>
+                    <p>To experience the full power of Eth Remote:</p>
+                    <p>Open a MetaMask enabled browser on a remote device</p>
+                    <p>Insert the peerId and relayId displayed on the remote browser and click Connect</p>
+                  </div> 
+                  :
+                  ''
+                }
+              </div>
             </div> 
 
             <div className="er-remote-controls">

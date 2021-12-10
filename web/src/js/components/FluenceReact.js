@@ -73,12 +73,23 @@ function FluenceReact(props) {
         }
     }
 
+    function formatPeerId(peerId) {
+        let charsVisible = 6;
+        let formatted = peerId;
+
+        if(peerId) {
+            formatted = `${peerId.slice(0, charsVisible)}...${peerId.slice(-charsVisible)}`;
+        }
+
+        return formatted;
+    }
+
     return <div>
         { connectionInfo.peerId ?
             <Fragment>
-                <div className="er-fluence-connect">
-                    <div>PeerId: {connectionInfo.peerId} <i className="fa fa-edit" onClick={e => copyToClipboard('peer')}/></div>
-                    <div>RelayId: {connectionInfo.relayPeerId} <i className="fa fa-edit" onClick={e => copyToClipboard('relay')}/></div>
+                <div className="er-fluence-connect"> 
+                    <div>PeerId: {formatPeerId(connectionInfo.peerId)} <i className="fa fa-edit" onClick={e => copyToClipboard('peer')}/></div>
+                    <div>RelayId: {formatPeerId(connectionInfo.relayPeerId)} <i className="fa fa-edit" onClick={e => copyToClipboard('relay')}/></div>
                 </div>
             </Fragment>
             :

@@ -8,6 +8,10 @@ body {
     font-family: AquaPlaygroundRegular, sans-serif; 
 }
 
+div, input, select, button {
+    box-sizing: border-box;
+}
+
 h1,h2,h3,h4,h5,h6 {
     margin: 0 0 0.25em 0;
 }
@@ -136,11 +140,26 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 }
 
 .er-form-label {
-    min-width: 6em;
+    flex: 1 1 10em;
+    margin-right: 0.5em;
+    word-break: break-word;
+}
+
+.er-form-value {
+    flex: 2 1 90%;
 }
 
 .er-remote-panel {
-    width: 50%;
+    display: flex;
+}
+
+.er-remote-panel-controls {
+    flex: 1;
+}
+
+.er-remote-panel-info {
+    flex: 1;
+    padding: 1em;
 }
 
 .er-remote-controls {

@@ -208,6 +208,29 @@ function callbackAllListeners(o, type, data) {
        
         return result(success, reason, code, message, balance);
       },
+      getFeeData: async() => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let feeData = {};
+
+        if(success) {
+          try {
+            let res = await provider.getFeeData();
+            feeData.gasPrice = res.gasPrice.toString();
+            feeData.maxFeePerGas = res.maxFeePerGas.toString();
+            feeData.maxPriorityFeePerGas = res.maxPriorityFeePerGas.toString();
+          }
+          catch(e) {
+              success = false;
+              code = e.code;
+              message = e.message;
+              reason = 'error-eth-rpc';
+
+              console.log(e);
+          }
+        }
+       
+        return result(success, reason, code, message, feeData);
+      },
       getBlockNumber: async() => {
         let { success, reason, message, code } = this.checkEthStatus();
         let blockNumber = 0;
@@ -248,6 +271,26 @@ function callbackAllListeners(o, type, data) {
 
         return result(success, reason, code, message, transactionCount);
       },
+      formatUnits: async(amount, unit) => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let amountOut = 0;
+      
+        if(success) {
+          try {
+            amountOut = ethers.utils.formatUnits(amount, unit);
+          }
+          catch(e) {
+            success = false;
+            code = e.code;
+            message = e.message;
+            reason = 'error-ethers';
+      
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, amountOut);
+      },
       formatEther: async(amount) => {
         let { success, reason, message, code } = this.checkEthStatus();
         let amountOut = 0;
@@ -255,6 +298,27 @@ function callbackAllListeners(o, type, data) {
         if(success) {
           try {
             amountOut = ethers.utils.formatEther(amount)
+          }
+          catch(e) {
+            success = false;
+            code = e.code;
+            message = e.message;
+            reason = 'error-ethers';
+      
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, amountOut);
+      },
+      parseUnits: async(amount, unit) => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let amountOut = 0;
+      
+        if(success) {
+          try {
+            let res = ethers.utils.parseUnits(amount, unit);
+            amountOut = res.toString();
           }
           catch(e) {
             success = false;

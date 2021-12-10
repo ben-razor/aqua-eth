@@ -34,6 +34,15 @@ data Currency:
     symbol: string
     decimals: u32 
 
+data FeeData:
+    gasPrice: string
+    maxFeePerGas: string
+    maxPriorityFeePerGas: string
+
+data ResultFeeData:
+    info: Result
+    data: FeeData
+
 data Chain:
     name: string
     chainId: u32
@@ -107,6 +116,7 @@ service Ethereum("ethereum"):
     getConnectedChainInfo() -> ResultChain
     getChainInfo(chainId: u32) -> ResultChain
     getBalance(address: string) -> ResultString
+    getFeeData() -> ResultFeeData
     getBlockNumber() -> ResultString
     getTransactionCount() -> ResultU32 
 
@@ -114,10 +124,14 @@ service Ethereum("ethereum"):
     erc20BalanceOf(contractAddress: string, address: string) -> ResultString
     erc20Transfer(contractAddress: string, to: string, amount: string) -> ResultTransaction
 
-    -- Wei to Eth
-    formatEther(amount: string) -> ResultString
-    -- Eth to Wei
-    parseEther(amount: string) -> ResultString
+    -- Returns a string representation of value formatted with unit digits (if it is a number) or to the unit specified (if a string).
+    formatUnits(value: string, unit: string) -> ResultString
+    -- The equivalent to calling formatUnits(value, "ether").
+    formatEther(value: string) -> ResultString
+    -- Returns a BigNumber representation of value, parsed with unit digits (if it is a number) or from the unit specified (if a string).
+    parseUnits(value: string, unit: string) -> ResultString
+    -- The equivalent to calling parseUnits(value, "ether").
+    parseEther(value: string) -> ResultString
     
     sendTransaction(transactionRequest: TransactionRequest) -> ResultTransaction
     signTypedData(domain: JSONString, types: JSONString, value: JSONString) -> RawSignature
@@ -160,6 +174,11 @@ func getBalance(peerId: string, relayId: string, address: string) -> ResultStrin
             
     <- resBox! 
 
+func getFeeData(peerId: string, relayId: string) -> ResultFeeData:
+    on peerId via relayId:
+        res <- Ethereum.getFeeData()
+    <- res
+
 func getBlockNumber(peerId: string, relayId: string) -> ResultString:
     on peerId via relayId:
         res <- Ethereum.getBlockNumber()
@@ -170,14 +189,24 @@ func getTransactionCount(peerId: string, relayId: string) -> ResultU32:
         res <- Ethereum.getTransactionCount()
     <- res
 
-func formatEther(peerId: string, relayId: string, amount: string) -> ResultString:
+func formatUnits(peerId: string, relayId: string, value: string, unit: string) -> ResultString:
     on peerId via relayId:
-        res <- Ethereum.formatEther(amount)
+        res <- Ethereum.formatUnits(value, unit)
     <- res
 
-func parseEther(peerId: string, relayId: string, amount: string) -> ResultString:
+func formatEther(peerId: string, relayId: string, value: string) -> ResultString:
     on peerId via relayId:
-        res <- Ethereum.parseEther(amount)
+        res <- Ethereum.formatEther(value)
+    <- res
+
+func parseUnits(peerId: string, relayId: string, value: string, unit: string) -> ResultString:
+    on peerId via relayId:
+        res <- Ethereum.parseUnits(value, unit)
+    <- res
+
+func parseEther(peerId: string, relayId: string, value: string) -> ResultString:
+    on peerId via relayId:
+        res <- Ethereum.parseEther(value)
     <- res
 
 func sendTransaction(peerId: string, relayId: string, transactionRequest: TransactionRequest) -> ResultTransaction:
