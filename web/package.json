@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "webpack-dev-server",
     "build": "webpack",
+    "preview": "webpack && firebase hosting:channel:deploy preview",
+    "deploy": "webpack && firebase deploy --only hosting",
     "aqua": "aqua --input src/aqua/aquaEth.aqua --output src/js/compiled --js"
   },
   "author": "",
