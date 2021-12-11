@@ -65,7 +65,7 @@ function App(props) {
                 {
                   (remotePeerId === connectionInfo.peerId) ?
                   <div className="er-help-panel">
-                    <h4>Remote peer is currently set to this browser.</h4>
+                    <h4>This browser is currently set as its own remote.</h4>
                     <p>To experience the full power of Eth Remote:</p>
                     <p>Open a MetaMask enabled browser on a remote device</p>
                     <p>Insert the peerId and relayId displayed on the remote browser and click Connect</p>

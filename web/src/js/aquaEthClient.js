@@ -215,9 +215,10 @@ function callbackAllListeners(o, type, data) {
         if(success) {
           try {
             let res = await provider.getFeeData();
+            console.log('gf res', res);
             feeData.gasPrice = res.gasPrice.toString();
-            feeData.maxFeePerGas = res.maxFeePerGas.toString();
-            feeData.maxPriorityFeePerGas = res.maxPriorityFeePerGas.toString();
+            feeData.maxFeePerGas = res.maxFeePerGas?.toString() || 0;
+            feeData.maxPriorityFeePerGas = res.maxPriorityFeePerGas?.toString() || 0;
           }
           catch(e) {
               success = false;
@@ -467,11 +468,8 @@ function callbackAllListeners(o, type, data) {
       
         if(success) {
           try {
-            console.log('dom', domainJSON);
             domain = JSON.parse(domainJSON);
-            console.log('types', typesJSON);
             types = JSON.parse(typesJSON);
-            console.log('value', valueJSON);
             value = JSON.parse(valueJSON);
           }
           catch(e) {
@@ -483,9 +481,7 @@ function callbackAllListeners(o, type, data) {
 
         if(success) {
           try {
-            console.log('pre sig');
             signature = await signer._signTypedData(domain, types, value);
-            console.log('post sig');
             callbackAllListeners(this, 'signedTypedData', signature);
           }
           catch(e) {
@@ -499,6 +495,40 @@ function callbackAllListeners(o, type, data) {
         }
       
         return result(success, reason, code, message, signature);
+      },
+      verifyTypedData: async(domainJSON, typesJSON, valueJSON, signature) => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let address = '';
+        let domain, types, value;
+      
+        if(success) {
+          try {
+            domain = JSON.parse(domainJSON);
+            types = JSON.parse(typesJSON);
+            value = JSON.parse(valueJSON);
+          }
+          catch(e) {
+            success = false;
+            reason = 'error-json-parse';
+            message = e.toString();
+          }
+        }
+
+        if(success) {
+          try {
+            address = await ethers.utils.verifyTypedData(domain, types, value, signature);
+          }
+          catch(e) {
+            success = false;
+            code = e.code;
+            message = e.message;
+            reason = 'error-ethers';
+      
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, address);
       },
       /**
        * Register a node to receive callbacks from window.ethereum events.

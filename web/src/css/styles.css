@@ -6,6 +6,7 @@
 
 body {
     font-family: AquaPlaygroundRegular, sans-serif; 
+    background-color: hsl(0deg, 0%, 97%);
 }
 
 div, input, select, button {
@@ -149,6 +150,14 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
     flex: 2 1 90%;
 }
 
+.er-form-label-50 {
+    flex: 1 1;
+}
+
+.er-form-value-50 {
+    flex: 1 1;
+}
+
 .er-remote-panel {
     display: flex;
 }
@@ -164,7 +173,7 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 
 .er-remote-controls {
     border-radius: 1em;
-    border: 1px solid grey;
+    border: 2px solid hsl(0deg, 0%, 80%);
     padding: 1em;
 }
 
@@ -186,6 +195,7 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
     min-width: 32%;
     max-width: 32%;
     box-shadow: 2px 0px 4px hsl(0deg, 0%, 85%);
+    background-color: hsl(0deg, 0%, 99%);
 }
 
 .er-feature-title {

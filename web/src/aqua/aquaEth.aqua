@@ -1,6 +1,9 @@
+-- Aqua wrapper around ethers.js
+-- 
 alias BigNumber: string 
 alias JSONString: string
 alias RawSignature: string
+alias Address: string
 
 data Result:
     success: bool
@@ -135,6 +138,7 @@ service Ethereum("ethereum"):
     
     sendTransaction(transactionRequest: TransactionRequest) -> ResultTransaction
     signTypedData(domain: JSONString, types: JSONString, value: JSONString) -> RawSignature
+    verifyTypedData(domain: JSONString, types: JSONString, value: JSONString, signature: RawSignature) -> Address
 
     -- Methods to register a listener for events on the local client 
     registerListenerNode(listenerPeerId: string, listenerRelayId: string)
@@ -218,6 +222,13 @@ func signTypedData(peerId: string, relayId: string,
                    domain: JSONString, types: JSONString, value: JSONString) -> RawSignature:
     on peerId via relayId:
         res <- Ethereum.signTypedData(domain, types, value)
+    <- res
+
+func verifyTypedData(peerId: string, relayId: string,
+                     domain: JSONString, types: JSONString, value: JSONString,
+                     signature: RawSignature) -> RawSignature:
+    on peerId via relayId:
+        res <- Ethereum.verifyTypedData(domain, types, value, signature)
     <- res
 
 func erc20Connect(peerId: string, relayId: string, contractAddress: string) -> ResultTokenInfo:

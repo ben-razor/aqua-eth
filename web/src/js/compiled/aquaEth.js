@@ -327,6 +327,38 @@ export function registerEthereum(...args) {
             "returnType" : {
                 "tag" : "primitive"
             }
+        },
+        {
+            "functionName" : "verifyTypedData",
+            "argDefs" : [
+                {
+                    "name" : "domain",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                },
+                {
+                    "name" : "types",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                },
+                {
+                    "name" : "value",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                },
+                {
+                    "name" : "signature",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                }
+            ],
+            "returnType" : {
+                "tag" : "primitive"
+            }
         }
     ]
 }
@@ -871,101 +903,6 @@ export function formatEther(...args) {
         },
         {
             "name" : "value",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        }
-    ],
-    "names" : {
-        "relay" : "-relay-",
-        "getDataSrv" : "getDataSrv",
-        "callbackSrv" : "callbackSrv",
-        "responseSrv" : "callbackSrv",
-        "responseFnName" : "response",
-        "errorHandlingSrv" : "errorHandlingSrv",
-        "errorFnName" : "error"
-    }
-},
-        script
-    )
-}
-
-
-export function registerListenerNode(...args) {
-
-    let script = `
-                        (xor
-                     (seq
-                      (seq
-                       (seq
-                        (seq
-                         (seq
-                          (seq
-                           (seq
-                            (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
-                            (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
-                           )
-                           (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
-                          )
-                          (call %init_peer_id% ("getDataSrv" "listenerPeerId") [] listenerPeerId)
-                         )
-                         (call %init_peer_id% ("getDataSrv" "listenerRelayId") [] listenerRelayId)
-                        )
-                        (call -relay- ("op" "noop") [])
-                       )
-                       (call relayId ("op" "noop") [])
-                      )
-                      (xor
-                       (call peerId ("ethereum" "registerListenerNode") [listenerPeerId listenerRelayId])
-                       (seq
-                        (seq
-                         (seq
-                          (call relayId ("op" "noop") [])
-                          (call -relay- ("op" "noop") [])
-                         )
-                         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
-                        )
-                        (call -relay- ("op" "noop") [])
-                       )
-                      )
-                     )
-                     (seq
-                      (seq
-                       (call relayId ("op" "noop") [])
-                       (call -relay- ("op" "noop") [])
-                      )
-                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
-                     )
-                    )
-    `
-    return callFunction(
-        args,
-        {
-    "functionName" : "registerListenerNode",
-    "returnType" : {
-        "tag" : "void"
-    },
-    "argDefs" : [
-        {
-            "name" : "peerId",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        },
-        {
-            "name" : "relayId",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        },
-        {
-            "name" : "listenerPeerId",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        },
-        {
-            "name" : "listenerRelayId",
             "argType" : {
                 "tag" : "primitive"
             }
@@ -1799,6 +1736,220 @@ export function erc20Connect(...args) {
         },
         {
             "name" : "contractAddress",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function verifyTypedData(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (seq
+                          (seq
+                           (seq
+                            (seq
+                             (seq
+                              (seq
+                               (seq
+                                (seq
+                                 (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                                 (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                                )
+                                (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                               )
+                               (call %init_peer_id% ("getDataSrv" "domain") [] domain)
+                              )
+                              (call %init_peer_id% ("getDataSrv" "types") [] types)
+                             )
+                             (call %init_peer_id% ("getDataSrv" "value") [] value)
+                            )
+                            (call %init_peer_id% ("getDataSrv" "signature") [] signature)
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                          (call relayId ("op" "noop") [])
+                         )
+                         (xor
+                          (call peerId ("ethereum" "verifyTypedData") [domain types value signature] res)
+                          (seq
+                           (seq
+                            (seq
+                             (call relayId ("op" "noop") [])
+                             (call -relay- ("op" "noop") [])
+                            )
+                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                         )
+                        )
+                        (call relayId ("op" "noop") [])
+                       )
+                       (call -relay- ("op" "noop") [])
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [res])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "verifyTypedData",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "peerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "domain",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "types",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "value",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "signature",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function registerListenerNode(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (seq
+                          (seq
+                           (seq
+                            (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                            (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                           )
+                           (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                          )
+                          (call %init_peer_id% ("getDataSrv" "listenerPeerId") [] listenerPeerId)
+                         )
+                         (call %init_peer_id% ("getDataSrv" "listenerRelayId") [] listenerRelayId)
+                        )
+                        (call -relay- ("op" "noop") [])
+                       )
+                       (call relayId ("op" "noop") [])
+                      )
+                      (xor
+                       (call peerId ("ethereum" "registerListenerNode") [listenerPeerId listenerRelayId])
+                       (seq
+                        (seq
+                         (seq
+                          (call relayId ("op" "noop") [])
+                          (call -relay- ("op" "noop") [])
+                         )
+                         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                        )
+                        (call -relay- ("op" "noop") [])
+                       )
+                      )
+                     )
+                     (seq
+                      (seq
+                       (call relayId ("op" "noop") [])
+                       (call -relay- ("op" "noop") [])
+                      )
+                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                     )
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "registerListenerNode",
+    "returnType" : {
+        "tag" : "void"
+    },
+    "argDefs" : [
+        {
+            "name" : "peerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "listenerPeerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "listenerRelayId",
             "argType" : {
                 "tag" : "primitive"
             }

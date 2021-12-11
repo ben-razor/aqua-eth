@@ -27,13 +27,36 @@ window['krasnodar'] = krasnodar;
 
 function FluenceReact(props) {
     const toast = props.toast;
+    const triggerConnectionTest = props.triggerConnectionTest;
     const [attemptingConnect, setAttemptingConnect] = useState();
     const [connected, setConnected] = useState(false);
     const [connectedNode, setConnectedNode] = useState();
     const [connectionInfo, setConnectionInfo] = useState({});
 
+    async function testConnection() {
+        let status = Fluence.getStatus();
+
+        console.log('Testing connection');
+
+        if(!status.isConnected) {
+            console.log('Peer disconnected from Fluence. Attempting reconnect...');
+            setConnected(false);
+        }
+    }
+
+    useEffect(() => {
+        let timer = setInterval(() => testConnection, 60000);
+
+        connect.addHandler('fluence-test-connection', (data) => {
+            testConnection();
+        });
+
+        return () => clearInterval(timer);
+    }, []);
+
     useEffect(() => {
         if(!connected) {
+
             setAttemptingConnect(true);
 
             async function connectToHost() {
@@ -63,7 +86,7 @@ function FluenceReact(props) {
             connectToHost();
         }
     }, [connected]);
-   
+
     function copyToClipboard(id) {
         if(id === 'peer') {
             clip(connectionInfo.peerId, toast);

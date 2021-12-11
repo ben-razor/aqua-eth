@@ -1,7 +1,8 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
 import { registerEthereum, requestAccounts, getChainInfo, getBalance, getBlockNumber,
          getFeeData,
-         formatUnits, formatEther, parseUnits, parseEther, sendTransaction, signTypedData,
+         formatUnits, formatEther, parseUnits, parseEther, sendTransaction, 
+         signTypedData, verifyTypedData,
          erc20Connect, erc20BalanceOf, erc20Transfer, 
          registerListenerNode} from '../compiled/aquaEth.js';
 import AqexButton from './AqexButton';
@@ -42,6 +43,7 @@ export default function AquaEthReact(props) {
     domain: textUI.signTypedDataDomain, types: textUI.signTypedDataTypes, value: textUI.signTypedDataValue
   });
   const [signTypedDataResult, setSignTypedDataResult] = useState('');
+  const [verifyTypedDataResult, setVerifyTypedDataResult] = useState('');
   const [erc20ContractAddressEntry, setERC20ContractAddressEntry] = useState('');
   const [erc20Info, setERC20Info] = useState('');
   const [erc20Balance, setErc20Balance] = useState('');
@@ -138,7 +140,6 @@ export default function AquaEthReact(props) {
         }
         else if(id === 'getFeeData') {
           res = await getFeeData(remotePeerId, remoteRelayPeerId);
-          console.log('fee data', res);
         }
         else if(id === 'getBlockNumber') {
           res = await getBlockNumber(remotePeerId, remoteRelayPeerId);
@@ -159,9 +160,12 @@ export default function AquaEthReact(props) {
           res = await sendTransaction(remotePeerId, remoteRelayPeerId, data);
         }
         else if(id === 'signTypedData') {
-          console.log('signreq', data);
           res = await signTypedData(remotePeerId, remoteRelayPeerId, data.domain, data.types, data.value);
-          console.log('signTypedData', res);
+        }
+        else if(id === 'verifyTypedData') {
+          let entry = data.entry;
+          let sig = data.signature;
+          res = await verifyTypedData(remotePeerId, remoteRelayPeerId, entry.domain, entry.types, entry.value, sig);
         }
         else if(id === 'erc20Contract') {
           res = await erc20Connect(remotePeerId, remoteRelayPeerId, data);
@@ -185,14 +189,19 @@ export default function AquaEthReact(props) {
           }
           else if(id === 'getChainInfo') { setChainInfo(res.data); }
           else if(id === 'getBalance') { setBalance(res.data); }
-          else if(id === 'getFeeData') { setGetFeeDataResult(res.data); }
+          else if(id === 'getFeeData') { 
+            let keys = Object.keys(res.data);
+            keys.forEach(key => { if(!res.data[key]) delete res.data[key] });
+            setGetFeeDataResult(res.data); 
+          }
           else if(id === 'getBlockNumber') { setBlockNumber(res.data); }
           else if(id === 'formatUnits') { setFormatUnitsAmount(res.data); }
           else if(id === 'formatEther') { setEtherAmount(res.data); }
           else if(id === 'parseUnits') { setParseUnitsAmount(res.data); }
           else if(id === 'parseEther') { setWeiAmount(res.data); }
           else if(id === 'sendTransaction') { setSendTransactionResult(JSON.stringify(res.data)); }
-          else if(id === 'signTypedData') { setSignTypedDataResult(JSON.stringify(res.data)); }
+          else if(id === 'signTypedData') { setSignTypedDataResult(res.data); }
+          else if(id === 'verifyTypedData') { setVerifyTypedDataResult(res.data); }
           else if(id === 'erc20Contract') { setERC20Info(res.data); }
           else if(id === 'erc20BalanceOf') { setErc20Balance(res.data); }
           else if(id === 'erc20Transfer') { setErc20TransferOutput(JSON.stringify(res.data)); }
@@ -209,6 +218,8 @@ export default function AquaEthReact(props) {
       }
       catch(e) {
         if(typeof e === 'string' && e.includes('timed out')) {
+          connect.msg('fluence-test-connection', {});
+
           if(id === 'requestAccounts') {
             toast('Connection timed out. You will be notified if remote signer connects.', 'error');
           }
@@ -233,6 +244,7 @@ export default function AquaEthReact(props) {
       handleErc20BalanceOfEntry('address', accounts[0]);
       resetFields();
       handleFeature('getChainInfo');
+      handleFeature('getFeeData');
     }
   }, [accounts]);
 
@@ -288,13 +300,13 @@ export default function AquaEthReact(props) {
     </div>
   }
 
-  function tabulate(data) {
+  function tabulate(data, tableConf={}) {
     let ui = [];
 
     for(let row of data) {
       ui.push(<div className="er-form-row" key={row.label}>
-        <div className="er-form-label">{row.label}</div>
-        <div className="er-form-value">{row.value}</div>
+        <div className={tableConf.labelClass || "er-form-label"}>{row.label}</div>
+        <div className={tableConf.valueClass || "er-form-value"}>{row.value}</div>
       </div>);
     }
 
@@ -329,14 +341,12 @@ export default function AquaEthReact(props) {
     return tokenUI;
   }
 
-  function formatGetFeeData(getFeeDataResult) {
+  function formatGetFeeData(getFeeDataResult, tableConf) {
     let ui;
 
     if(getFeeDataResult) {
-      console.log('gfdr', getFeeDataResult);
       let labeled = labelData(getFeeDataResult);
-      console.log('labeled', labeled);
-      ui = tabulate(labeled);
+      ui = tabulate(labeled, tableConf);
     }
 
     return ui;
@@ -459,10 +469,6 @@ export default function AquaEthReact(props) {
           </Fragment>,
           sendTransactionResult 
       )}
-      { featurePanel('', 
-        getFeatureControls('getFeeData', 'Get Fee Data (Est Gas)', {}, ()=>{}, [ ]),
-        formatGetFeeData(getFeeDataResult)
-      )}
       </div> 
     </Fragment>
   }
@@ -495,12 +501,6 @@ export default function AquaEthReact(props) {
   function getUtilPanels() {
     return <Fragment>
       <div className="er-features">
-      { featurePanel('', 
-        getFeatureControls('formatUnits', 'Format Units', formatUnitsEntry, setFormatUnitsEntry, [
-          { label: 'Value', key: 'value'}, { label: 'Decimals', key: 'unit'}
-        ]),
-        formatUnitsAmount
-      )}
       { featurePanel( '', 
           <Fragment>
             <div className="er-form-row">
@@ -514,12 +514,6 @@ export default function AquaEthReact(props) {
               setUIMsg={handleUIMessage} />
           </Fragment>,
           etherAmount
-      )}
-      { featurePanel('', 
-        getFeatureControls('parseUnits', 'Parse Units', parseUnitsEntry, setParseUnitsEntry, [
-          { label: 'Value', key: 'value'}, { label: 'Decimals', key: 'unit'}
-        ]),
-        parseUnitsAmount
       )}
       { featurePanel( '', 
           <Fragment>
@@ -535,11 +529,19 @@ export default function AquaEthReact(props) {
           </Fragment>,
           weiAmount
       )}
-      { featurePanel( '', 
-          <AqexButton label="Block Number" id="getBlockNumber" className="playground-button playground-icon-button"
-            onClick={() => handleFeature('getBlockNumber')} isSubmitting={submitting['getBlockNumber']} timeout={BUTTON_TIMEOUT}
-            setUIMsg={handleUIMessage} />,
-          blockNumber
+      </div>
+      <div className="er-features">
+      { featurePanel('', 
+        getFeatureControls('formatUnits', 'Units to Decimal', formatUnitsEntry, setFormatUnitsEntry, [
+          { label: 'Value', key: 'value'}, { label: 'Decimals', key: 'unit'}
+        ]),
+        formatUnitsAmount
+      )}
+      { featurePanel('', 
+        getFeatureControls('parseUnits', 'Decimal to Units', parseUnitsEntry, setParseUnitsEntry, [
+          { label: 'Value', key: 'value'}, { label: 'Decimals', key: 'unit'}
+        ]),
+        parseUnitsAmount
       )}
       </div>
     </Fragment>
@@ -567,6 +569,17 @@ export default function AquaEthReact(props) {
         </Fragment>,
         formatSignature(signTypedDataResult)
     )}
+    { signTypedDataResult &&
+      featurePanel( '', 
+        <Fragment>
+          <AqexButton label="Verify Typed Data" id="verifyTypedData" className="playground-button playground-icon-button"
+            onClick={() => handleFeature('verifyTypedData', { entry: signTypedEntry, signature: signTypedDataResult })} 
+            isSubmitting={submitting['verifyTypedData']} timeout={BUTTON_TIMEOUT}
+            setUIMsg={handleUIMessage} />
+        </Fragment>,
+        verifyTypedDataResult ? verifyTypedDataResult : ''
+    )}
+    
     </div>
   }
 
@@ -634,7 +647,12 @@ export default function AquaEthReact(props) {
             timeout={BUTTON_TIMEOUT} setUIMsg={handleUIMessage} />,
           formatAccounts(accounts)
       )}
-      { featurePanel('Chain Info', '', formatChain(chainInfo)) }
+      { accounts && 
+        <Fragment>
+          { featurePanel('Chain Info', '', formatChain(chainInfo)) }
+          { featurePanel('', '', formatGetFeeData(getFeeDataResult, { labelClass: 'er-form-label-50', valueClass: 'er-form-label-50' }))}
+        </Fragment>
+      }
     </div>
     
     { accounts && 

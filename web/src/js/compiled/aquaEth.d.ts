@@ -36,6 +36,7 @@ export interface EthereumDef {
     requestAccounts: (callParams: CallParams<null>) => { data: string[]; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string[]; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     sendTransaction: (transactionRequest: { chainId: number; data: string; from: string; gasLimit: string; gasPrice: string; maxFeePerGas: string; maxPriorityFeePerGas: string; nonce: number; to: string; transactionRequest: number; value: string; }, callParams: CallParams<'transactionRequest'>) => { data: { blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; }; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: { blockHash: string; blockNumber: number; confirmation: number; raw: string; timestamp: number; type: number; }; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     signTypedData: (domain: string, types: string, value: string, callParams: CallParams<'domain' | 'types' | 'value'>) => string | Promise<string>;
+    verifyTypedData: (domain: string, types: string, value: string, signature: string, callParams: CallParams<'domain' | 'types' | 'value' | 'signature'>) => string | Promise<string>;
 }
 export function registerEthereum(service: EthereumDef): void;
 export function registerEthereum(serviceId: string, service: EthereumDef): void;
@@ -73,11 +74,6 @@ export function getBalance(peer: FluencePeer, peerId: string, relayId: string, a
 export type FormatEtherResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
 export function formatEther(peerId: string, relayId: string, value: string, config?: {ttl?: number}): Promise<FormatEtherResult>;
 export function formatEther(peer: FluencePeer, peerId: string, relayId: string, value: string, config?: {ttl?: number}): Promise<FormatEtherResult>;
-
- 
-
-export function registerListenerNode(peerId: string, relayId: string, listenerPeerId: string, listenerRelayId: string, config?: {ttl?: number}): Promise<void>;
-export function registerListenerNode(peer: FluencePeer, peerId: string, relayId: string, listenerPeerId: string, listenerRelayId: string, config?: {ttl?: number}): Promise<void>;
 
 export type ListenerNodeCallbackArgJsonPacket = { data: string; type: string; } 
 
@@ -128,6 +124,16 @@ export function getChainInfo(peer: FluencePeer, peerId: string, relayId: string,
 export type Erc20ConnectResult = { data: { address: string; decimals: number; name: string; symbol: string; }; info: { code: number; message: string; reason: string; success: boolean; }; }
 export function erc20Connect(peerId: string, relayId: string, contractAddress: string, config?: {ttl?: number}): Promise<Erc20ConnectResult>;
 export function erc20Connect(peer: FluencePeer, peerId: string, relayId: string, contractAddress: string, config?: {ttl?: number}): Promise<Erc20ConnectResult>;
+
+ 
+
+export function verifyTypedData(peerId: string, relayId: string, domain: string, types: string, value: string, signature: string, config?: {ttl?: number}): Promise<string>;
+export function verifyTypedData(peer: FluencePeer, peerId: string, relayId: string, domain: string, types: string, value: string, signature: string, config?: {ttl?: number}): Promise<string>;
+
+ 
+
+export function registerListenerNode(peerId: string, relayId: string, listenerPeerId: string, listenerRelayId: string, config?: {ttl?: number}): Promise<void>;
+export function registerListenerNode(peer: FluencePeer, peerId: string, relayId: string, listenerPeerId: string, listenerRelayId: string, config?: {ttl?: number}): Promise<void>;
 
  
 export type ParseUnitsResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
