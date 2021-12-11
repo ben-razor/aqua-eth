@@ -34,7 +34,13 @@ new AquaEthServer(aquaEthHandler);
 
 The constructor calls **registerEthereum** exported by the FluenceJS compilation to create a Fluence service that wraps ethers.js. A handler can be passed in so that the **server** can receive updates as methods are called.
 
-The **client** imports functions from the compiled Aqua that automatically forward requests to the **server**.
+The **client** imports functions from the compiled Aqua that automatically forward requests to the **server**. It calls these functions to execute ethers JS methods across the network:
+
+```js
+res = await requestAccounts(remotePeerId, remoteRelayPeerId);
+```
+
+Before doing this, the **client** also creates it's own AquaEthServer. It does this only so that it can use the **Ethereum.receiveData** to recieve updates on a two way connection. 
 
 ## Two way connection
 
