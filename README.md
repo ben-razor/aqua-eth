@@ -10,9 +10,11 @@ Demo Application: [Eth Remote](https://eth-remote.web.app/) acts as a test harne
 
 ## Important Files
 
-The file [aquaEth.aqua](https://github.com/ben-razor/aqua-eth/blob/main/web/src/aqua/aquaEth.aqua) defines the interface for a Fluence service called Ethereum.
+[aquaEth.aqua](https://github.com/ben-razor/aqua-eth/blob/main/web/src/aqua/aquaEth.aqua) defines the interface for a Fluence service called Ethereum.
 
-The interface is implemented using FluenceJS in [aquaEthServer.js](https://github.com/ben-razor/aqua-eth/blob/main/web/src/js/aquaEthServer.js).
+[aquaEthServer.js](https://github.com/ben-razor/aqua-eth/blob/main/web/src/js/aquaEthServer.js) implements service using FluenceJS.
+
+[AquaEthReact.js](https://github.com/ben-razor/aqua-eth/blob/main/web/src/js/components/AquaEthReact.js) calls the compiled functions and handles updates from the service.
 
 The service wraps a wide variety of functionality from the [ethers.js](https://docs.ethers.io/v5/api/) library.
 
