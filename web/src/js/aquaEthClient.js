@@ -295,6 +295,35 @@ function callbackAllListeners(o, type, data) {
 
         return result(success, reason, code, message, transactionCount);
       },
+      getTransaction: async(id) => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let transaction = {};
+
+        if(success) {
+          try {
+            transaction = await provider.getTransaction(id);
+            console.log('TX', transaction);
+            transaction.gasLimit = transaction.gasLimit.toString();
+            transaction.gasPrice = transaction.gasPrice.toString();
+            if(transaction.value) {
+              transaction.value = transaction.value.toString();
+            }
+            if(transaction.wait) {
+              delete transaction.wait;
+            }
+          }
+          catch(e) {
+              success = false;
+              code = e.code;
+              message = e.message;
+              reason = 'error-ethers';
+
+              console.log(e);
+          }
+        }
+
+        return result(success, reason, code, message, transaction);
+      },
       formatUnits: async(amount, unit) => {
         let { success, reason, message, code } = this.checkEthStatus();
         let amountOut = 0;

@@ -1,6 +1,6 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
 import { registerEthereum, requestAccounts, getChainInfo, getBalance, getBlockNumber,
-         getFeeData, getBlock,
+         getFeeData, getBlock, getTransaction,
          formatUnits, formatEther, parseUnits, parseEther, sendTransaction, 
          signTypedData, verifyTypedData,
          erc20Connect, erc20BalanceOf, erc20Transfer, 
@@ -28,6 +28,8 @@ export default function AquaEthReact(props) {
   const [blockNumber, setBlockNumber] = useState();
   const [getBlockEntry, setGetBlockEntry] = useState( { blockNumber: '' });
   const [getBlockResult, setGetBlockResult] = useState();
+  const [getTransactionEntry, setGetTransactionEntry] = useState( { id: '' });
+  const [getTransactionResult, setGetTransactionResult] = useState();
   const [transactionEntry, setTransactionEntry] = useState( { id: '' });
   const [balance, setBalance] = useState();
   const [getFeeDataResult, setGetFeeDataResult] = useState();
@@ -151,6 +153,9 @@ export default function AquaEthReact(props) {
         else if(id === 'getBlock') {
           res = await getBlock(remotePeerId, remoteRelayPeerId, data.blockNumber);
         }
+        else if(id === 'getTransaction') {
+          res = await getTransaction(remotePeerId, remoteRelayPeerId, data.id);
+        }
         else if(id === 'formatUnits') {
           res = await formatUnits(remotePeerId, remoteRelayPeerId, data.value, data.unit);
         }
@@ -203,6 +208,7 @@ export default function AquaEthReact(props) {
           }
           else if(id === 'getBlockNumber') { setBlockNumber(res.data); }
           else if(id === 'getBlock') { setGetBlockResult(res.data); }
+          else if(id === 'getTransaction') { setGetTransactionResult(res.data); }
           else if(id === 'formatUnits') { setFormatUnitsAmount(res.data); }
           else if(id === 'formatEther') { setEtherAmount(res.data); }
           else if(id === 'parseUnits') { setParseUnitsAmount(res.data); }
@@ -266,6 +272,10 @@ export default function AquaEthReact(props) {
   useEffect(() => {
     setGetBlockEntry({ blockNumber: blockNumber });
   }, [blockNumber]);
+
+  useEffect(() => {
+    console.log(getTransactionEntry);
+  }, [getTransactionEntry]);
 
   function resetFields() {
     setBalanceAccount(accounts[0])
@@ -371,28 +381,51 @@ export default function AquaEthReact(props) {
     if(getBlockResult) {
       let _getBlockResult = { ...getBlockResult };
       let transactions = [ ..._getBlockResult.transactions ];
-      console.log('TX', transactions);
       delete _getBlockResult.transactions;
       let labeled = labelData(_getBlockResult);
       ui = [ tabulate(labeled, tableConf) ];
 
       ui.push(<h3>Transactions</h3>);
       for(let tx of transactions) {
-        ui.push(<div className="er-clickable er-hash" key={tx} onClick={e => setTransactionEntry({id: e.target.value})}>{tx}</div>);
+        ui.push(<div className="er-clickable er-hash" key={tx} onClick={e => setGetTransactionEntry({id: tx})}>{tx}</div>);
       }
     }
 
     return ui;
   }
 
+  function formatTransactionData(getTransactionResult, tableConf={}) {
+    let ui;
+
+    if(getTransactionResult) {
+      let _getTransactionResult = { ...getTransactionResult };
+      console.log('TX DATA', _getTransactionResult);
+      let labeled = labelData(_getTransactionResult);
+      ui = [ tabulate(labeled, tableConf) ];
+    }
+
+    return ui;
+  }
+
+
+  /**
+   * E.g. Convert from theFeeData to The Fee Data
+   */
   function keyToLabel(key) {
-    // Change from theFeeData to The Fee Data
-    return key.match(/([A-Z]|[a-z])[a-z]+/g).map(x => x[0].toUpperCase() + x.slice(1)).join(' ');
+    let label = key;
+    if(key.length > 1) {
+      let match = key.match(/([A-Z]|[a-z])[a-z]+/g);
+      if(match) {
+        label = match.map(x => x[0].toUpperCase() + x.slice(1)).join(' ');
+      }
+    }
+    return label;
   }
 
   function labelData(data) {
     let labeledData = [];
     for(let key of Object.keys(data)) {
+      console.log('key', key);
       labeledData.push({
         label: keyToLabel(key), value: data[key]
       })
@@ -607,7 +640,14 @@ export default function AquaEthReact(props) {
         getFeatureControls('getBlock', 'Get Block', getBlockEntry, setGetBlockEntry, [
           { label: 'Block Number', key: 'blockNumber' }
         ]),
-        formatBlockData(getBlockResult, { labelClass: 'er-form-label-50', valueClass: 'er-form-label-50' }),
+        formatBlockData(getBlockResult),
+        { class: 'er-feature-50'}
+      )}
+      { featurePanel('', 
+        getFeatureControls('getTransaction', 'Get Transaction', getTransactionEntry, setGetTransactionEntry, [
+          { label: 'Transaction ID', key: 'id' }
+        ]),
+        formatTransactionData(getTransactionResult),
         { class: 'er-feature-50'}
       )}
      </div>

@@ -84,23 +84,35 @@ data ResultBlock:
 data TransactionRequest:
     to: Address
     from: Address 
-    nonce: u32
-    data: string
-    value: string
-    gasLimit: string
-    gasPrice: string
-    maxFeePerGas: string
-    maxPriorityFeePerGas: string
+    nonce: BigInt 
+    data: HexString
+    value: BigNumber 
+    gasLimit: BigNumber 
+    gasPrice: BigNumber
+    maxFeePerGas: BigNumber
+    maxPriorityFeePerGas: BigNumber
     chainId: u32
     transactionRequest: u32
 
 data TransactionResponse:
-    blockNumber: u32
-    blockHash: string
-    timestamp: u32
-    confirmation: u32
-    raw: string
-    type: u32
+    to: Address
+    from: Address 
+    nonce: BigInt 
+    data: HexString
+    value: BigNumber 
+    gasLimit: BigNumber 
+    gasPrice: BigNumber
+    maxFeePerGas: BigNumber
+    maxPriorityFeePerGas: BigNumber
+    chainId: u32
+    transactionRequest: u32
+
+    blockNumber: ?BigInt
+    blockHash: ?HexString
+    timestamp: ?BigInt
+    confirmations: ?BigInt 
+    raw: ?HexString 
+    type: ?BigInt
 
 data TransactionReceipt:
     to: Address
@@ -148,6 +160,7 @@ service Ethereum("ethereum"):
     getBlockNumber() -> ResultBigInt
     getBlock(blockNumber: BigInt) -> ResultBlock
     getTransactionCount() -> ResultU32
+    getTransaction(id: HexString) -> ResultTransaction
 
     erc20Connect(contractAddress: string) -> ResultTokenInfo
     erc20BalanceOf(contractAddress: string, address: string) -> ResultString
@@ -222,6 +235,11 @@ func getBlock(peerId: string, relayId: string, blockNumber: BigInt) -> ResultBlo
 func getTransactionCount(peerId: string, relayId: string) -> ResultU32:
     on peerId via relayId:
         res <- Ethereum.getTransactionCount()
+    <- res
+
+func getTransaction(peerId: string, relayId: string, id: HexString) -> ResultTransaction:
+    on peerId via relayId:
+        res <- Ethereum.getTransaction(id)
     <- res
 
 func formatUnits(peerId: string, relayId: string, value: string, unit: string) -> ResultString:

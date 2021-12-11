@@ -219,6 +219,20 @@ export function registerEthereum(...args) {
             }
         },
         {
+            "functionName" : "getTransaction",
+            "argDefs" : [
+                {
+                    "name" : "id",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                }
+            ],
+            "returnType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
             "functionName" : "getTransactionCount",
             "argDefs" : [
             ],
@@ -574,53 +588,6 @@ export function getBlockNumber(...args) {
         },
         {
             "name" : "relayId",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        }
-    ],
-    "names" : {
-        "relay" : "-relay-",
-        "getDataSrv" : "getDataSrv",
-        "callbackSrv" : "callbackSrv",
-        "responseSrv" : "callbackSrv",
-        "responseFnName" : "response",
-        "errorHandlingSrv" : "errorHandlingSrv",
-        "errorFnName" : "error"
-    }
-},
-        script
-    )
-}
-
-
-export function identityResultChain(...args) {
-
-    let script = `
-                        (xor
-                     (seq
-                      (seq
-                       (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
-                       (call %init_peer_id% ("getDataSrv" "val") [] val)
-                      )
-                      (xor
-                       (call %init_peer_id% ("callbackSrv" "response") [val])
-                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
-                      )
-                     )
-                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
-                    )
-    `
-    return callFunction(
-        args,
-        {
-    "functionName" : "identityResultChain",
-    "returnType" : {
-        "tag" : "primitive"
-    },
-    "argDefs" : [
-        {
-            "name" : "val",
             "argType" : {
                 "tag" : "primitive"
             }
@@ -1376,6 +1343,145 @@ export function identityU32(...args) {
         args,
         {
     "functionName" : "identityU32",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "val",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function getTransaction(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (seq
+                          (seq
+                           (seq
+                            (seq
+                             (seq
+                              (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                              (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                             )
+                             (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                            )
+                            (call %init_peer_id% ("getDataSrv" "id") [] id)
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                          (call relayId ("op" "noop") [])
+                         )
+                         (xor
+                          (call peerId ("ethereum" "getTransaction") [id] res)
+                          (seq
+                           (seq
+                            (seq
+                             (call relayId ("op" "noop") [])
+                             (call -relay- ("op" "noop") [])
+                            )
+                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                         )
+                        )
+                        (call relayId ("op" "noop") [])
+                       )
+                       (call -relay- ("op" "noop") [])
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [res])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "getTransaction",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "peerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "id",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function identityResultChain(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                       (call %init_peer_id% ("getDataSrv" "val") [] val)
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [val])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "identityResultChain",
     "returnType" : {
         "tag" : "primitive"
     },
