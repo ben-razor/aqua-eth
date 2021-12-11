@@ -6,7 +6,7 @@ import { registerEthereum, requestAccounts, getChainInfo, getBalance, getBlockNu
          erc20Connect, erc20BalanceOf, erc20Transfer, 
          registerListenerNode} from '../compiled/aquaEth.js';
 import AqexButton from './AqexButton';
-import AquaEthClient from '../aquaEthClient.js';
+import AquaEthServer from '../aquaEthServer.js';
 import { textUI } from '../text.js';
 import { verifyMessage } from '@ethersproject/wallet';
 
@@ -20,7 +20,6 @@ export default function AquaEthReact(props) {
   const connectionInfo = props.connectionInfo;
 
   const [activePanel, setActivePanel] = useState('account');
-  const [aquaEthClientCreated, setAquaEthClientCreated] = useState();
   const [submitting, setSubmitting] = useState({});
   const [accounts, setAccounts] = useState();
   const [chainInfo, setChainInfo] = useState();
@@ -114,8 +113,7 @@ export default function AquaEthReact(props) {
   }
 
   useEffect(() => {
-    let aquaEthClient = new AquaEthClient(aquaEthHandler);
-    setAquaEthClientCreated(true);
+    new AquaEthServer(aquaEthHandler);
   }, []);
 
   function handleError(res) {
@@ -476,7 +474,10 @@ export default function AquaEthReact(props) {
 
     if(address) {
       if(address.toLowerCase() === accounts[0].toLowerCase()) {
-        verifyUI = `Signature is match for address ${address}`;
+        verifyUI = <div>
+          <div>Signature verified on address:</div>
+          <div>{address}</div>
+        </div>
       }
       else {
         verifyUI = <div>

@@ -8,9 +8,11 @@ let chains;
 let provider;
 let signer;
 
-provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-if(provider) {
-  signer = provider.getSigner();
+if(window.ethereum) { 
+  provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+  if(provider) {
+    signer = provider.getSigner();
+  }
 }
 
 function result(success, reason, code, message, data) {
@@ -68,7 +70,7 @@ function callbackAllListeners(o, type, data) {
  * This class contains the implementation for a Fluence service that wraps
  * window.ethereum (as injected by MetaMask).
  */
- class AquaEthClient {
+ class AquaEthServer {
   /**
    * 
    * An event listener callback can be passed to trigger updates on the remote
@@ -671,4 +673,4 @@ function callbackAllListeners(o, type, data) {
   }
 }
 
-export default AquaEthClient;
+export default AquaEthServer;
