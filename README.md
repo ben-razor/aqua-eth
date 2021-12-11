@@ -6,15 +6,15 @@ For the Gitcoin GR12 Hackathon task:
 
 [Use The Fluence Js Node Example To Wrap And Expose A Web3 JS/TS Library](https://gitcoin.co/issue/fluencelabs/gitcoin-gr12-hackathon/1/100027204)
 
-## Important Links
+Demo Application: [Eth Remote](https://eth-remote.web.app/) acts as a test harness for the wrapped ethers.js functionality.
+
+## Important Files
 
 The file [aquaEth.aqua](https://github.com/ben-razor/aqua-eth/blob/main/web/src/aqua/aquaEth.aqua) defines the interface for a Fluence service called Ethereum.
 
 The interface is implemented using FluenceJS in [aquaEthServer.js](https://github.com/ben-razor/aqua-eth/blob/main/web/src/js/aquaEthServer.js).
 
 The service wraps a wide variety of functionality from the [ethers.js](https://docs.ethers.io/v5/api/) library.
-
-An application is provided at [Eth Remote](https://eth-remote.web.app/) that acts as a test harness for the wrapped ethers.js functionality.
 
 ## Mode of Operation
 
