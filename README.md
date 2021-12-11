@@ -23,7 +23,7 @@ We will call peers that connect to the signer to carry out ethers.js functions t
 
 The **server** is created using:
 
-```
+```js
 // msg object has fields { method, type, success, reason, data }
 function aquaEthHandler(msg) {
   ...
@@ -38,3 +38,26 @@ The **client** imports functions from the compiled Aqua that automatically forwa
 
 ## Two way connection
 
+Queries to ethers.js return relatively quickly so the data is returned directly to the client.
+
+Because Update operations need human interaction on the **server** side. A mechanism is provided in Aqua to register the client to receive updates when operations complete. This also allows for updates to be provided when transactions are added to the chain.
+
+The interface is acheived in Aqua using:
+
+```aqua
+service Ethereum:
+  registerListenerNode(listenerPeerId: string, listenerRelayId: string)
+  receiveData(packet: JSONPacket)
+
+func registerListenerNode(peerId: string, relayId: string, listenerPeerId: string, listenerRelayId: string):
+    on peerId via relayId:
+        Ethereum.registerListenerNode(listenerPeerId, listenerRelayId)
+
+func listenerNodeCallback(peerId: string, relayId: string, jsonPacket: JSONPacket):
+    on peerId via relayId:
+        Ethereum.receiveData(jsonPacket)
+```
+
+1. The client calls **registerListenerNode** to register for updates.
+2. The **server** calls the function **listenerNodeCallback** to trigger events on the **client**.
+3. The Ethereum.receiveData(jsonPacket) service method uses the registered aquaEthHandler on the **client** to provide updates. The **method** passed in the msg data is set to **receiveData**
