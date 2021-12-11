@@ -1,68 +1,10 @@
 -- Aqua wrapper around ethers.js
--- 
 alias BigNumber: string 
 alias BigInt: string
 alias HexString: string 
 alias JSONString: string
 alias RawSignature: string
 alias Address: string
-
-data Result:
-    success: bool
-    reason: string
-    code: u32
-    message: string
-
-data ResultString:
-    info: Result
-    data: string
-
-data ResultBigInt:
-    info: Result
-    data: BigInt
-
--- Same as result string but the user knows to parse data as a JSON string
-data ResultJSONString:
-    info: Result
-    data: JSONString
-
-data ResultAddresses:
-    info: Result
-    data: []string
-
-data ResultU32:
-    info: Result
-    data: u32
-
-data JSONPacket:
-    type: string
-    data: JSONString 
-
-data Currency:
-    name: string
-    symbol: string
-    decimals: u32 
-
-data FeeData:
-    gasPrice: string
-    maxFeePerGas: string
-    maxPriorityFeePerGas: string
-
-data ResultFeeData:
-    info: Result
-    data: FeeData
-
-data Chain:
-    name: string
-    chainId: u32
-    shortName: string
-    network: string
-    networkId: u32
-    currency: Currency
-
-data ResultChain:
-    info: Result
-    data: Chain
 
 data Block:
     difficulty: BigNumber
@@ -77,9 +19,23 @@ data Block:
     timestamp: BigInt
     transactions: []HexString
 
-data ResultBlock:
-    info: Result
-    data: Block
+data Currency:
+    name: string
+    symbol: string
+    decimals: u32 
+
+data Chain:
+    name: string
+    chainId: u32
+    shortName: string
+    network: string
+    networkId: u32
+    currency: Currency
+
+data FeeData:
+    gasPrice: string
+    maxFeePerGas: string
+    maxPriorityFeePerGas: string
 
 data TransactionRequest:
     to: Address
@@ -124,15 +80,59 @@ data TransactionReceipt:
     transactionHash: string
     status: bool 
 
-data ResultTransaction:
-    info: Result
-    data: TransactionResponse
-
 data TokenInfo:
     address: Address
     name: string
     symbol: string
     decimals: u32
+
+-- Result Records package return values with info about success
+data Result:
+    success: bool
+    reason: string
+    code: u32
+    message: string
+
+data ResultString:
+    info: Result
+    data: string
+
+data ResultBigInt:
+    info: Result
+    data: BigInt
+
+-- Same as result string but the user knows to parse data as a JSON string
+data ResultJSONString:
+    info: Result
+    data: JSONString
+
+data ResultAddresses:
+    info: Result
+    data: []string
+
+data ResultU32:
+    info: Result
+    data: u32
+
+data ResultFeeData:
+    info: Result
+    data: FeeData
+
+data ResultChain:
+    info: Result
+    data: Chain
+
+data JSONPacket:
+    type: string
+    data: JSONString 
+
+data ResultBlock:
+    info: Result
+    data: Block
+
+data ResultTransaction:
+    info: Result
+    data: TransactionResponse
 
 data ResultTokenInfo:
     info: Result
