@@ -177,6 +177,18 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
     padding: 1em;
 }
 
+.er-clickable {
+    cursor: default;
+    padding: 0.1em 0;
+    margin: 0.1em 0;
+    text-decoration: underline;
+    text-decoration-color: hsl(0deg, 0%, 70%);
+}
+
+.er-clickable:hover {
+    background-color: hsl(0deg, 0%, 80%);
+}
+
 .er-features {
     display: flex;
     flex-wrap: wrap;
@@ -196,6 +208,15 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
     max-width: 32%;
     box-shadow: 2px 0px 4px hsl(0deg, 0%, 85%);
     background-color: hsl(0deg, 0%, 99%);
+}
+
+.er-hash {
+    font-family: monospace;
+}
+
+.er-feature-50 {
+    min-width: 49%;
+    max-width: 49%;
 }
 
 .er-feature-title {

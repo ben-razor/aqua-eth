@@ -252,6 +252,29 @@ function callbackAllListeners(o, type, data) {
 
         return result(success, reason, code, message, blockNumber);
       },
+      getBlock: async(blockNumber) => {
+        let { success, reason, message, code } = this.checkEthStatus();
+        let block = {};
+
+        if(success) {
+          try {
+            block = await provider.getBlock(blockNumber);
+            block.gasLimit = block.gasLimit.toString();
+            block.gasUsed = block.gasUsed.toString();
+            delete block._difficulty;
+          }
+          catch(e) {
+              success = false;
+              code = e.code;
+              message = e.message;
+              reason = 'error-ethers';
+
+              console.log(e);
+          }
+        }
+
+        return result(success, reason, code, message, block);
+      },
       getTransactionCount: async() => {
         let { success, reason, message, code } = this.checkEthStatus();
         let transactionCount = 0;

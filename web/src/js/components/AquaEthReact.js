@@ -1,6 +1,6 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
 import { registerEthereum, requestAccounts, getChainInfo, getBalance, getBlockNumber,
-         getFeeData,
+         getFeeData, getBlock,
          formatUnits, formatEther, parseUnits, parseEther, sendTransaction, 
          signTypedData, verifyTypedData,
          erc20Connect, erc20BalanceOf, erc20Transfer, 
@@ -26,6 +26,9 @@ export default function AquaEthReact(props) {
   const [chainInfo, setChainInfo] = useState();
   const [balanceAccount, setBalanceAccount] = useState('');
   const [blockNumber, setBlockNumber] = useState();
+  const [getBlockEntry, setGetBlockEntry] = useState( { blockNumber: '' });
+  const [getBlockResult, setGetBlockResult] = useState();
+  const [transactionEntry, setTransactionEntry] = useState( { id: '' });
   const [balance, setBalance] = useState();
   const [getFeeDataResult, setGetFeeDataResult] = useState();
   const [formatEtherAmount, setFormatEtherAmount] = useState(0);
@@ -145,6 +148,9 @@ export default function AquaEthReact(props) {
         else if(id === 'getBlockNumber') {
           res = await getBlockNumber(remotePeerId, remoteRelayPeerId);
         }
+        else if(id === 'getBlock') {
+          res = await getBlock(remotePeerId, remoteRelayPeerId, data.blockNumber);
+        }
         else if(id === 'formatUnits') {
           res = await formatUnits(remotePeerId, remoteRelayPeerId, data.value, data.unit);
         }
@@ -196,6 +202,7 @@ export default function AquaEthReact(props) {
             setGetFeeDataResult(res.data); 
           }
           else if(id === 'getBlockNumber') { setBlockNumber(res.data); }
+          else if(id === 'getBlock') { setGetBlockResult(res.data); }
           else if(id === 'formatUnits') { setFormatUnitsAmount(res.data); }
           else if(id === 'formatEther') { setEtherAmount(res.data); }
           else if(id === 'parseUnits') { setParseUnitsAmount(res.data); }
@@ -246,6 +253,7 @@ export default function AquaEthReact(props) {
       resetFields();
       handleFeature('getChainInfo');
       handleFeature('getFeeData');
+      handleFeature('getBlockNumber');
     }
   }, [accounts]);
 
@@ -254,6 +262,10 @@ export default function AquaEthReact(props) {
       resetFields();
     }
   }, [chainInfo]);
+
+  useEffect(() => {
+    setGetBlockEntry({ blockNumber: blockNumber });
+  }, [blockNumber]);
 
   function resetFields() {
     setBalanceAccount(accounts[0])
@@ -287,8 +299,8 @@ export default function AquaEthReact(props) {
     return accountsUI;
   }
 
-  function featurePanel(title, controls, output) {
-    return <div className="er-feature">
+  function featurePanel(title, controls, output, options={}) {
+    return <div className={"er-feature " + options.class}>
       {title && 
         <div className="er-feature-title"></div>
       }
@@ -348,6 +360,26 @@ export default function AquaEthReact(props) {
     if(getFeeDataResult) {
       let labeled = labelData(getFeeDataResult);
       ui = tabulate(labeled, tableConf);
+    }
+
+    return ui;
+  }
+
+  function formatBlockData(getBlockResult, tableConf={}) {
+    let ui;
+
+    if(getBlockResult) {
+      let _getBlockResult = { ...getBlockResult };
+      let transactions = [ ..._getBlockResult.transactions ];
+      console.log('TX', transactions);
+      delete _getBlockResult.transactions;
+      let labeled = labelData(_getBlockResult);
+      ui = [ tabulate(labeled, tableConf) ];
+
+      ui.push(<h3>Transactions</h3>);
+      for(let tx of transactions) {
+        ui.push(<div className="er-clickable er-hash" key={tx} onClick={e => setTransactionEntry({id: e.target.value})}>{tx}</div>);
+      }
     }
 
     return ui;
@@ -421,7 +453,7 @@ export default function AquaEthReact(props) {
         </div>
       }
     }
-    
+
     return verifyUI;
   }
 
@@ -446,6 +478,7 @@ export default function AquaEthReact(props) {
     return <div className="er-tabs">
       { getTab('account', 'Account', activePanel) }
       { getTab('util', 'Util', activePanel) }
+      { getTab('chain', 'Chain', activePanel) }
       { getTab('signing', 'Signing', activePanel) }
       { getTab('tokens', 'Tokens', activePanel) }
     </div>
@@ -567,6 +600,20 @@ export default function AquaEthReact(props) {
     </Fragment>
   }
 
+  function getChainPanels() {
+    return <Fragment>
+      <div className="er-features">
+      { featurePanel('', 
+        getFeatureControls('getBlock', 'Get Block', getBlockEntry, setGetBlockEntry, [
+          { label: 'Block Number', key: 'blockNumber' }
+        ]),
+        formatBlockData(getBlockResult, { labelClass: 'er-form-label-50', valueClass: 'er-form-label-50' }),
+        { class: 'er-feature-50'}
+      )}
+     </div>
+    </Fragment>
+  }
+
   function getSigningPanels() {
     return <div className="er-features">
     { featurePanel( '', 
@@ -680,6 +727,7 @@ export default function AquaEthReact(props) {
         { getTabs(activePanel) }
         { activePanel === 'account' && getAccountPanels() }
         { activePanel === 'util' && getUtilPanels() }
+        { activePanel === 'chain' && getChainPanels() }
         { activePanel === 'signing' && getSigningPanels() }
         { activePanel === 'tokens' && getTokenPanels() }
       </Fragment>

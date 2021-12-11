@@ -1,6 +1,8 @@
 -- Aqua wrapper around ethers.js
 -- 
 alias BigNumber: string 
+alias BigInt: string
+alias HexString: string 
 alias JSONString: string
 alias RawSignature: string
 alias Address: string
@@ -14,6 +16,10 @@ data Result:
 data ResultString:
     info: Result
     data: string
+
+data ResultBigInt:
+    info: Result
+    data: BigInt
 
 -- Same as result string but the user knows to parse data as a JSON string
 data ResultJSONString:
@@ -57,6 +63,23 @@ data Chain:
 data ResultChain:
     info: Result
     data: Chain
+
+data Block:
+    difficulty: BigNumber
+    extraData: string
+    gasLimit: BigNumber
+    gasUsed: BigNumber
+    hash: HexString
+    miner: Address
+    nonce: HexString
+    number: BigInt
+    parentHash: HexString
+    timestamp: BigInt
+    transactions: []HexString
+
+data ResultBlock:
+    info: Result
+    data: Block
 
 data TransactionRequest:
     to: Address
@@ -120,8 +143,11 @@ service Ethereum("ethereum"):
     getChainInfo(chainId: u32) -> ResultChain
     getBalance(address: string) -> ResultString
     getFeeData() -> ResultFeeData
-    getBlockNumber() -> ResultString
-    getTransactionCount() -> ResultU32 
+
+    -- Get the most recent block number
+    getBlockNumber() -> ResultBigInt
+    getBlock(blockNumber: BigInt) -> ResultBlock
+    getTransactionCount() -> ResultU32
 
     erc20Connect(contractAddress: string) -> ResultTokenInfo
     erc20BalanceOf(contractAddress: string, address: string) -> ResultString
@@ -183,9 +209,14 @@ func getFeeData(peerId: string, relayId: string) -> ResultFeeData:
         res <- Ethereum.getFeeData()
     <- res
 
-func getBlockNumber(peerId: string, relayId: string) -> ResultString:
+func getBlockNumber(peerId: string, relayId: string) -> ResultBigInt:
     on peerId via relayId:
         res <- Ethereum.getBlockNumber()
+    <- res
+
+func getBlock(peerId: string, relayId: string, blockNumber: BigInt) -> ResultBlock:
+    on peerId via relayId:
+        res <- Ethereum.getBlock(blockNumber)
     <- res
 
 func getTransactionCount(peerId: string, relayId: string) -> ResultU32:

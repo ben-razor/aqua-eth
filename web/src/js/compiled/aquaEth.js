@@ -167,6 +167,20 @@ export function registerEthereum(...args) {
             }
         },
         {
+            "functionName" : "getBlock",
+            "argDefs" : [
+                {
+                    "name" : "blockNumber",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                }
+            ],
+            "returnType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
             "functionName" : "getBlockNumber",
             "argDefs" : [
             ],
@@ -607,6 +621,98 @@ export function identityResultChain(...args) {
     "argDefs" : [
         {
             "name" : "val",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function getBlock(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (seq
+                          (seq
+                           (seq
+                            (seq
+                             (seq
+                              (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                              (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                             )
+                             (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                            )
+                            (call %init_peer_id% ("getDataSrv" "blockNumber") [] blockNumber)
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                          (call relayId ("op" "noop") [])
+                         )
+                         (xor
+                          (call peerId ("ethereum" "getBlock") [blockNumber] res)
+                          (seq
+                           (seq
+                            (seq
+                             (call relayId ("op" "noop") [])
+                             (call -relay- ("op" "noop") [])
+                            )
+                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                         )
+                        )
+                        (call relayId ("op" "noop") [])
+                       )
+                       (call -relay- ("op" "noop") [])
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [res])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "getBlock",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "peerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "blockNumber",
             "argType" : {
                 "tag" : "primitive"
             }
