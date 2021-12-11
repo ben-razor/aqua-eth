@@ -263,6 +263,9 @@ function callbackAllListeners(o, type, data) {
             block = await provider.getBlock(blockNumber);
             block.gasLimit = block.gasLimit.toString();
             block.gasUsed = block.gasUsed.toString();
+            if(block.baseFeePerGas) {
+              block.baseFeePerGas = block.baseFeePerGas.toString();
+            }
             delete block._difficulty;
           }
           catch(e) {
@@ -307,11 +310,21 @@ function callbackAllListeners(o, type, data) {
             console.log('TX', transaction);
             transaction.gasLimit = transaction.gasLimit.toString();
             transaction.gasPrice = transaction.gasPrice.toString();
+
+            if(transaction.maxFeePerGas) {
+              transaction.maxFeePerGas = transaction.maxFeePerGas.toString(); 
+            }
+            if(transaction.maxPriorityFeePerGas) {
+              transaction.maxPriorityFeePerGas = transaction.maxPriorityFeePerGas.toString(); 
+            }
             if(transaction.value) {
               transaction.value = transaction.value.toString();
             }
             if(transaction.wait) {
               delete transaction.wait;
+            }
+            if(transaction.accessList) {
+              delete transaction.accessList;
             }
           }
           catch(e) {

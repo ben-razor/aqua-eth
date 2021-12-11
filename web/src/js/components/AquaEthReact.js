@@ -153,6 +153,7 @@ export default function AquaEthReact(props) {
         }
         else if(id === 'getTransaction') {
           res = await getTransaction(remotePeerId, remoteRelayPeerId, data.id);
+          console.log('GT', res);
         }
         else if(id === 'formatUnits') {
           res = await formatUnits(remotePeerId, remoteRelayPeerId, data.value, data.unit);
@@ -325,9 +326,15 @@ export default function AquaEthReact(props) {
     let ui = [];
 
     for(let row of data) {
+      let value = row.value;
+
+      if(typeof value === 'object' || typeof Array.isArray(value)) {
+        value = JSON.stringify(value);
+      }
+
       ui.push(<div className="er-form-row" key={row.label}>
         <div className={tableConf.labelClass || "er-form-label"}>{row.label}</div>
-        <div className={tableConf.valueClass || "er-form-value"}>{row.value}</div>
+        <div className={tableConf.valueClass || "er-form-value"}>{value}</div>
       </div>);
     }
 
@@ -423,7 +430,6 @@ export default function AquaEthReact(props) {
   function labelData(data) {
     let labeledData = [];
     for(let key of Object.keys(data)) {
-      console.log('key', key);
       labeledData.push({
         label: keyToLabel(key), value: data[key]
       })
