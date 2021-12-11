@@ -59,8 +59,8 @@ data ResultChain:
     data: Chain
 
 data TransactionRequest:
-    to: string
-    from: string
+    to: Address
+    from: Address 
     nonce: u32
     data: string
     value: string
@@ -80,9 +80,9 @@ data TransactionResponse:
     type: u32
 
 data TransactionReceipt:
-    to: string
-    from: string
-    contractAddress: string
+    to: Address
+    from: Address 
+    contractAddress: Address
     transactionIndex: u32
     type: u32
     gasUsed: BigNumber
@@ -94,7 +94,7 @@ data ResultTransaction:
     data: TransactionResponse
 
 data TokenInfo:
-    address: string
+    address: Address
     name: string
     symbol: string
     decimals: u32

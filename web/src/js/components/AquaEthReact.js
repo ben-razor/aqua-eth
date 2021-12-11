@@ -8,6 +8,7 @@ import { registerEthereum, requestAccounts, getChainInfo, getBalance, getBlockNu
 import AqexButton from './AqexButton';
 import AquaEthClient from '../aquaEthClient.js';
 import { textUI } from '../text.js';
+import { verifyMessage } from '@ethersproject/wallet';
 
 const BUTTON_TIMEOUT = 10000;
 
@@ -405,6 +406,25 @@ export default function AquaEthReact(props) {
     return signatureUI;
   }
 
+  function formatVerifySigResult(address) {
+    let verifyUI;
+
+    if(address) {
+      if(address.toLowerCase() === accounts[0].toLowerCase()) {
+        verifyUI = `Signature is match for address ${address}`;
+      }
+      else {
+        verifyUI = <div>
+          <div>Signature address mismatch</div>
+          <div>Signed with: {address}</div>
+          <div>Current address: {accounts[0]}</div>
+        </div>
+      }
+    }
+    
+    return verifyUI;
+  }
+
   function handleErc20BalanceOfEntry(field, value) {
     let _erc20BalanceOfEntry = { ...erc20BalanceOfEntry };
     _erc20BalanceOfEntry[field] = value;
@@ -577,7 +597,7 @@ export default function AquaEthReact(props) {
             isSubmitting={submitting['verifyTypedData']} timeout={BUTTON_TIMEOUT}
             setUIMsg={handleUIMessage} />
         </Fragment>,
-        verifyTypedDataResult ? verifyTypedDataResult : ''
+        formatVerifySigResult(verifyTypedDataResult)
     )}
     
     </div>
