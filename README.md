@@ -19,7 +19,7 @@ An application is provided at [Eth Remote](https://eth-remote.web.app/) that act
 ## Mode of Operation
 
 We will call the peer that has MetaMask the **server**.
-We will call peers that connect to the signer to carry out ethers.js functions the **client**.
+We will call peers that connect to the server to carry out ethers.js functions the **client**.
 
 The **server** is created using:
 
