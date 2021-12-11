@@ -656,16 +656,17 @@ export default function AquaEthReact(props) {
       { featurePanel( '', 
           <Fragment>
             <div className="er-form-row">
-              <div className="er-form-label">Contract</div>
+              <div className="er-form-label">ERC20 Contract</div>
               <input type="text" value={ erc20ContractAddressEntry } onChange={e => setERC20ContractAddressEntry(e.target.value) } />
             </div>
             <AqexButton label="Connect Contract" id="erc20Contract" className="playground-button playground-icon-button"
               onClick={() => handleFeature('erc20Contract', erc20ContractAddressEntry ) } isSubmitting={submitting['erc20Contract']} timeout={BUTTON_TIMEOUT}
               setUIMsg={handleUIMessage} />
           </Fragment>,
-          ''
+          '',
+          { class: 'er-feature-50'}
       )}
-      { featurePanel('Token Info', '', formatTokenInfo(erc20Info)) }
+      { featurePanel('Token Info', '', formatTokenInfo(erc20Info), {class: 'er-feature-50'}) }
     </div>
     {
       erc20Info && 
