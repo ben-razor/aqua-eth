@@ -2,13 +2,13 @@
 
 A wrapper around ethers.js and Metamask for interacting with Ethereum compatible blockchains remotely using [Fluence Aqua](https://fluence.network/).
 
-For the Gitcoin GR12 Hackathon task:
-
-[Use The Fluence Js Node Example To Wrap And Expose A Web3 JS/TS Library](https://gitcoin.co/issue/fluencelabs/gitcoin-gr12-hackathon/1/100027204)
-
 Demo Application: [Eth Remote](https://eth-remote.web.app/) acts as a test harness for the wrapped ethers.js functionality.
 
 Demo Video: [Eth Remote - Powered by Fluence Network](https://youtu.be/PjqgG5DueWY)
+
+For the Gitcoin GR12 Hackathon task:
+
+[Use The Fluence Js Node Example To Wrap And Expose A Web3 JS/TS Library](https://gitcoin.co/issue/fluencelabs/gitcoin-gr12-hackathon/1/100027204)
 
 ## Important Files
 
