@@ -8,6 +8,8 @@ For the Gitcoin GR12 Hackathon task:
 
 Demo Application: [Eth Remote](https://eth-remote.web.app/) acts as a test harness for the wrapped ethers.js functionality.
 
+Demo Video: [Eth Remote - Powered by Fluence Network](https://youtu.be/PjqgG5DueWY)
+
 ## Important Files
 
 [aquaEth.aqua](https://github.com/ben-razor/aqua-eth/blob/main/web/src/aqua/aquaEth.aqua) defines the interface for a Fluence service called Ethereum.
