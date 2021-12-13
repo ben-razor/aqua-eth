@@ -119,10 +119,10 @@ export default function AquaEthReact(props) {
     if(ethRes.info.success) {
       let web3Res = createWeb3Provider(ethRes.data.ethereum);
       if(web3Res.info.success) {
-        new AquaEthService(pRes.data.provider, pRes.data.signer, aquaEthHandler);
+        new AquaEthService(web3Res.data.provider, web3Res.data.signer, aquaEthHandler);
       }
       else {
-        handleError(pRes);
+        handleError(web3Res);
       }
     }
     else {

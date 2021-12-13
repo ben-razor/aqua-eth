@@ -124,10 +124,6 @@ data ResultChain:
     info: Result
     data: Chain
 
-data JSONPacket:
-    type: string
-    data: JSONString 
-
 data ResultBlock:
     info: Result
     data: Block

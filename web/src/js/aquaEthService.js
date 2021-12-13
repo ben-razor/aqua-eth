@@ -5,8 +5,13 @@ import chainsJSON from '../data/chains.json';
 import { erc20Abi } from '../data/contractData.js';
 let chains;
 
-let provider;
-let signer;
+function createSuccessInfo() {
+  return { success: true, reason: 'ok', code: 0, message: ''};
+}
+
+function createErrorInfo(reason='error', code=0, message='') {
+  return { success: false, reason, code, message };
+}
 
 function result(success, reason, code, message, data) {
   return { info: { success, reason, code, message }, data};
@@ -34,9 +39,9 @@ export function createWeb3Provider(externalProvider) {
   let data = {};
 
   if(window && window.ethereum) { 
-    provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+    let provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
     if(provider) {
-      signer = provider.getSigner();
+      let signer = provider.getSigner();
       data = { provider, signer };
     }
     else {
@@ -50,9 +55,6 @@ export function createWeb3Provider(externalProvider) {
   }
 
   return result(success, reason, 0, '', data);
-}
-export function sum(a, b) {
-  return a + b;
 }
 
 function getChainInfo(chainsJSON, id) {
@@ -102,7 +104,6 @@ function callbackAllListeners(o, type, data) {
   }
 }
 
-
 /**
  * This class contains the implementation for a Fluence service that wraps
  * window.ethereum (as injected by MetaMask).
@@ -145,7 +146,7 @@ function callbackAllListeners(o, type, data) {
       reason = 'error-no-ethereum';
       this._triggerEvent('', '', {}, success, reason);
     }
-    else if(!provider || !signer) {
+    else if(!this.provider || !this.signer) {
       success = false;
       reason = 'error-no-ethers-init';
       this._triggerEvent('', '', {}, success, reason);
@@ -195,11 +196,7 @@ function callbackAllListeners(o, type, data) {
             chainInfo = getChainInfo(chainsJSON, chainId);
           }
           catch(e) {
-            success = false;
-            code = e.code;
-            message = e.message;
-            reason = 'error-ethers';
-      
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
             console.log(e);
           }
         }
@@ -215,11 +212,7 @@ function callbackAllListeners(o, type, data) {
             chainInfo = getChainInfo(chainsJSON, chainId);
           }
           catch(e) {
-            success = false;
-            code = e.code;
-            message = e.message;
-            reason = 'error-ethers';
-      
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
             console.log(e);
           }
         }
@@ -236,11 +229,7 @@ function callbackAllListeners(o, type, data) {
             balance = res.toHexString();
           }
           catch(e) {
-              success = false;
-              code = e.code;
-              message = e.message;
-              reason = 'error-eth-rpc';
-
+              ({ success, reason, message, code} = createErrorInfo('error-eth-rpc', e.code, e.messsage));
               console.log(e);
           }
         }
@@ -260,11 +249,7 @@ function callbackAllListeners(o, type, data) {
             feeData.maxPriorityFeePerGas = res.maxPriorityFeePerGas?.toString() || 0;
           }
           catch(e) {
-              success = false;
-              code = e.code;
-              message = e.message;
-              reason = 'error-eth-rpc';
-
+              ({ success, reason, message, code} = createErrorInfo('error-eth-rpc', e.code, e.messsage));
               console.log(e);
           }
         }
@@ -280,11 +265,7 @@ function callbackAllListeners(o, type, data) {
             blockNumber = await this.provider.getBlockNumber();
           }
           catch(e) {
-              success = false;
-              code = e.code;
-              message = e.message;
-              reason = 'error-ethers';
-
+              ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
               console.log(e);
           }
         }
@@ -306,11 +287,7 @@ function callbackAllListeners(o, type, data) {
             delete block._difficulty;
           }
           catch(e) {
-              success = false;
-              code = e.code;
-              message = e.message;
-              reason = 'error-ethers';
-
+              ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
               console.log(e);
           }
         }
@@ -326,11 +303,7 @@ function callbackAllListeners(o, type, data) {
             transactionCount = await this.signer.getTransactionCount();
           }
           catch(e) {
-              success = false;
-              code = e.code;
-              message = e.message;
-              reason = 'error-ethers';
-
+              ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
               console.log(e);
           }
         }
@@ -364,11 +337,7 @@ function callbackAllListeners(o, type, data) {
             }
           }
           catch(e) {
-              success = false;
-              code = e.code;
-              message = e.message;
-              reason = 'error-ethers';
-
+              ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
               console.log(e);
           }
         }
@@ -376,7 +345,7 @@ function callbackAllListeners(o, type, data) {
         return result(success, reason, code, message, transaction);
       },
       formatUnits: async(amount, unit) => {
-        let { success, reason, message, code } = this.checkEthStatus();
+        let { success, reason, message, code } = createSuccessInfo();
         let amountOut = 0;
       
         if(success) {
@@ -384,10 +353,7 @@ function callbackAllListeners(o, type, data) {
             amountOut = ethers.utils.formatUnits(amount, unit);
           }
           catch(e) {
-            success = false;
-            code = e.code;
-            message = e.message;
-            reason = 'error-ethers';
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
       
             console.log(e);
           }
@@ -396,7 +362,7 @@ function callbackAllListeners(o, type, data) {
         return result(success, reason, code, message, amountOut);
       },
       formatEther: async(amount) => {
-        let { success, reason, message, code } = this.checkEthStatus();
+        let { success, reason, message, code } = createSuccessInfo();
         let amountOut = 0;
       
         if(success) {
@@ -404,11 +370,7 @@ function callbackAllListeners(o, type, data) {
             amountOut = ethers.utils.formatEther(amount)
           }
           catch(e) {
-            success = false;
-            code = e.code;
-            message = e.message;
-            reason = 'error-ethers';
-      
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
             console.log(e);
           }
         }
@@ -416,7 +378,7 @@ function callbackAllListeners(o, type, data) {
         return result(success, reason, code, message, amountOut);
       },
       parseUnits: async(amount, unit) => {
-        let { success, reason, message, code } = this.checkEthStatus();
+        let { success, reason, message, code } = createSuccessInfo();
         let amountOut = 0;
       
         if(success) {
@@ -425,11 +387,7 @@ function callbackAllListeners(o, type, data) {
             amountOut = res.toString();
           }
           catch(e) {
-            success = false;
-            code = e.code;
-            message = e.message;
-            reason = 'error-ethers';
-      
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
             console.log(e);
           }
         }
@@ -437,7 +395,7 @@ function callbackAllListeners(o, type, data) {
         return result(success, reason, code, message, amountOut);
       },
       parseEther: async(amount) => {
-        let { success, reason, message, code } = this.checkEthStatus();
+        let { success, reason, message, code } = createSuccessInfo();
         let amountOut = 0;
       
         if(success) {
@@ -446,11 +404,7 @@ function callbackAllListeners(o, type, data) {
             amountOut = res.toString();
           }
           catch(e) {
-            success = false;
-            code = e.code;
-            message = e.message;
-            reason = 'error-ethers';
-      
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
             console.log(e);
           }
         }
