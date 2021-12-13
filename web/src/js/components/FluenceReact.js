@@ -14,22 +14,13 @@ import {
 import { Toast } from 'react-bootstrap';
 import AquaEthReact from './AquaEthReact';
 
-// These assignments are necessary to ensure that webpack pulls in these things
-// from the modules so that they are available to the code running in the sandbox
-window['Fluence'] = Fluence;
-window['FluencePeer'] = FluencePeer;
-window['ResultCodes'] = ResultCodes;
-window['registerService'] = registerService;
-window['CallParams'] = CallParams;
-window['callFunction'] = callFunction;
-window['RequestFlowBuilder'] = RequestFlowBuilder;
-window['krasnodar'] = krasnodar;
-
 export async function attemptConnect(handler) {
+    let _connectionInfo;
+
     for(let node of krasnodar) {
         try {
-            let res = await Fluence.start({ connectTo: node });
-            let _connectionInfo = Fluence.getStatus();
+            await Fluence.start({ connectTo: node });
+            _connectionInfo = Fluence.getStatus();
 
             handler.msg('fluence-connect', {
                 connected: true,
@@ -40,9 +31,16 @@ export async function attemptConnect(handler) {
             break;
         }
         catch(e) { 
+            console.log('Fluence attemptConnect error', e);
             await Fluence.stop();
         } 
     }
+
+    return _connectionInfo;
+}
+
+export async function attemptDisconnect() {
+    await Fluence.stop();
 }
 
 function FluenceReact(props) {

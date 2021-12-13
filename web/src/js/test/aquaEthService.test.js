@@ -5,13 +5,26 @@ import { requestAccounts, getChainInfo, getBalance, getBlockNumber,
          signTypedData, verifyTypedData,
          erc20Connect, erc20BalanceOf, erc20Transfer, 
          registerListenerNode} from '../compiled/aquaEth.js';
+import { attemptConnect, attemptDisconnect } from '../components/FluenceReact.js';
+import connect from '../components/Connect.js';
 
-function aquaEthHandler(msg) {
-  console.log(msg);
-}
+let peerId;
+let relayPeerId;
 
-new AquaEthService(null, null, aquaEthHandler);
+jest.setTimeout(10000);
 
-test('formats units', () => {
-  expect(formatEther(1e18)).toBe('1.0');
+function aquaEthHandler(msg) { }
+
+beforeEach(async() => {
+  ({ peerId, relayPeerId } = await attemptConnect(connect));
+  new AquaEthService(null, null, aquaEthHandler);
+});
+
+afterEach(async() => {
+  await attemptDisconnect();
+})
+
+test('formats units', async() => {
+  let res = await formatEther(peerId, relayPeerId, "100000000000")
+  expect(res.data).toBe('0.0000001');
 });
