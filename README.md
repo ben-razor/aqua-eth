@@ -14,7 +14,7 @@ For the Gitcoin GR12 Hackathon task:
 
 [aquaEth.aqua](https://github.com/ben-razor/aqua-eth/blob/main/web/src/aqua/aquaEth.aqua) defines the interface for a Fluence service called Ethereum.
 
-[aquaEthServer.js](https://github.com/ben-razor/aqua-eth/blob/main/web/src/js/aquaEthServer.js) implements service using FluenceJS.
+[aquaEthService.js](https://github.com/ben-razor/aqua-eth/blob/main/web/src/js/aquaEthService.js) implements service using FluenceJS.
 
 [AquaEthReact.js](https://github.com/ben-razor/aqua-eth/blob/main/web/src/js/components/AquaEthReact.js) calls the compiled functions and handles updates from the service.
 
