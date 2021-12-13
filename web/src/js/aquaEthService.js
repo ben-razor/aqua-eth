@@ -411,6 +411,86 @@ function callbackAllListeners(o, type, data) {
       
         return result(success, reason, code, message, amountOut);
       },
+      keccak256Text: async(text) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let hexString = 0;
+      
+        if(success) {
+          try {
+            hexString = ethers.utils.id(text)
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, hexString);
+      },
+      keccak256: async(data) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let hexString = 0;
+      
+        if(success) {
+          try {
+            hexString = ethers.utils.keccak256(data)
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, hexString);
+      },
+      ripemd160: async(data) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let hexString = 0;
+      
+        if(success) {
+          try {
+            hexString = ethers.utils.ripemd160(data)
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, hexString);
+      },
+      sha256: async(data) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let hexString = 0;
+      
+        if(success) {
+          try {
+            hexString = ethers.utils.sha256(data)
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, hexString);
+      },
+      sha512: async(data) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let hexString = 0;
+      
+        if(success) {
+          try {
+            hexString = ethers.utils.sha512(data)
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, hexString);
+      },
       tellListener: async(type, data) => {
         for(let peerId in Object.keys(this.registeredRemoteListeners)) {
           let relayId = this.registeredRemoteListeners[peerId].relayId;

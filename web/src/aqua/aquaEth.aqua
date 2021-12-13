@@ -172,6 +172,12 @@ service Ethereum("ethereum"):
     parseUnits(value: string, unit: string) -> ResultString
     -- The equivalent to calling parseUnits(value, "ether").
     parseEther(value: string) -> ResultString
+
+    keccak256Text(data: string) -> HexString
+    keccak256(data: HexString) -> HexString
+    ripemd160(data: HexString) -> HexString
+    sha256(data: HexString) -> HexString
+    sha512(data: HexString) -> HexString
     
     sendTransaction(transactionRequest: TransactionRequest) -> ResultTransaction
     signTypedData(domain: JSONString, types: JSONString, value: JSONString) -> RawSignature
@@ -257,6 +263,31 @@ func parseUnits(peerId: string, relayId: string, value: string, unit: string) ->
 func parseEther(peerId: string, relayId: string, value: string) -> ResultString:
     on peerId via relayId:
         res <- Ethereum.parseEther(value)
+    <- res
+
+func keccak256Text(peerId: string, relayId: string, value: string) -> HexString:
+    on peerId via relayId:
+        res <- Ethereum.keccak256Text(value)
+    <- res
+
+func keccak256(peerId: string, relayId: string, value: HexString) -> HexString:
+    on peerId via relayId:
+        res <- Ethereum.keccak256(value)
+    <- res
+
+func ripemd160(peerId: string, relayId: string, value: HexString) -> HexString:
+    on peerId via relayId:
+        res <- Ethereum.ripemd160(value)
+    <- res
+
+func sha256(peerId: string, relayId: string, value: HexString) -> HexString:
+    on peerId via relayId:
+        res <- Ethereum.sha256(value)
+    <- res
+
+func sha512(peerId: string, relayId: string, value: HexString) -> HexString:
+    on peerId via relayId:
+        res <- Ethereum.sha512(value)
     <- res
 
 func sendTransaction(peerId: string, relayId: string, transactionRequest: TransactionRequest) -> ResultTransaction:

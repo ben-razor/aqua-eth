@@ -241,6 +241,34 @@ export function registerEthereum(...args) {
             }
         },
         {
+            "functionName" : "keccak256",
+            "argDefs" : [
+                {
+                    "name" : "data",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                }
+            ],
+            "returnType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "functionName" : "keccak256Text",
+            "argDefs" : [
+                {
+                    "name" : "data",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                }
+            ],
+            "returnType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
             "functionName" : "parseEther",
             "argDefs" : [
                 {
@@ -303,10 +331,52 @@ export function registerEthereum(...args) {
             }
         },
         {
+            "functionName" : "ripemd160",
+            "argDefs" : [
+                {
+                    "name" : "data",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                }
+            ],
+            "returnType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
             "functionName" : "sendTransaction",
             "argDefs" : [
                 {
                     "name" : "transactionRequest",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                }
+            ],
+            "returnType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "functionName" : "sha256",
+            "argDefs" : [
+                {
+                    "name" : "data",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                }
+            ],
+            "returnType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "functionName" : "sha512",
+            "argDefs" : [
+                {
+                    "name" : "data",
                     "argType" : {
                         "tag" : "primitive"
                     }
@@ -890,98 +960,6 @@ export function getBalance(...args) {
 }
 
 
-export function formatEther(...args) {
-
-    let script = `
-                        (xor
-                     (seq
-                      (seq
-                       (seq
-                        (seq
-                         (seq
-                          (seq
-                           (seq
-                            (seq
-                             (seq
-                              (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
-                              (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
-                             )
-                             (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
-                            )
-                            (call %init_peer_id% ("getDataSrv" "value") [] value)
-                           )
-                           (call -relay- ("op" "noop") [])
-                          )
-                          (call relayId ("op" "noop") [])
-                         )
-                         (xor
-                          (call peerId ("ethereum" "formatEther") [value] res)
-                          (seq
-                           (seq
-                            (seq
-                             (call relayId ("op" "noop") [])
-                             (call -relay- ("op" "noop") [])
-                            )
-                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
-                           )
-                           (call -relay- ("op" "noop") [])
-                          )
-                         )
-                        )
-                        (call relayId ("op" "noop") [])
-                       )
-                       (call -relay- ("op" "noop") [])
-                      )
-                      (xor
-                       (call %init_peer_id% ("callbackSrv" "response") [res])
-                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
-                      )
-                     )
-                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
-                    )
-    `
-    return callFunction(
-        args,
-        {
-    "functionName" : "formatEther",
-    "returnType" : {
-        "tag" : "primitive"
-    },
-    "argDefs" : [
-        {
-            "name" : "peerId",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        },
-        {
-            "name" : "relayId",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        },
-        {
-            "name" : "value",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        }
-    ],
-    "names" : {
-        "relay" : "-relay-",
-        "getDataSrv" : "getDataSrv",
-        "callbackSrv" : "callbackSrv",
-        "responseSrv" : "callbackSrv",
-        "responseFnName" : "response",
-        "errorHandlingSrv" : "errorHandlingSrv",
-        "errorFnName" : "error"
-    }
-},
-        script
-    )
-}
-
-
 export function listenerNodeCallback(...args) {
 
     let script = `
@@ -1308,6 +1286,98 @@ export function formatUnits(...args) {
 }
 
 
+export function sha512(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (seq
+                          (seq
+                           (seq
+                            (seq
+                             (seq
+                              (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                              (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                             )
+                             (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                            )
+                            (call %init_peer_id% ("getDataSrv" "value") [] value)
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                          (call relayId ("op" "noop") [])
+                         )
+                         (xor
+                          (call peerId ("ethereum" "sha512") [value] res)
+                          (seq
+                           (seq
+                            (seq
+                             (call relayId ("op" "noop") [])
+                             (call -relay- ("op" "noop") [])
+                            )
+                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                         )
+                        )
+                        (call relayId ("op" "noop") [])
+                       )
+                       (call -relay- ("op" "noop") [])
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [res])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "sha512",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "peerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "value",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
 export function identityU32(...args) {
 
     let script = `
@@ -1427,6 +1497,98 @@ export function getTransaction(...args) {
         },
         {
             "name" : "id",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function keccak256(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (seq
+                          (seq
+                           (seq
+                            (seq
+                             (seq
+                              (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                              (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                             )
+                             (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                            )
+                            (call %init_peer_id% ("getDataSrv" "value") [] value)
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                          (call relayId ("op" "noop") [])
+                         )
+                         (xor
+                          (call peerId ("ethereum" "keccak256") [value] res)
+                          (seq
+                           (seq
+                            (seq
+                             (call relayId ("op" "noop") [])
+                             (call -relay- ("op" "noop") [])
+                            )
+                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                         )
+                        )
+                        (call relayId ("op" "noop") [])
+                       )
+                       (call -relay- ("op" "noop") [])
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [res])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "keccak256",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "peerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "value",
             "argType" : {
                 "tag" : "primitive"
             }
@@ -1862,6 +2024,98 @@ export function getChainInfo(...args) {
 }
 
 
+export function keccak256Text(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (seq
+                          (seq
+                           (seq
+                            (seq
+                             (seq
+                              (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                              (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                             )
+                             (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                            )
+                            (call %init_peer_id% ("getDataSrv" "value") [] value)
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                          (call relayId ("op" "noop") [])
+                         )
+                         (xor
+                          (call peerId ("ethereum" "keccak256Text") [value] res)
+                          (seq
+                           (seq
+                            (seq
+                             (call relayId ("op" "noop") [])
+                             (call -relay- ("op" "noop") [])
+                            )
+                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                         )
+                        )
+                        (call relayId ("op" "noop") [])
+                       )
+                       (call -relay- ("op" "noop") [])
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [res])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "keccak256Text",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "peerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "value",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
 export function erc20Connect(...args) {
 
     let script = `
@@ -1934,6 +2188,190 @@ export function erc20Connect(...args) {
         },
         {
             "name" : "contractAddress",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function sha256(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (seq
+                          (seq
+                           (seq
+                            (seq
+                             (seq
+                              (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                              (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                             )
+                             (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                            )
+                            (call %init_peer_id% ("getDataSrv" "value") [] value)
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                          (call relayId ("op" "noop") [])
+                         )
+                         (xor
+                          (call peerId ("ethereum" "sha256") [value] res)
+                          (seq
+                           (seq
+                            (seq
+                             (call relayId ("op" "noop") [])
+                             (call -relay- ("op" "noop") [])
+                            )
+                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                         )
+                        )
+                        (call relayId ("op" "noop") [])
+                       )
+                       (call -relay- ("op" "noop") [])
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [res])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "sha256",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "peerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "value",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function formatEther(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (seq
+                          (seq
+                           (seq
+                            (seq
+                             (seq
+                              (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                              (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                             )
+                             (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                            )
+                            (call %init_peer_id% ("getDataSrv" "value") [] value)
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                          (call relayId ("op" "noop") [])
+                         )
+                         (xor
+                          (call peerId ("ethereum" "formatEther") [value] res)
+                          (seq
+                           (seq
+                            (seq
+                             (call relayId ("op" "noop") [])
+                             (call -relay- ("op" "noop") [])
+                            )
+                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                         )
+                        )
+                        (call relayId ("op" "noop") [])
+                       )
+                       (call -relay- ("op" "noop") [])
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [res])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "formatEther",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "peerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "value",
             "argType" : {
                 "tag" : "primitive"
             }
@@ -2148,6 +2586,98 @@ export function registerListenerNode(...args) {
         },
         {
             "name" : "listenerRelayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function ripemd160(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (seq
+                          (seq
+                           (seq
+                            (seq
+                             (seq
+                              (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                              (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                             )
+                             (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                            )
+                            (call %init_peer_id% ("getDataSrv" "value") [] value)
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                          (call relayId ("op" "noop") [])
+                         )
+                         (xor
+                          (call peerId ("ethereum" "ripemd160") [value] res)
+                          (seq
+                           (seq
+                            (seq
+                             (call relayId ("op" "noop") [])
+                             (call -relay- ("op" "noop") [])
+                            )
+                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                         )
+                        )
+                        (call relayId ("op" "noop") [])
+                       )
+                       (call -relay- ("op" "noop") [])
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [res])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "ripemd160",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "peerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "value",
             "argType" : {
                 "tag" : "primitive"
             }
