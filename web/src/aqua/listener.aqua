@@ -1,3 +1,4 @@
+-- A lightweight service for registering remote listeners in aqua
 alias JSONString: string
 
 data JSONPacket:
