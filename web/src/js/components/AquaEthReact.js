@@ -1,14 +1,14 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
-import { registerEthereum, requestAccounts, getChainInfo, getBalance, getBlockNumber,
+import { requestAccounts, getChainInfo, getBalance, getBlockNumber,
          getFeeData, getBlock, getTransaction,
          formatUnits, formatEther, parseUnits, parseEther, sendTransaction, 
          signTypedData, verifyTypedData,
          erc20Connect, erc20BalanceOf, erc20Transfer, 
          registerListenerNode} from '../compiled/aquaEth.js';
 import AqexButton from './AqexButton';
-import AquaEthService from '../aquaEthService.js';
+import AquaEthService, { getEthereum, createWeb3Provider } from '../aquaEthService.js';
+import ListenerService from '../listenerService.js';
 import { textUI } from '../text.js';
-import { verifyMessage } from '@ethersproject/wallet';
 
 const BUTTON_TIMEOUT = 10000;
 
@@ -113,15 +113,35 @@ export default function AquaEthReact(props) {
   }
 
   useEffect(() => {
-    new AquaEthService(aquaEthHandler);
+    new ListenerService(aquaEthHandler);
+
+    let ethRes = getEthereum();
+    if(ethRes.info.success) {
+      let pRes = createWeb3Provider(ethRes.data.ethereum);
+      if(pRes.info.success) {
+        new AquaEthService(pRes.data.provider, pRes.data.signer, aquaEthHandler);
+      }
+      else {
+        handleError(pRes);
+      }
+    }
+    else {
+      handleError(ethRes);
+    }
   }, []);
 
   function handleError(res) {
     if(res.info.reason === 'error-json-parse') {
-      toast('Error parsing JSON ' + res.info.message);
+      toast('Error parsing JSON ' + res.info.message, 'error');
+    }
+    else if(res.info.reason === 'error-no-ethereum') {
+      toast('Error: No Ethereum detected. Try MetaMask!', 'error');
+    }
+    else if(res.info.reason === 'error-no-ethers-init') {
+      toast('Error: Unable to initalize ethers provider and signer.');
     }
     else {
-      toast('Error ' + res.info.message);
+      toast('Error ' + res.info.message, 'error');
     }
     console.log('handleError', res);
   }
@@ -231,8 +251,6 @@ export default function AquaEthReact(props) {
       }
       catch(e) {
         if(typeof e === 'string' && e.includes('timed out')) {
-          connect.msg('fluence-test-connection', {});
-
           if(id === 'requestAccounts') {
             toast('Connection timed out. You will be notified if remote signer connects.', 'error');
           }

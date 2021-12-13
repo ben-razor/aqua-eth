@@ -275,20 +275,6 @@ export function registerEthereum(...args) {
             }
         },
         {
-            "functionName" : "receiveData",
-            "argDefs" : [
-                {
-                    "name" : "packet",
-                    "argType" : {
-                        "tag" : "primitive"
-                    }
-                }
-            ],
-            "returnType" : {
-                "tag" : "void"
-            }
-        },
-        {
             "functionName" : "registerListenerNode",
             "argDefs" : [
                 {
@@ -1018,7 +1004,7 @@ export function listenerNodeCallback(...args) {
                        (call relayId ("op" "noop") [])
                       )
                       (xor
-                       (call peerId ("ethereum" "receiveData") [jsonPacket])
+                       (call peerId ("listener" "receiveData") [jsonPacket])
                        (seq
                         (seq
                          (seq

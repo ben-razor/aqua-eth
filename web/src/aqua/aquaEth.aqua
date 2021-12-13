@@ -1,3 +1,5 @@
+import "listener.aqua"
+
 -- Aqua wrapper around ethers.js
 alias BigNumber: string 
 alias BigInt: string
@@ -181,7 +183,6 @@ service Ethereum("ethereum"):
 
     -- Methods to register a listener for events on the local client 
     registerListenerNode(listenerPeerId: string, listenerRelayId: string)
-    receiveData(packet: JSONPacket)
 
     -- Helper methods
     castErrorResultU32ToTransaction(result: ResultU32) -> ResultTransaction
@@ -203,7 +204,7 @@ func registerListenerNode(peerId: string, relayId: string, listenerPeerId: strin
     
 func listenerNodeCallback(peerId: string, relayId: string, jsonPacket: JSONPacket):
     on peerId via relayId:
-        Ethereum.receiveData(jsonPacket)
+        Listener.receiveData(jsonPacket)
 
 func getBalance(peerId: string, relayId: string, address: string) -> ResultString:
     resBox: *ResultString

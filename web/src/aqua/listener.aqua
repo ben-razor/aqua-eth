@@ -1,0 +1,8 @@
+alias JSONString: string
+
+data JSONPacket:
+    type: string
+    data: JSONString 
+
+service Listener("listener"):
+    receiveData(packet: JSONPacket)

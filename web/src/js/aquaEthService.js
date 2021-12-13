@@ -8,15 +8,51 @@ let chains;
 let provider;
 let signer;
 
-if(window.ethereum) { 
-  provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-  if(provider) {
-    signer = provider.getSigner();
-  }
-}
-
 function result(success, reason, code, message, data) {
   return { info: { success, reason, code, message }, data};
+}
+
+export function getEthereum() {
+  let success = true;
+  let reason = 'ok';
+  let data = {};
+
+  if(window && window.ethereum) { 
+    data.ethereum = ethereum;
+  }
+  else {
+    success = false;
+    reason = 'error-no-ethereum';
+  }
+
+  return result(success, reason, 0, '', data);
+}
+
+export function createWeb3Provider(externalProvider) {
+  let success = true;
+  let reason = 'ok';
+  let data = {};
+
+  if(window && window.ethereum) { 
+    provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+    if(provider) {
+      signer = provider.getSigner();
+      data = { provider, signer };
+    }
+    else {
+      success = false;
+      reason = 'error-creating-provider';
+    }
+  }
+  else {
+    success = false;
+    reason = 'error-no-ethereum';
+  }
+
+  return result(success, reason, 0, '', data);
+}
+export function sum(a, b) {
+  return a + b;
 }
 
 function getChainInfo(chainsJSON, id) {
@@ -66,6 +102,7 @@ function callbackAllListeners(o, type, data) {
   }
 }
 
+
 /**
  * This class contains the implementation for a Fluence service that wraps
  * window.ethereum (as injected by MetaMask).
@@ -89,9 +126,11 @@ function callbackAllListeners(o, type, data) {
    * 
    * @param {function} eventListener  
    */
-  constructor(eventListener) {
+  constructor(provider, signer, eventListener) {
     this.eventListener = eventListener;
     this.registeredRemoteListeners = {};
+    this.provider = provider;
+    this.signer = signer;
     this.init();
   }
 
@@ -151,7 +190,7 @@ function callbackAllListeners(o, type, data) {
       
         if(success) {
           try {
-            let res = await provider.getNetwork();
+            let res = await this.provider.getNetwork();
             let chainId = res.chainId;
             chainInfo = getChainInfo(chainsJSON, chainId);
           }
@@ -193,7 +232,7 @@ function callbackAllListeners(o, type, data) {
 
         if(success) {
           try {
-            let res = await provider.getBalance(account);
+            let res = await this.provider.getBalance(account);
             balance = res.toHexString();
           }
           catch(e) {
@@ -214,7 +253,7 @@ function callbackAllListeners(o, type, data) {
 
         if(success) {
           try {
-            let res = await provider.getFeeData();
+            let res = await this.provider.getFeeData();
 
             feeData.gasPrice = res.gasPrice.toString();
             feeData.maxFeePerGas = res.maxFeePerGas?.toString() || 0;
@@ -238,7 +277,7 @@ function callbackAllListeners(o, type, data) {
 
         if(success) {
           try {
-            blockNumber = await provider.getBlockNumber();
+            blockNumber = await this.provider.getBlockNumber();
           }
           catch(e) {
               success = false;
@@ -258,7 +297,7 @@ function callbackAllListeners(o, type, data) {
 
         if(success) {
           try {
-            block = await provider.getBlock(blockNumber);
+            block = await this.provider.getBlock(blockNumber);
             block.gasLimit = block.gasLimit.toString();
             block.gasUsed = block.gasUsed.toString();
             if(block.baseFeePerGas) {
@@ -284,7 +323,7 @@ function callbackAllListeners(o, type, data) {
 
         if(success) {
           try {
-            transactionCount = await signer.getTransactionCount();
+            transactionCount = await this.signer.getTransactionCount();
           }
           catch(e) {
               success = false;
@@ -304,7 +343,7 @@ function callbackAllListeners(o, type, data) {
 
         if(success) {
           try {
-            transaction = await provider.getTransaction(id);
+            transaction = await this.provider.getTransaction(id);
             transaction.gasLimit = transaction.gasLimit.toString();
             transaction.gasPrice = transaction.gasPrice.toString();
 
@@ -431,11 +470,11 @@ function callbackAllListeners(o, type, data) {
         if(success) {
           try {
             transactionRequest.value = ethers.utils.parseEther(transactionRequest.value);
-            transactionResult = await signer.sendTransaction(transactionRequest)
+            transactionResult = await this.signer.sendTransaction(transactionRequest)
             callbackAllListeners(this, 'transactionCreated', transactionResult);
 
             let superfly = this;
-            provider.once(transactionResult.hash, function(transaction) {
+            this.provider.once(transactionResult.hash, function(transaction) {
               callbackAllListeners(superfly, 'transactionMined', transaction);
             });
           }
@@ -509,7 +548,7 @@ function callbackAllListeners(o, type, data) {
             callbackAllListeners(this, 'transactionCreated', transactionResult);
 
             let superfly = this;
-            provider.once(transactionResult.hash, function(transaction) {
+            this.provider.once(transactionResult.hash, function(transaction) {
               callbackAllListeners(superfly, 'transactionMined', transaction);
             });
           }
@@ -545,7 +584,7 @@ function callbackAllListeners(o, type, data) {
 
         if(success) {
           try {
-            signature = await signer._signTypedData(domain, types, value);
+            signature = await this.signer._signTypedData(domain, types, value);
             callbackAllListeners(this, 'signedTypedData', signature);
           }
           catch(e) {
@@ -651,17 +690,7 @@ function callbackAllListeners(o, type, data) {
           peerId: listenerPeerId, relayId: listenerRelayId
         });
       },
-      receiveData: async(jsonPacket) => {
-        console.log('RECEIVE', jsonPacket);
-        try {
-          let data = JSON.parse(jsonPacket.data);
-          this._triggerEvent('receiveData', jsonPacket.type, data);
-        }
-        catch(e) {
-          this._triggerEvent('receiveData', jsonPacket.type, jsonPacket.data, false, 'error-json-parse');
-          console.log(e);
-        }
-      },
+
       castErrorResultU32ToTransaction: async(resultU32) => {
         let resultTransction = { 
           info: { ...resultU32.info },
