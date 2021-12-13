@@ -26,7 +26,20 @@ afterEach(async() => {
   await attemptDisconnect();
 })
 
-test('formats units', async() => {
-  let res = await formatEther(peerId, relayPeerId, "100000000000")
-  expect(res.data).toBe('0.0000001');
+test('ethersjs utils', async() => {
+  let res;
+
+  res = await formatEther(peerId, relayPeerId, 1e18.toString());
+  expect(res.data).toBe('1.0');
+
+  res = await parseEther(peerId, relayPeerId, '1');
+  expect(res.data).toBe(1e18.toString());
+
+  res = await formatUnits(peerId, relayPeerId, 1e18.toString(), '18');
+  expect(res.data).toBe('1.0');
+
+  res = await parseUnits(peerId, relayPeerId, '1', '18');
+  expect(res.data).toBe(1e18.toString());
+
+  
 });
