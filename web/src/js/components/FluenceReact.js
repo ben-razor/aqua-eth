@@ -25,6 +25,26 @@ window['callFunction'] = callFunction;
 window['RequestFlowBuilder'] = RequestFlowBuilder;
 window['krasnodar'] = krasnodar;
 
+export async function attemptConnect(handler) {
+    for(let node of krasnodar) {
+        try {
+            let res = await Fluence.start({ connectTo: node });
+            let _connectionInfo = Fluence.getStatus();
+
+            handler.msg('fluence-connect', {
+                connected: true,
+                connectionInfo: { ..._connectionInfo },
+                node
+            });
+
+            break;
+        }
+        catch(e) { 
+            await Fluence.stop();
+        } 
+    }
+}
+
 function FluenceReact(props) {
     const toast = props.toast;
     const triggerConnectionTest = props.triggerConnectionTest;
@@ -33,6 +53,14 @@ function FluenceReact(props) {
     const [connectedNode, setConnectedNode] = useState();
     const [connectionInfo, setConnectionInfo] = useState({});
 
+    useEffect(() => {
+        connect.addHandler('fluence-connect', (data) => {
+          setConnected(data.connected);
+          setConnectionInfo({...data.connectionInfo});
+          setConnectedNode(data.node);
+        })
+    }, []);
+      
     async function testConnection() {
         let status = Fluence.getStatus();
 
@@ -56,31 +84,11 @@ function FluenceReact(props) {
 
     useEffect(() => {
         if(!connected) {
-
             setAttemptingConnect(true);
 
             async function connectToHost() {
                 setConnected(false);
-
-                for(let node of krasnodar) {
-                    try {
-                        let res = await Fluence.start({ connectTo: node });
-                        setConnected(true);
-                        setConnectedNode(node);
-                        let _connectionInfo = Fluence.getStatus();
-                        setConnectionInfo(_connectionInfo);
-
-                        connect.msg('fluence-connect', {
-                            connected: true,
-                            connectionInfo: { ..._connectionInfo }
-                        });
-
-                        break;
-                    }
-                    catch(e) { 
-                        await Fluence.stop();
-                    } 
-                }
+                await attemptConnect(connect);
             }
 
             connectToHost();

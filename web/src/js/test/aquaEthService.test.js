@@ -1,5 +1,17 @@
-import { sum } from '../aquaEthService';
+import AquaEthService from '../aquaEthService.js';
+import { requestAccounts, getChainInfo, getBalance, getBlockNumber,
+         getFeeData, getBlock, getTransaction,
+         formatUnits, formatEther, parseUnits, parseEther, sendTransaction, 
+         signTypedData, verifyTypedData,
+         erc20Connect, erc20BalanceOf, erc20Transfer, 
+         registerListenerNode} from '../compiled/aquaEth.js';
 
-test('adds 1 + 2 to equal 3', () => {
-  expect(sum(1, 2)).toBe(3);
+function aquaEthHandler(msg) {
+  console.log(msg);
+}
+
+new AquaEthService(null, null, aquaEthHandler);
+
+test('formats units', () => {
+  expect(formatEther(1e18)).toBe('1.0');
 });
