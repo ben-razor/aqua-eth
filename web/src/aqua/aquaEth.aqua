@@ -179,6 +179,9 @@ service Ethereum("ethereum"):
     sha256(data: HexString) -> HexString
     sha512(data: HexString) -> HexString
     
+    -- algorithm (sha256|sha512)
+    computeHmac(algorithm: string, key: HexString, data: HexString) -> HexString
+
     sendTransaction(transactionRequest: TransactionRequest) -> ResultTransaction
     signTypedData(domain: JSONString, types: JSONString, value: JSONString) -> RawSignature
     verifyTypedData(domain: JSONString, types: JSONString, value: JSONString, signature: RawSignature) -> Address
@@ -288,6 +291,11 @@ func sha256(peerId: string, relayId: string, value: HexString) -> HexString:
 func sha512(peerId: string, relayId: string, value: HexString) -> HexString:
     on peerId via relayId:
         res <- Ethereum.sha512(value)
+    <- res
+
+func computeHmac(peerId: string, relayId: string, algorithm: string, key: HexString, data: HexString) -> HexString:
+    on peerId via relayId:
+        res <- Ethereum.computeHmac(algorithm, key, data)
     <- res
 
 func sendTransaction(peerId: string, relayId: string, transactionRequest: TransactionRequest) -> ResultTransaction:

@@ -491,6 +491,22 @@ function callbackAllListeners(o, type, data) {
       
         return result(success, reason, code, message, hexString);
       },
+      computeHmac: async(algorithm, key, data) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let hexString = 0;
+      
+        if(success) {
+          try {
+            hexString = ethers.utils.computeHmac(algorithm, key, data);
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, hexString);
+      },
       tellListener: async(type, data) => {
         for(let peerId in Object.keys(this.registeredRemoteListeners)) {
           let relayId = this.registeredRemoteListeners[peerId].relayId;

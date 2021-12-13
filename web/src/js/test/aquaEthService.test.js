@@ -2,7 +2,7 @@ import AquaEthService from '../aquaEthService.js';
 import { requestAccounts, getChainInfo, getBalance, getBlockNumber,
          getFeeData, getBlock, getTransaction,
          formatUnits, formatEther, parseUnits, parseEther, sendTransaction, 
-         keccak256Text, keccak256, ripemd160, sha256, sha512,
+         keccak256Text, keccak256, ripemd160, sha256, sha512, computeHmac,
          signTypedData, verifyTypedData,
          erc20Connect, erc20BalanceOf, erc20Transfer, 
          registerListenerNode} from '../compiled/aquaEth.js';
@@ -56,5 +56,10 @@ test('ethersjs utils', async() => {
 
   res = await sha512(peerId, relayPeerId, '0x1234');
   expect(res.data).toBe('0x4c54886c9821195522d88ff4705c3e0c686b921054421e6ea598739c29c26e1ee75419aaceec94dd2e3c0dbb82ecf895c9f61215f375de6d800d9b99d3d4b816');
+
+  let key = "0x0102"
+  let data = "0x1234"
+  res = await computeHmac(peerId, relayPeerId, 'sha256', key, data);
+  expect(res.data).toBe('0x7553df81c628815cf569696cad13a37c606c5058df13d9dff4fee2cf5e9b5779');
 
 });
