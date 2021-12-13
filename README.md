@@ -44,7 +44,13 @@ The **client** imports functions from the compiled Aqua that automatically forwa
 res = await requestAccounts(remotePeerId, remoteRelayPeerId);
 ```
 
-Before doing this, the **client** also creates it's own AquaEthServer. It does this only so that it can use the **Ethereum.receiveData** to recieve updates on a two way connection. 
+Before doing this, the **client** creates a ListenerService:
+
+```js
+new ListenerService(aquaEthHandler);
+```
+
+It does this only so that it will recieve updates on a two way connection.
 
 ## Two way connection
 
@@ -55,9 +61,11 @@ Because Update operations need human interaction on the **server** side. A mecha
 The interface is acheived in Aqua using:
 
 ```aqua
+service Listener:
+  receiveData(packet: JSONPacket)
+  
 service Ethereum:
   registerListenerNode(listenerPeerId: string, listenerRelayId: string)
-  receiveData(packet: JSONPacket)
 
 func registerListenerNode(peerId: string, relayId: string, listenerPeerId: string, listenerRelayId: string):
     on peerId via relayId:
@@ -65,9 +73,9 @@ func registerListenerNode(peerId: string, relayId: string, listenerPeerId: strin
 
 func listenerNodeCallback(peerId: string, relayId: string, jsonPacket: JSONPacket):
     on peerId via relayId:
-        Ethereum.receiveData(jsonPacket)
+        Listener.receiveData(jsonPacket)
 ```
 
 1. The client calls **registerListenerNode** to register for updates.
 2. The **server** calls the function **listenerNodeCallback** to trigger events on the **client**.
-3. The Ethereum.receiveData(jsonPacket) service method uses the registered aquaEthHandler on the **client** to provide updates. The **method** passed in the msg data is set to **receiveData**
+3. The Listener.receiveData(jsonPacket) service method uses the registered aquaEthHandler on the **client** to provide updates. The **method** passed in the msg data is set to **receiveData**. 
