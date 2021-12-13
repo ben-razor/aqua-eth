@@ -6,7 +6,7 @@ import { registerEthereum, requestAccounts, getChainInfo, getBalance, getBlockNu
          erc20Connect, erc20BalanceOf, erc20Transfer, 
          registerListenerNode} from '../compiled/aquaEth.js';
 import AqexButton from './AqexButton';
-import AquaEthServer from '../aquaEthServer.js';
+import AquaEthService from '../aquaEthService.js';
 import { textUI } from '../text.js';
 import { verifyMessage } from '@ethersproject/wallet';
 
@@ -113,7 +113,7 @@ export default function AquaEthReact(props) {
   }
 
   useEffect(() => {
-    new AquaEthServer(aquaEthHandler);
+    new AquaEthService(aquaEthHandler);
   }, []);
 
   function handleError(res) {

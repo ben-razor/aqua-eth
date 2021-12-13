@@ -70,7 +70,7 @@ function callbackAllListeners(o, type, data) {
  * This class contains the implementation for a Fluence service that wraps
  * window.ethereum (as injected by MetaMask).
  */
- class AquaEthServer {
+ class AquaEthService {
   /**
    * 
    * An event listener callback can be passed to trigger updates on the remote
@@ -683,4 +683,4 @@ function callbackAllListeners(o, type, data) {
   }
 }
 
-export default AquaEthServer;
+export default AquaEthService;
