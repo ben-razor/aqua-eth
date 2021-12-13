@@ -124,7 +124,6 @@ function callbackAllListeners(o, type, data) {
         if(success) {
           try {
             accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            console.log('acc', accounts);
             this._triggerEvent('requestAccounts', 'connect', accounts);
           }
           catch(e) {
@@ -155,7 +154,6 @@ function callbackAllListeners(o, type, data) {
             let res = await provider.getNetwork();
             let chainId = res.chainId;
             chainInfo = getChainInfo(chainsJSON, chainId);
-            console.log('CI', chainInfo)
           }
           catch(e) {
             success = false;
@@ -217,7 +215,7 @@ function callbackAllListeners(o, type, data) {
         if(success) {
           try {
             let res = await provider.getFeeData();
-            console.log('gf res', res);
+
             feeData.gasPrice = res.gasPrice.toString();
             feeData.maxFeePerGas = res.maxFeePerGas?.toString() || 0;
             feeData.maxPriorityFeePerGas = res.maxPriorityFeePerGas?.toString() || 0;
@@ -307,7 +305,6 @@ function callbackAllListeners(o, type, data) {
         if(success) {
           try {
             transaction = await provider.getTransaction(id);
-            console.log('TX', transaction);
             transaction.gasLimit = transaction.gasLimit.toString();
             transaction.gasPrice = transaction.gasPrice.toString();
 
