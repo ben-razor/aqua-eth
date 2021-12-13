@@ -16,7 +16,9 @@ jest.setTimeout(10000);
 function aquaEthHandler(msg) { }
 
 beforeEach(async() => {
-  ({ peerId, relayPeerId } = await attemptConnect(connect));
+  let data = await attemptConnect(connect);
+  peerId = data.connectionInfo.peerId;
+  relayPeerId = data.connectionInfo.relayPeerId;
   new AquaEthService(null, null, aquaEthHandler);
 });
 

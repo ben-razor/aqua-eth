@@ -15,19 +15,15 @@ import { Toast } from 'react-bootstrap';
 import AquaEthReact from './AquaEthReact';
 
 export async function attemptConnect(handler) {
-    let _connectionInfo;
+    let data;
 
     for(let node of krasnodar) {
         try {
             await Fluence.start({ connectTo: node });
-            _connectionInfo = Fluence.getStatus();
+            let _connectionInfo = Fluence.getStatus();
 
-            handler.msg('fluence-connect', {
-                connected: true,
-                connectionInfo: { ..._connectionInfo },
-                node
-            });
-
+            data = { connected: true, connectionInfo: { ..._connectionInfo }, node };
+            handler.msg('fluence-connect', data);
             break;
         }
         catch(e) { 
@@ -36,7 +32,7 @@ export async function attemptConnect(handler) {
         } 
     }
 
-    return _connectionInfo;
+    return data;
 }
 
 export async function attemptDisconnect() {
@@ -51,14 +47,6 @@ function FluenceReact(props) {
     const [connectedNode, setConnectedNode] = useState();
     const [connectionInfo, setConnectionInfo] = useState({});
 
-    useEffect(() => {
-        connect.addHandler('fluence-connect', (data) => {
-          setConnected(data.connected);
-          setConnectionInfo({...data.connectionInfo});
-          setConnectedNode(data.node);
-        })
-    }, []);
-      
     async function testConnection() {
         let status = Fluence.getStatus();
 
@@ -86,7 +74,10 @@ function FluenceReact(props) {
 
             async function connectToHost() {
                 setConnected(false);
-                await attemptConnect(connect);
+                let data = await attemptConnect(connect);
+                setConnected(data.connected);
+                setConnectionInfo({...data.connectionInfo});
+                setConnectedNode(data.node);
             }
 
             connectToHost();
