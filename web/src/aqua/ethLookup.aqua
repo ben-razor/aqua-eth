@@ -1,0 +1,80 @@
+-- Allow mappings to be stored from Eth addresses to peerIds
+--
+-- The mapping is stored along with the signature of a EIP-712 typed data
+-- record that contains the peerId, which is signed by the owner of the 
+-- Eth address.
+-- 
+-- This enables Eth addresses to be used instead of peerIds to make
+-- connections on the Fluence network.
+import "@fluencelabs/aqua-dht/dht.aqua"
+import "@fluencelabs/aqua-lib/builtin.aqua"
+import "aquaEth.aqua"
+
+data VerifyResult:
+    info: Result
+    data: JSONString
+
+service EthLookup("eth-lookup"):
+    -- Creates a hash that will be used as key to lookup the record
+    --
+    -- A salt can be supplied so that a group can select a shared word
+    -- to make it slightly harder to find the hash for the addresses. It also
+    -- allows mutiple peerId mappings to be provided for the same address for
+    -- different purposes
+    createHashInput(address: string, salt: string) -> string
+
+    -- record is a JSON string in form { peerId: ..., sig:...}
+    -- verify checks that the EIP-712 object containing this peerId was signed
+    -- by the passed address
+    verify(address: string, record: JSONString) -> VerifyResult
+
+func getValue(hostId: string, key: string) -> Record:
+    rec: *Record
+    on hostId:
+        ts <- Peer.timestamp_sec()
+        res <- AquaDHT.get_values(key, ts)
+        rec <<- res.result!
+    <- rec!
+    
+func putValue(hostId: string, key: string, value: string) -> DhtResult:
+    on hostId:
+        ts <- Peer.timestamp_sec()
+        arr1: *string
+        AquaDHT.register_key(key, ts, false, 1)
+        res <- AquaDHT.put_value(key, value, ts, arr1, arr1, 1)
+    <- res
+
+func getHash(peerId: string, relayId: string, address: string, salt: string) -> HexString:
+    on peerId via relayId:
+        hashInput <- EthLookup.createHashInput(address, salt)
+            on relayId:
+                hash <- Op.sha256_string(hashInput)
+    <- hash
+
+func putVerifiedEthRecord(peerId: string, relayId: string, 
+                           address: string, salt: string, record: JSONString) -> VerifyResult:
+    resBox: *VerifyResult
+
+    on peerId via relayId:
+        verifyRes <- EthLookup.verify(address, record)
+        if verifyRes.info.success:
+            hash <- getHash(peerId, relayId, address, salt)
+            putValue(relayId, hash, record)
+        
+        resBox <<- verifyRes
+    
+    <- resBox!
+
+func getVerifiedEthRecord(peerId: string, relayId: string, address: string, salt: string) -> VerifyResult:
+    resBox: *VerifyResult
+
+    on peerId via relayId:
+        hash <- getHash(peerId, relayId, address, salt)
+        record <- getValue(relayId, hash)
+
+        verifyRes <- EthLookup.verify(address, record.value)
+
+        resBox <<- verifyRes
+    
+    <- resBox!
+

@@ -1,4 +1,5 @@
 import AquaEthService from '../aquaEthService.js';
+import EthLookup from '../ethLookupService';
 import { requestAccounts, getChainInfo, getBalance, getBlockNumber,
          getFeeData, getBlock, getTransaction,
          formatUnits, formatEther, parseUnits, parseEther, sendTransaction, 
@@ -8,6 +9,7 @@ import { requestAccounts, getChainInfo, getBalance, getBlockNumber,
          signTypedData, verifyTypedData,
          erc20Connect, erc20BalanceOf, erc20Transfer, 
          registerListenerNode} from '../compiled/aquaEth.js';
+import { putVerifiedEthRecord, getVerifiedEthRecord } from '../compiled/ethLookup.js';
 import { attemptConnect, attemptDisconnect } from '../components/FluenceReact.js';
 import connect from '../components/Connect.js';
 
@@ -22,6 +24,7 @@ beforeEach(async() => {
   let data = await attemptConnect(connect);
   peerId = data.connectionInfo.peerId;
   relayPeerId = data.connectionInfo.relayPeerId;
+  new EthLookup();
   new AquaEthService(null, null, aquaEthHandler);
 });
 
@@ -29,6 +32,23 @@ afterEach(async() => {
   await attemptDisconnect();
 })
 
+const address = "0xdd63a74061fd022868f18bcbb750bd56530809f1";
+const sig = "0x26374285feb77c773640a16fa2c93c5bc6ed2c7f54013e9fd42e9c2f443e30c032cb039b4e6bfb368048102a5a6ba23c6d469930bc51c390887666ac17c10d391b";
+
+test('eth lookup', async() => {
+  console.log('peerId', peerId);
+  let ethRecord = JSON.stringify({ peerId, sig });
+  let res = await putVerifiedEthRecord(peerId, relayPeerId, address, '', ethRecord);
+  console.log('REZ', res);
+  expect(res.info.success).toBe(false);
+  expect(res.info.reason).toBe('error-sig-mismatch');
+
+  let resGet = await getVerifiedEthRecord(peerId, relayPeerId, address, '');
+  console.log('REZ GET', resGet);
+  expect(resGet.info.success).toBe(true);
+})
+
+/*
 test('ethersjs utils', async() => {
   let res;
 
@@ -94,3 +114,5 @@ test('ethersjs utils', async() => {
   res = await hexZeroPad(peerId, relayPeerId, '0x01', 4)
   expect(res.data).toBe('0x00000001');
 });
+*/
+

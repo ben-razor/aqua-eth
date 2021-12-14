@@ -3,19 +3,9 @@ import { ethers, BigNumber } from 'ethers';
 import { cloneObj } from './helpersHTML.js';
 import chainsJSON from '../data/chains.json';
 import { erc20Abi } from '../data/contractData.js';
+import { createSuccessInfo, createErrorInfo, result } from './serviceHelpers.js';
+
 let chains;
-
-function createSuccessInfo() {
-  return { success: true, reason: 'ok', code: 0, message: ''};
-}
-
-function createErrorInfo(reason='error', code=0, message='') {
-  return { success: false, reason, code, message };
-}
-
-function result(success, reason, code, message, data) {
-  return { info: { success, reason, code, message }, data};
-}
 
 export function getEthereum() {
   let success = true;
@@ -802,7 +792,7 @@ function callbackAllListeners(o, type, data) {
         return result(success, reason, code, message, signature);
       },
       verifyTypedData: async(domainJSON, typesJSON, valueJSON, signature) => {
-        let { success, reason, message, code } = this.checkEthStatus();
+        let { success, reason, message, code } = createSuccessInfo();
         let address = '';
         let domain, types, value;
       
