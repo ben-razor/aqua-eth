@@ -18,6 +18,8 @@ For the Gitcoin GR12 Hackathon task:
 
 [AquaEthReact.js](https://github.com/ben-razor/aqua-eth/blob/main/web/src/js/components/AquaEthReact.js) calls the compiled functions and handles updates from the service.
 
+[aquaEthService.test.js](https://github.com/ben-razor/aqua-eth/blob/main/web/src/js/test/aquaEthService.test.js) has basic tests of ethers util functions and demonstrates the minimal initialization steps for the Aqua Eth service.
+
 The service wraps a wide variety of functionality from the [ethers.js](https://docs.ethers.io/v5/api/) library.
 
 ## Mode of Operation
