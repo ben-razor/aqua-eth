@@ -3,6 +3,8 @@ import { requestAccounts, getChainInfo, getBalance, getBlockNumber,
          getFeeData, getBlock, getTransaction,
          formatUnits, formatEther, parseUnits, parseEther, sendTransaction, 
          keccak256Text, keccak256, ripemd160, sha256, sha512, computeHmac,
+         arrayify, hexValue, stripZeros, zeroPad, hexConcat, hexDataLength, hexDataSlice,
+         hexStripZeros, hexZeroPad,
          signTypedData, verifyTypedData,
          erc20Connect, erc20BalanceOf, erc20Transfer, 
          registerListenerNode} from '../compiled/aquaEth.js';
@@ -12,7 +14,7 @@ import connect from '../components/Connect.js';
 let peerId;
 let relayPeerId;
 
-jest.setTimeout(10000);
+jest.setTimeout(20000);
 
 function aquaEthHandler(msg) { }
 
@@ -62,4 +64,33 @@ test('ethersjs utils', async() => {
   res = await computeHmac(peerId, relayPeerId, 'sha256', key, data);
   expect(res.data).toBe('0x7553df81c628815cf569696cad13a37c606c5058df13d9dff4fee2cf5e9b5779');
 
+  res = await arrayify(peerId, relayPeerId, '0x0102')
+  expect(res.data).toStrictEqual([1,2]);
+
+  res = await hexValue(peerId, relayPeerId, '255');
+  expect(res.data).toBe('0xff');
+
+  res = await stripZeros(peerId, relayPeerId, [0, 0, 0, 1])
+  expect(res.data).toStrictEqual([1]);
+
+  res = await zeroPad(peerId, relayPeerId, [1], 4)
+  expect(res.data).toStrictEqual([0, 0, 0, 1]);
+
+  res = await hexConcat(peerId, relayPeerId, ['0x11', '0x22', '0x33'])
+  expect(res.data).toBe('0x112233');
+
+  res = await hexDataLength(peerId, relayPeerId, '0x1122')
+  expect(res.data).toBe(2);
+
+  res = await hexDataSlice(peerId, relayPeerId, '0x112233', 1, null)
+  expect(res.data).toBe('0x2233');
+
+  res = await hexDataSlice(peerId, relayPeerId, '0x112233', 1, 2)
+  expect(res.data).toBe('0x22');
+  
+  res = await hexStripZeros(peerId, relayPeerId, '0x000069');
+  expect(res.data).toBe('0x69');
+
+  res = await hexZeroPad(peerId, relayPeerId, '0x01', 4)
+  expect(res.data).toBe('0x00000001');
 });

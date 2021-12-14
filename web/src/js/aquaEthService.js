@@ -507,6 +507,158 @@ function callbackAllListeners(o, type, data) {
       
         return result(success, reason, code, message, hexString);
       },
+      arrayify: async(value) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let arr = [];
+      
+        if(success) {
+          try {
+            let uint8Array = ethers.utils.arrayify(value);
+            arr = Array.from(uint8Array);
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, arr);
+      },
+      hexValue: async(value) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let hexString = 0;
+      
+        if(success) {
+          try {
+            hexString = ethers.utils.hexValue(BigNumber.from(value));
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, hexString);
+      },
+      stripZeros: async(data) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let arr = [];
+      
+        if(success) {
+          try {
+            let uint8Array = ethers.utils.stripZeros(data);
+            arr = Array.from(uint8Array);
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, arr);
+      },
+      zeroPad: async(data, length) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let arr = [];
+      
+        if(success) {
+          try {
+            let uint8Array = ethers.utils.zeroPad(data, length);
+            arr = Array.from(uint8Array);
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, arr);
+      },
+      hexConcat: async(data) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let arr = 0;
+      
+        if(success) {
+          try {
+            arr = ethers.utils.hexConcat(data);
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, arr);
+      },
+      hexDataLength: async(data) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let hexString = 0;
+      
+        if(success) {
+          try {
+            hexString = ethers.utils.hexDataLength(data);
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, hexString);
+      },
+      hexDataSlice: async(data, offset, endOffset) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let hexString = 0;
+      
+        if(success) {
+          try {
+            if(isNaN(endOffset)) {
+              hexString = ethers.utils.hexDataSlice(data, offset);
+            }
+            else {
+              hexString = ethers.utils.hexDataSlice(data, offset, endOffset);
+            }
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, hexString);
+      },
+      hexStripZeros: async(data) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let hexString = 0;
+      
+        if(success) {
+          try {
+            hexString = ethers.utils.hexStripZeros(data);
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, hexString);
+      },
+      hexZeroPad: async(data, length) => {
+        let { success, reason, message, code } = createSuccessInfo();
+        let hexString = 0;
+      
+        if(success) {
+          try {
+            hexString = ethers.utils.hexZeroPad(data, length);
+          }
+          catch(e) {
+            ({ success, reason, message, code} = createErrorInfo('error-ethers', e.code, e.messsage));
+            console.log(e);
+          }
+        }
+      
+        return result(success, reason, code, message, hexString);
+      },
       tellListener: async(type, data) => {
         for(let peerId in Object.keys(this.registeredRemoteListeners)) {
           let relayId = this.registeredRemoteListeners[peerId].relayId;

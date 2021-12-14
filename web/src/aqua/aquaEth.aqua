@@ -116,6 +116,22 @@ data ResultU32:
     info: Result
     data: u32
 
+data ResultU8:
+    info: Result
+    data: u32
+
+data ResultBoolean:
+    info: Result
+    data: u32
+
+data ResultU8Array:
+    info: Result
+    data: u8
+
+data ResultHexString:
+    info: Result
+    data: HexString
+
 data ResultFeeData:
     info: Result
     data: FeeData
@@ -173,14 +189,33 @@ service Ethereum("ethereum"):
     -- The equivalent to calling parseUnits(value, "ether").
     parseEther(value: string) -> ResultString
 
-    keccak256Text(data: string) -> HexString
-    keccak256(data: HexString) -> HexString
-    ripemd160(data: HexString) -> HexString
-    sha256(data: HexString) -> HexString
-    sha512(data: HexString) -> HexString
+    keccak256Text(data: string) -> ResultHexString
+    keccak256(data: HexString) -> ResultHexString
+    ripemd160(data: HexString) -> ResultHexString
+    sha256(data: HexString) -> ResultHexString
+    sha512(data: HexString) -> ResultHexString
     
     -- algorithm (sha256|sha512)
-    computeHmac(algorithm: string, key: HexString, data: HexString) -> HexString
+    computeHmac(algorithm: string, key: HexString, data: HexString) -> ResultHexString
+
+    -- Converts DataHexStringOrArrayish to a Uint8Array.
+    arrayify(value: HexString) -> ResultU8Array
+    -- Converts big number to a HexString, with no unnecessary leading zeros
+    hexValue(value: BigNumber) -> ResultHexString
+    -- Returns a Uint8Array with all leading 0 bytes removed.
+    stripZeros(data: []u8) -> ResultU8Array
+    -- Returns a Uint8Array of the data with 0 bytes prepended to length bytes long.
+    zeroPad(data: []u8, length: u32) -> ResultU8Array
+    -- Concatenates all the BytesLike in arrayOfBytesLike into a single DataHexString
+    hexConcat(data: []HexString) -> ResultHexString
+    -- Returns the length (in bytes) of aBytesLike.
+	hexDataLength(data: HexString) -> ResultHexString
+    -- Returns a HexString representation of a slice of HexString, from offset (in bytes) to endOffset (in bytes). If endOffset is omitted, the length is used.
+	hexDataSlice(data: HexString, offset: u32, endOffset: ?u32) -> ResultHexString
+    -- Returns a HexString representation of aBytesLike with all leading zeros removed.
+	hexStripZeros(data: HexString) -> ResultHexString
+    -- Returns a DataHexString representation of aBytesLike padded to length bytes.
+	hexZeroPad(data: HexString, length: u32) -> ResultHexString
 
     sendTransaction(transactionRequest: TransactionRequest) -> ResultTransaction
     signTypedData(domain: JSONString, types: JSONString, value: JSONString) -> RawSignature
@@ -268,34 +303,79 @@ func parseEther(peerId: string, relayId: string, value: string) -> ResultString:
         res <- Ethereum.parseEther(value)
     <- res
 
-func keccak256Text(peerId: string, relayId: string, value: string) -> HexString:
+func keccak256Text(peerId: string, relayId: string, value: string) -> ResultHexString:
     on peerId via relayId:
         res <- Ethereum.keccak256Text(value)
     <- res
 
-func keccak256(peerId: string, relayId: string, value: HexString) -> HexString:
+func keccak256(peerId: string, relayId: string, value: HexString) -> ResultHexString:
     on peerId via relayId:
         res <- Ethereum.keccak256(value)
     <- res
 
-func ripemd160(peerId: string, relayId: string, value: HexString) -> HexString:
+func ripemd160(peerId: string, relayId: string, value: HexString) -> ResultHexString:
     on peerId via relayId:
         res <- Ethereum.ripemd160(value)
     <- res
 
-func sha256(peerId: string, relayId: string, value: HexString) -> HexString:
+func sha256(peerId: string, relayId: string, value: HexString) -> ResultHexString:
     on peerId via relayId:
         res <- Ethereum.sha256(value)
     <- res
 
-func sha512(peerId: string, relayId: string, value: HexString) -> HexString:
+func sha512(peerId: string, relayId: string, value: HexString) -> ResultHexString:
     on peerId via relayId:
         res <- Ethereum.sha512(value)
     <- res
 
-func computeHmac(peerId: string, relayId: string, algorithm: string, key: HexString, data: HexString) -> HexString:
+func computeHmac(peerId: string, relayId: string, algorithm: string, key: HexString, data: HexString) -> ResultHexString:
     on peerId via relayId:
         res <- Ethereum.computeHmac(algorithm, key, data)
+    <- res
+
+func arrayify(peerId: string, relayId: string, value: HexString) -> ResultU8Array:
+    on peerId via relayId:
+        res <- Ethereum.arrayify(value)
+    <- res
+
+func hexValue(peerId: string, relayId: string, value: BigNumber) -> ResultHexString:
+    on peerId via relayId:
+        res <- Ethereum.hexValue(value)
+    <- res
+
+func stripZeros(peerId: string, relayId: string, data: []u8) -> ResultU8Array:
+    on peerId via relayId:
+        res <- Ethereum.stripZeros(data)
+    <- res
+
+func zeroPad(peerId: string, relayId: string, data: []u8, length: u32) -> ResultU8Array:
+    on peerId via relayId:
+        res <- Ethereum.zeroPad(data, length)
+    <- res
+
+func hexConcat(peerId: string, relayId: string, data: []HexString) -> ResultHexString:
+    on peerId via relayId:
+        res <- Ethereum.hexConcat(data)
+    <- res
+
+func hexDataLength(peerId: string, relayId: string, data: HexString) -> ResultHexString:
+    on peerId via relayId:
+        res <- Ethereum.hexDataLength(data)
+    <- res
+
+func hexDataSlice(peerId: string, relayId: string, data: HexString, offset: u32, endOffset: ?u32) -> ResultHexString:
+    on peerId via relayId:
+        res <- Ethereum.hexDataSlice(data, offset, endOffset)
+    <- res
+
+func hexStripZeros(peerId: string, relayId: string, data: HexString) -> ResultHexString:
+    on peerId via relayId:
+        res <- Ethereum.hexStripZeros(data)
+    <- res
+
+func hexZeroPad(peerId: string, relayId: string, data: HexString, length: u32) -> ResultHexString:
+    on peerId via relayId:
+        res <- Ethereum.hexZeroPad(data, length)
     <- res
 
 func sendTransaction(peerId: string, relayId: string, transactionRequest: TransactionRequest) -> ResultTransaction:
