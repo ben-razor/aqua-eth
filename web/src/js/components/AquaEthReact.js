@@ -7,11 +7,13 @@ import { requestAccounts, getChainInfo, getBalance, getBlockNumber,
          erc20Connect, erc20BalanceOf, erc20Transfer, 
          registerListenerNode} from '../compiled/aquaEth.js';
 import EthLookup, { createTypedConnectionObj } from '../ethLookupService.js';
+import { createSuccessInfo, createErrorInfo } from '../serviceHelpers.js';
 import { putVerifiedEthRecord, getVerifiedEthRecord } from '../compiled/ethLookup.js';
 import AqexButton from './AqexButton';
 import AquaEthService, { getEthereum, createWeb3Provider } from '../aquaEthService.js';
 import ListenerService from '../listenerService.js';
 import { textUI } from '../text.js';
+import connect from './Connect.js';
 
 const BUTTON_TIMEOUT = 10000;
 
@@ -21,7 +23,12 @@ export default function AquaEthReact(props) {
   const toast = props.toast;
   const connected = props.connected;
   const connectionInfo = props.connectionInfo;
+  const setModalState = props.setModalState;
+  const closeModal = props.closeModal;
+  const linkedEthAccount = props.linkedEthAccount;
+  const setLinkedEthAccount = props.setLinkedEthAccount;
 
+  const [web3Data, setWeb3Data] = useState();
   const [activePanel, setActivePanel] = useState('account');
   const [submitting, setSubmitting] = useState({});
   const [ownAccounts, setOwnAccounts] = useState();
@@ -116,11 +123,19 @@ export default function AquaEthReact(props) {
     }
   }
 
-  async function initEthLookup(ethereum) {
-    new EthLookup();
-    ethereum.on('accountsChanged', (accounts) => {
-      setOwnAccounts(accounts);
-    });
+  async function initEthLookup() {
+    if(ethereum) {
+      new EthLookup();
+      ethereum.on('accountsChanged', (accounts) => {
+        setOwnAccounts(accounts);
+      });
+
+      let _ownAccounts = await ethereum.request({ method: 'eth_requestAccounts' });
+      setOwnAccounts(_ownAccounts);
+    }
+    else {
+      handleError({ info: { success: false, reason: 'error-no-ethereum' } });
+    }
   }
 
   useEffect(() => {
@@ -149,17 +164,28 @@ export default function AquaEthReact(props) {
       let address = ownAccount;
       let peerId = connectionInfo.peerId;
       let relayPeerId = connectionInfo.relayPeerId;
+      console.log('ci', connectionInfo);
 
+      let web3Res = createWeb3Provider(ethRes.data.ethereum);
       let obj = createTypedConnectionObj(peerId, relayPeerId);
-    console.log('rel2', connectionInfo, peerId, relayPeerId, obj.domain, obj.types, obj.value);
-      let sigRes = await signTypedData(peerId, relayPeerId, JSON.stringify(obj.domain), JSON.stringify(obj.types), JSON.stringify(obj.value));
-    console.log('rel3');
+      let sigRes;
+      
+      try {
+        console.log('dtv', obj.domain, obj.types, obj.value);
+        let signature = await web3Res.data.signer._signTypedData(obj.domain, obj.types, obj.value);
+        sigRes = { info: createSuccessInfo(), data: signature };
+      }
+      catch(e) {
+        sigRes = { info: createErrorInfo('error-ethers', e.code, e.message) };
+      }
+
+      console.log('sig res', sigRes);
       if(sigRes.info.success) {
-        let ethRecord = JSON.stringify({ peerId, sig: sigRes.data });
+        let ethRecord = JSON.stringify({ peerId, relayPeerId, sig: sigRes.data });
         let res = await putVerifiedEthRecord(peerId, relayPeerId, address, '', ethRecord);
-    console.log('rel4');
 
         if(res.info.success) {
+          setLinkedEthAccount({ account: ownAccount, peerId, relayPeerId });
           toast("Eth address lookup record created!");
         }
         else {
@@ -179,7 +205,7 @@ export default function AquaEthReact(props) {
     if(ethRes.info.success) {
       let web3Res = createWeb3Provider(ethRes.data.ethereum);
       if(web3Res.info.success) {
-        initEthLookup(ethereum);
+        setWeb3Data(web3Res.data);
 
         new AquaEthService(web3Res.data.provider, web3Res.data.signer, aquaEthHandler);
       }
@@ -833,6 +859,31 @@ export default function AquaEthReact(props) {
     }
     </Fragment>
   }
+
+  function getAccountLinkPanel() {
+    return <div className="er-account-link-panel">
+      <h3>Link Eth Address to this peer</h3>
+      <div>
+        <AqexButton label="Link" id="link" className="playground-button playground-icon-button"
+          onClick={() => initEthLookup() } />
+      </div>
+    </div>
+  }
+
+  useEffect(() => {
+    connect.addHandler('link-eth-lookup', (data) => {
+      console.log('hui', data);
+      console.log('open modal');
+      setModalState({
+        open: true,
+        title: 'Link Eth Lookup',
+        content: getAccountLinkPanel()
+      });
+    })
+    connect.addHandler('eth-lookup-linked', (data) => {
+      closeModal();
+    })
+  }, []);
 
   return <Fragment>
     <div className="er-features">

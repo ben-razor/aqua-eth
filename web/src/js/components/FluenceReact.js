@@ -42,7 +42,7 @@ export async function attemptDisconnect() {
 
 function FluenceReact(props) {
     const toast = props.toast;
-    const triggerConnectionTest = props.triggerConnectionTest;
+    const linkedEthAccount = props.linkedEthAccount;
     const [attemptingConnect, setAttemptingConnect] = useState();
     const [connected, setConnected] = useState(false);
     const [connectedNode, setConnectedNode] = useState();
@@ -105,21 +105,32 @@ function FluenceReact(props) {
         return formatted;
     }
 
-    const [isLinking, setIsLinking] = useState();
-
     function linkAccount() {
-
+        connect.msg('link-eth-lookup');
     }
 
-    return <div class="er-fluence-connect-panel">
+    function isLinked(connectionInfo, linkedEthAccount) {
+        return connectionInfo && linkedEthAccount && connectionInfo.peerId === linkedEthAccount.peerId;
+    }
+
+    return <div className="er-fluence-connect-panel">
         { connectionInfo.peerId ?
             <Fragment>
                 <div className="er-fluence-connect"> 
-                    <div>PeerId: {formatPeerId(connectionInfo.peerId)} <i className="fa fa-edit" onClick={e => copyToClipboard('peer')}/></div>
-                    <div>RelayId: {formatPeerId(connectionInfo.relayPeerId)} <i className="fa fa-edit" onClick={e => copyToClipboard('relay')}/></div>
+                {
+                    isLinked(connectionInfo, linkedEthAccount) ?
+                    <Fragment>
+                        <div>{linkedEthAccount.account}</div>
+                    </Fragment>
+                    :
+                    <Fragment>
+                        <div>PeerId: {formatPeerId(connectionInfo.peerId)} <i className="fa fa-edit" onClick={e => copyToClipboard('peer')}/></div>
+                        <div>RelayId: {formatPeerId(connectionInfo.relayPeerId)} <i className="fa fa-edit" onClick={e => copyToClipboard('relay')}/></div>
+                    </Fragment>
+                }
                 </div>
                 <AqexButton label="Link" id="link" className="playground-button playground-icon-button"
-                onClick={() => linkAccount() } isSubmitting={isLinking} />
+                onClick={() => linkAccount() } />
             </Fragment>
             :
             <Fragment>

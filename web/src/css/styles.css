@@ -133,6 +133,7 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 .er-fluence-connect {
     display: flex;
     flex-direction: column;
+    justify-content: center;
 }
 
 .er-fluence-connect-panel {
@@ -292,6 +293,41 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
     color: white;
     background-image: linear-gradient(269deg, transparent 0%, hsl(342deg 48% 42%) 99%, transparent 100%);
     font-size: 0.9em;    
+}
+
+.playground-button {
+    position: relative;
+    z-index: 10;
+    min-width: 7em;
+    padding: 0.2em 0.8em;
+    margin: 0 0.05em;
+    border-radius: 0.4em;
+    border-width: 1px 0 0 1px;
+    font-size: 0.9em;
+    min-height: 2.5em;
+    background-image: linear-gradient(0deg, transparent 0%, hsl(342deg, 100%, 50%, 0.8) 100%);
+    background-color: hsl(342deg 70% 43%);
+    border-color: hsl(342deg, 50%, 50%);
+    color: white;
+}
+
+.playground-run-button {
+    float: right;
+    border-radius: 2em 0.4em 2em 0;
+    margin-left: 0.5em;
+}
+
+.playground-save-button {
+    min-width: initial;
+    padding: .375rem .75rem;
+    background-image: linear-gradient(0deg, transparent 0%, hsl(120deg, 100%, 40%, 0.8) 100%);
+    background-color: hsl(122deg 70% 33%);
+    border-color: hsl(122deg, 50%, 40%);
+    color: white;
+}
+
+.playground-icon-button {
+    min-width: initial;
 }
 
 @media (max-width: 992px) {

@@ -811,6 +811,7 @@ function callbackAllListeners(o, type, data) {
 
         if(success) {
           try {
+            console.log('vtd', domain, types, value, signature);
             address = await ethers.utils.verifyTypedData(domain, types, value, signature);
           }
           catch(e) {

@@ -16,6 +16,7 @@ function App(props) {
   const [remotePeerId, setRemotePeerId] = useState('');
   const [remoteRelayPeerId, setRemoteRelayPeerId] = useState('');
   const [modalState, setModalState] = useState({ open: false, title: '', content: ''});
+  const [linkedEthAccount, setLinkedEthAccount] = useState({ account: null, peerId: null, relayPeerId: null});
 
   const { addToast } = useToasts();
 
@@ -36,19 +37,6 @@ function App(props) {
     })
   }, []);
 
-  function handleUIMessage(type, data={}) {
-    if(type === 'link-eth-lookup') {
-      setModalState({
-        open: true,
-        title: 'Link Eth Lookup',
-        content: <ProjectPanel toast={toast} handleUIMessage={handleUIMessage} />
-      });
-    }
-    else if(type === 'eth-lookup-linked') {
-      closeModal();
-    }
-  }
-
   function closeModal() {
     setModalState({...modalState, open: false});
   }
@@ -63,7 +51,7 @@ function App(props) {
           <h3>Powered by Fluence Network</h3>
         </div>
         <div className="er-header-controls">
-          <FluenceReact toast={toast} />
+          <FluenceReact toast={toast} linkedEthAccount={linkedEthAccount} />
         </div>
       </div>
       <div className="er-content">
@@ -98,7 +86,9 @@ function App(props) {
 
             <div className="er-remote-controls">
               <AquaEthReact connected={connected} connectionInfo={connectionInfo} 
-                            remotePeerId={remotePeerId} remoteRelayPeerId={remoteRelayPeerId} toast={toast} />
+                            remotePeerId={remotePeerId} remoteRelayPeerId={remoteRelayPeerId} toast={toast} 
+                            setModalState={setModalState} closeModal={closeModal} 
+                            linkedEthAccount={linkedEthAccount} setLinkedEthAccount={setLinkedEthAccount} />
             </div>
           </Fragment>
         }
