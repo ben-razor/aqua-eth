@@ -133,6 +133,7 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 .er-fluence-connect {
     display: flex;
     flex-direction: column;
+    justify-content: center;
 }
 
 .er-fluence-connect-panel {
