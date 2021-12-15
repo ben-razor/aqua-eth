@@ -3,11 +3,11 @@ import { verifyTypedData } from './compiled/aquaEth';
 import { createSuccessInfo, createErrorInfo, result } from './serviceHelpers.js';
 import { Fluence, FluencePeer } from "@fluencelabs/fluence";
 
-export function createTypedPeerIdObj(peerId) {
+export function createTypedConnectionObj(peerId, relayPeerId) {
   return {
     domain: {},
-    types: { Info: [{ name: "peerId", type: "string" }] },
-    value: { peerId }
+    types: { Info: [ { name: "peerId", type: "string" }, { name: "relayPeerId", type: "string" }] },
+    value: { peerId, relayPeerId }
   };
 }
  
@@ -67,9 +67,10 @@ class EthLookup {
           if(success) {
             try {
               let origPeerId = record.peerId;
+              let origRelayId = record.relayPeerId;
               let sig = record.sig;
 
-              let { domain, types, value } = createTypedPeerIdObj(origPeerId);
+              let { domain, types, value } = createTypedConnectionObj(origPeerId, origRelayId);
               let domainJSON = JSON.stringify(domain);
               let typesJSON = JSON.stringify(types);
               let valueJSON = JSON.stringify(value);
