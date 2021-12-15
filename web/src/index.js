@@ -20,6 +20,8 @@ function App(props) {
   const [linkedEthAccount, setLinkedEthAccount] = useState({ account: null, peerId: null, relayPeerId: null});
   const [ethLookupEntry, setEthLookupEntry] = useState('');
   const [lookupAddress, setLookupAddress] = useState('');
+  const [viewingPeerDetails, setViewingPeerDetails] = useState();
+  const [performingLookup, setPerformingLookup] = useState();
 
   const { addToast } = useToasts();
 
@@ -37,7 +39,10 @@ function App(props) {
       setConnectionInfo({...data.connectionInfo});
       setRemotePeerId(data.connectionInfo.peerId);
       setRemoteRelayPeerId(data.connectionInfo.relayPeerId);
-    })
+    });
+    connect.addHandler('lookup-complete', (data) => {
+      setPerformingLookup(false);
+    });
   }, []);
 
   function closeModal() {
@@ -45,6 +50,7 @@ function App(props) {
   }
 
   function lookupEthAddress() {
+    setPerformingLookup(true);
     setLookupAddress(ethLookupEntry);
   }
 
@@ -71,16 +77,22 @@ function App(props) {
                   <div className="er-form-label">Address:</div>
                   <input type="text" value={ethLookupEntry} onChange={e => setEthLookupEntry(e.target.value)} />
                   <AqexButton label="Lookup" id="lookupEthAddress" className="playground-button playground-icon-button"
-                  onClick={() => lookupEthAddress() } />
+                  onClick={() => lookupEthAddress() } isSubmitting={performingLookup} timeout={8000} />
                 </div>
-                <div className="er-form-row">
-                  <div className="er-form-label">PeerId:</div>
-                  <input type="text" value={remotePeerId} onChange={e => setRemotePeerId(e.target.value)} />
-                </div>
-                <div className="er-form-row">
-                  <div className="er-form-label">RelayId:</div>
-                  <input type="text" value={remoteRelayPeerId} onChange={e => setRemoteRelayPeerId(e.target.value)} />
-                </div>
+                { viewingPeerDetails ?
+                <Fragment>
+                  <div className="er-form-row">
+                    <div className="er-form-label">PeerId:</div>
+                    <input type="text" value={remotePeerId} onChange={e => setRemotePeerId(e.target.value)} />
+                  </div>
+                  <div className="er-form-row">
+                    <div className="er-form-label">RelayId:</div>
+                    <input type="text" value={remoteRelayPeerId} onChange={e => setRemoteRelayPeerId(e.target.value)} />
+                  </div>
+                </Fragment>  
+                :
+                <div className="er-link-like"onClick={e => setViewingPeerDetails(true)}>View Peer details</div>
+                }
               </div>
               <div className="er-remote-panel-info">
                 {
@@ -89,7 +101,7 @@ function App(props) {
                     <h4>This browser is currently set as its own remote.</h4>
                     <p>To experience the full power of Eth Remote:</p>
                     <p>Open a MetaMask enabled browser on a remote device</p>
-                    <p>Insert the peerId and relayId displayed on the remote browser and click Connect</p>
+                    <p>Link the Eth Address and enter it into <b>Address</b></p>
                   </div> 
                   :
                   ''

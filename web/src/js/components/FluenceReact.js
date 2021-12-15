@@ -120,16 +120,16 @@ function FluenceReact(props) {
                 {
                     isLinked(connectionInfo, linkedEthAccount) ?
                     <Fragment>
-                        <div>{linkedEthAccount.account}</div>
+                        <div className="er-fluence-connect-item">{linkedEthAccount.account}</div>
                     </Fragment>
                     :
                     <Fragment>
-                        <div>PeerId: {formatPeerId(connectionInfo.peerId)} <i className="fa fa-edit" onClick={e => copyToClipboard('peer')}/></div>
-                        <div>RelayId: {formatPeerId(connectionInfo.relayPeerId)} <i className="fa fa-edit" onClick={e => copyToClipboard('relay')}/></div>
+                        <div className="er-fluence-connect-item">PeerId: {formatPeerId(connectionInfo.peerId)} <i className="fa fa-edit" onClick={e => copyToClipboard('peer')}/></div>
+                        <div className="er-fluence-connect-item">RelayId: {formatPeerId(connectionInfo.relayPeerId)} <i className="fa fa-edit" onClick={e => copyToClipboard('relay')}/></div>
                     </Fragment>
                 }
                 </div>
-                <AqexButton label="Link" id="link" className="playground-button playground-icon-button"
+                <AqexButton label="Link Eth Address" id="link" className="playground-button playground-icon-button"
                 onClick={() => linkAccount() } />
             </Fragment>
             :

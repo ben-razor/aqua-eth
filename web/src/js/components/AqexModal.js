@@ -41,7 +41,7 @@ function AqexModal(props) {
         contentLabel="Aqua Explore Modal"
       >
         <div className="aqex-modal-title">
-          <h2>{modalState.title}</h2>
+          <h2 className="aqex-modal-heading">{modalState.title}</h2>
           <div className="aqex-modal-close">
             <AqexButton label={<i className="fas fa-times-circle" />} className="playground-button playground-icon-button" 
                         onClick={closeModal} />

@@ -140,6 +140,11 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
     display: flex;
 }
 
+.er-fluence-connect-item {
+    display: flex;
+    justify-content: space-between;
+}
+
 .er-form-row {
     display: flex;
     margin-bottom: 0.25em;
@@ -294,6 +299,31 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
     color: white;
     background-image: linear-gradient(269deg, transparent 0%, hsl(342deg 48% 42%) 99%, transparent 100%);
     font-size: 0.9em;    
+}
+
+.aqex-modal-heading {
+    padding: 0;
+}
+
+.er-account-link-panel {
+    min-width: 16em;
+    min-height: 12em;
+    padding: 0 1em;
+}
+
+.er-p-spaced-2 {
+    margin-bottom: 1em;
+}
+
+.er-link-like {
+    color: hsl(200, 50%, 50%);
+    text-decoration: underline;
+    cursor: default;
+    display: inline;
+}
+
+.er-link-like:hover {
+    color: lightgrey;
 }
 
 .playground-button {

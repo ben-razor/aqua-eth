@@ -235,6 +235,9 @@ export default function AquaEthReact(props) {
     else if(res.info.reason === 'error-no-ethers-init') {
       toast('Error: Unable to initalize ethers provider and signer.');
     }
+    else if(res.info.reason === 'error-lookup-failed') {
+      toast('Error: Address lookup failed.')
+    }
     else {
       toast('Error ' + res.info.message, 'error');
     }
@@ -441,7 +444,7 @@ export default function AquaEthReact(props) {
     for(let row of data) {
       let value = row.value;
 
-      if(typeof value === 'object' || typeof Array.isArray(value)) {
+      if(typeof value === 'object' || Array.isArray(value)) {
         value = JSON.stringify(value);
       }
 
@@ -871,19 +874,24 @@ export default function AquaEthReact(props) {
     return <div className="er-account-link-panel">
       <h3>Link Eth Address to this peer</h3>
       <div>
+        <p className="er-p-spaced-2">
+          Click the link button to associate your Ethereum address with this peerId
+          and relay.
+        </p>
+        <p className="er-p-spaced-2">
+          Peers can then find you by looking up this address.
+        </p>
         <AqexButton label="Link" id="link" className="playground-button playground-icon-button"
-          onClick={() => initEthLookup() } />
+          onClick={() => { initEthLookup(); closeModal(); }} />
       </div>
     </div>
   }
 
   useEffect(() => {
     connect.addHandler('link-eth-lookup', (data) => {
-      console.log('hui', data);
-      console.log('open modal');
       setModalState({
         open: true,
-        title: 'Link Eth Lookup',
+        title: 'Link Eth Address',
         content: getAccountLinkPanel()
       });
     })
@@ -900,8 +908,8 @@ export default function AquaEthReact(props) {
     if(lookupAddress) {
       (async() => {
         console.log('VER1', connectionInfo, lookupAddress);
-      let hash = await getHash(connectionInfo.peerId, connectionInfo.relayPeerId, lookupAddress, '');
-      console.log('PRE GET', hash, connectionInfo.peerId, connectionInfo.relayPeerId, lookupAddress);
+        let hash = await getHash(connectionInfo.peerId, connectionInfo.relayPeerId, lookupAddress, '');
+        console.log('PRE GET', hash, connectionInfo.peerId, connectionInfo.relayPeerId, lookupAddress);
         let res = await getVerifiedEthRecord(connectionInfo.peerId, connectionInfo.relayPeerId, lookupAddress, '');      
         if(res.info.success) {
           try {
@@ -912,16 +920,18 @@ export default function AquaEthReact(props) {
             console.log('VER3', record);
             setRemotePeerId(record.peerId);
             setRemoteRelayPeerId(record.relayPeerId);
+            connect.msg('lookup-complete');
           }
           catch(e) {
             handleError({ info: createErrorInfo('error-decoding-json'), data: e });
             console.log(e);
+            connect.msg('lookup-complete');
           }
         }
         else {
           handleError(res);
+          connect.msg('lookup-complete');
         }
-        
       })();
     }
   }, [lookupAddress]);
