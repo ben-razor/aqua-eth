@@ -5,16 +5,7 @@ import { clip } from '../helpersHTML';
 import connect from './Connect';
 import AqexButton from './AqexButton';
 
-import {
-    ResultCodes,
-    CallParams,
-    callFunction, 
-    registerService,
-    RequestFlowBuilder
-} from '@fluencelabs/fluence/dist/internal/compilerSupport/v2';
-import { Toast } from 'react-bootstrap';
-import AquaEthReact from './AquaEthReact';
-
+const BUTTON_TIMEOUT = 10000;
 export async function attemptConnect(handler) {
     let data;
 
@@ -47,6 +38,7 @@ function FluenceReact(props) {
     const [connected, setConnected] = useState(false);
     const [connectedNode, setConnectedNode] = useState();
     const [connectionInfo, setConnectionInfo] = useState({});
+    const [linking, setLinking] = useState();
 
     async function testConnection() {
         let status = Fluence.getStatus();
@@ -58,6 +50,15 @@ function FluenceReact(props) {
             setConnected(false);
         }
     }
+
+    useEffect(() => {
+        connect.addHandler('linking-started', (data) => {
+            setLinking(true);
+        });
+        connect.addHandler('linking-complete', (data) => {
+            setLinking(false);
+        });
+    }, []);
 
     useEffect(() => {
         let timer = setInterval(() => testConnection, 60000);
@@ -124,13 +125,19 @@ function FluenceReact(props) {
                     </Fragment>
                     :
                     <Fragment>
-                        <div className="er-fluence-connect-item">PeerId: {formatPeerId(connectionInfo.peerId)} <i className="fa fa-edit" onClick={e => copyToClipboard('peer')}/></div>
-                        <div className="er-fluence-connect-item">RelayId: {formatPeerId(connectionInfo.relayPeerId)} <i className="fa fa-edit" onClick={e => copyToClipboard('relay')}/></div>
+                        <div className="er-fluence-connect-item">
+                            <div className="er-fluence-connect-text">PeerId: {formatPeerId(connectionInfo.peerId)}</div>
+                            <i className="fa fa-edit" onClick={e => copyToClipboard('peer')}/>
+                        </div>
+                        <div className="er-fluence-connect-item">
+                            <div className="er-fluence-connect-text">RelayId: {formatPeerId(connectionInfo.relayPeerId)}</div> 
+                            <i className="fa fa-edit" onClick={e => copyToClipboard('relay')}/>
+                        </div>
                     </Fragment>
                 }
                 </div>
                 <AqexButton label="Link Eth Address" id="link" className="playground-button playground-icon-button"
-                onClick={() => linkAccount() } />
+                onClick={() => linkAccount() } isSubmitting={linking} timeout={BUTTON_TIMEOUT} />
             </Fragment>
             :
             <Fragment>

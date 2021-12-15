@@ -4,7 +4,7 @@
 -- record that contains the peerId, which is signed by the owner of the 
 -- Eth address.
 -- 
--- This enables Eth addresses to be used instead of peerIds to make
+-- This enables verifiable Eth addresses to be used instead of peerIds to make
 -- connections on the Fluence network.
 import "@fluencelabs/aqua-dht/dht.aqua"
 import "@fluencelabs/aqua-lib/builtin.aqua"

@@ -150,7 +150,6 @@ export default function AquaEthReact(props) {
     (async() => {
 
       let hash = await getHash(peerId, relayPeerId, address, '');
-      console.log('PRE GET', hash, connectionInfo.peerId, connectionInfo.relayPeerId, accounts[0]);
       let resGet = await getVerifiedEthRecord(connectionInfo.peerId, connectionInfo.relayPeerId, accounts[0], '');
 
         if(resGet.success) {
@@ -163,20 +162,17 @@ export default function AquaEthReact(props) {
   }
 
   async function registerEthLookup(ownAccount) {
-    console.log('rel1');
     let ethRes = getEthereum();
     if(ethRes.info.success) {
       let address = ownAccount;
       let peerId = connectionInfo.peerId;
       let relayPeerId = connectionInfo.relayPeerId;
-      console.log('ci', connectionInfo);
 
       let web3Res = createWeb3Provider(ethRes.data.ethereum);
       let obj = createTypedConnectionObj(peerId, relayPeerId);
       let sigRes;
       
       try {
-        console.log('dtv', obj.domain, obj.types, obj.value);
         let signature = await web3Res.data.signer._signTypedData(obj.domain, obj.types, obj.value);
         sigRes = { info: createSuccessInfo(), data: signature };
       }
@@ -184,16 +180,16 @@ export default function AquaEthReact(props) {
         sigRes = { info: createErrorInfo('error-ethers', e.code, e.message) };
       }
 
-      console.log('sig res', sigRes);
       if(sigRes.info.success) {
+        connect.msg('linking-started');
         let ethRecord = JSON.stringify({ peerId, relayPeerId, sig: sigRes.data });
         let hash = await getHash(peerId, relayPeerId, address, '');
-        console.log('PRE PUT', hash, peerId, relayPeerId, address)
         let res = await putVerifiedEthRecord(peerId, relayPeerId, address, '', ethRecord);
 
         if(res.info.success) {
           setLinkedEthAccount({ account: ownAccount, peerId, relayPeerId });
-          toast("Eth address lookup record created!");
+          toast("Eth address linked!");
+          connect.msg('linking-complete');
         }
         else {
           handleError(res);
@@ -907,17 +903,12 @@ export default function AquaEthReact(props) {
   useEffect(() => {
     if(lookupAddress) {
       (async() => {
-        console.log('VER1', connectionInfo, lookupAddress);
-        let hash = await getHash(connectionInfo.peerId, connectionInfo.relayPeerId, lookupAddress, '');
-        console.log('PRE GET', hash, connectionInfo.peerId, connectionInfo.relayPeerId, lookupAddress);
         let res = await getVerifiedEthRecord(connectionInfo.peerId, connectionInfo.relayPeerId, lookupAddress, '');      
         if(res.info.success) {
           try {
-            console.log('VER3', res);
             let JSONRecord = res.data;
             let record = JSON.parse(JSONRecord);
             toast(`Peer and relay retrieved for address ${lookupAddress}`);
-            console.log('VER3', record);
             setRemotePeerId(record.peerId);
             setRemoteRelayPeerId(record.relayPeerId);
             connect.msg('lookup-complete');

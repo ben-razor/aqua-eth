@@ -8,8 +8,8 @@ export default class ListenerService {
 
   init() {
     registerListener({
-      receiveData: async(jsonPacket) => {
-        console.log('RECEIVE', jsonPacket);
+      receiveData: async(jsonPacket, particle) => {
+        console.log('RECEIVE', jsonPacket, particle.initPeerId);
         try {
           let data = JSON.parse(jsonPacket.data);
           this._triggerEvent('receiveData', jsonPacket.type, data);

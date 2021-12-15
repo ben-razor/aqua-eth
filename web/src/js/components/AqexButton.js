@@ -21,7 +21,9 @@ function AqexButton(props) {
     if(isSubmitting && timeout) {
       timerId = setTimeout(() => {
         setIsSubmittingInternal(false);
-        setUIMsg({ type: 'ui-button-timeout', data: { id: id } });
+        if(setUIMsg) {
+          setUIMsg({ type: 'ui-button-timeout', data: { id: id } });
+        }
       }, timeout);
     }
   }, [isSubmitting]);
