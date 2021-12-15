@@ -5,6 +5,7 @@ import { ToastProvider, useToasts } from 'react-toast-notifications';
 import FluenceReact from './js/components/FluenceReact';
 import connect from './js/components/Connect';
 import AquaEthReact from './js/components/AquaEthReact';
+import AqexModal from './js/components/AqexModal';
 import logo from '../src/images/aqua-eth-2.png';
 
 const TOAST_TIMEOUT = 4000;
@@ -14,6 +15,7 @@ function App(props) {
   const [connectionInfo, setConnectionInfo] = useState({});
   const [remotePeerId, setRemotePeerId] = useState('');
   const [remoteRelayPeerId, setRemoteRelayPeerId] = useState('');
+  const [modalState, setModalState] = useState({ open: false, title: '', content: ''});
 
   const { addToast } = useToasts();
 
@@ -34,8 +36,26 @@ function App(props) {
     })
   }, []);
 
+  function handleUIMessage(type, data={}) {
+    if(type === 'link-eth-lookup') {
+      setModalState({
+        open: true,
+        title: 'Link Eth Lookup',
+        content: <ProjectPanel toast={toast} handleUIMessage={handleUIMessage} />
+      });
+    }
+    else if(type === 'eth-lookup-linked') {
+      closeModal();
+    }
+  }
+
+  function closeModal() {
+    setModalState({...modalState, open: false});
+  }
+
   return (
     <Fragment>
+      <AqexModal modalState={modalState} setModalState={setModalState} />
       <div className="er-header">
         <div className="er-header-details">
           <h2 className="er-header-title">Eth Remote</h2>

@@ -6,7 +6,7 @@ import { requestAccounts, getChainInfo, getBalance, getBlockNumber,
          signTypedData, verifyTypedData,
          erc20Connect, erc20BalanceOf, erc20Transfer, 
          registerListenerNode} from '../compiled/aquaEth.js';
-import EthLookup, { createTypedPeerIdObj } from '../ethLookupService.js';
+import EthLookup, { createTypedConnectionObj } from '../ethLookupService.js';
 import { putVerifiedEthRecord, getVerifiedEthRecord } from '../compiled/ethLookup.js';
 import AqexButton from './AqexButton';
 import AquaEthService, { getEthereum, createWeb3Provider } from '../aquaEthService.js';
@@ -150,7 +150,7 @@ export default function AquaEthReact(props) {
       let peerId = connectionInfo.peerId;
       let relayPeerId = connectionInfo.relayPeerId;
 
-      let obj = createTypedPeerIdObj(peerId);
+      let obj = createTypedConnectionObj(peerId, relayPeerId);
     console.log('rel2', connectionInfo, peerId, relayPeerId, obj.domain, obj.types, obj.value);
       let sigRes = await signTypedData(peerId, relayPeerId, JSON.stringify(obj.domain), JSON.stringify(obj.types), JSON.stringify(obj.value));
     console.log('rel3');

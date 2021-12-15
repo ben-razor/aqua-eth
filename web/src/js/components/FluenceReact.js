@@ -3,6 +3,7 @@ import { Fluence, FluencePeer } from "@fluencelabs/fluence";
 import { krasnodar } from "@fluencelabs/fluence-network-environment";
 import { clip } from '../helpersHTML';
 import connect from './Connect';
+import AqexButton from './AqexButton';
 
 import {
     ResultCodes,
@@ -104,13 +105,21 @@ function FluenceReact(props) {
         return formatted;
     }
 
-    return <div>
+    const [isLinking, setIsLinking] = useState();
+
+    function linkAccount() {
+
+    }
+
+    return <div class="er-fluence-connect-panel">
         { connectionInfo.peerId ?
             <Fragment>
                 <div className="er-fluence-connect"> 
                     <div>PeerId: {formatPeerId(connectionInfo.peerId)} <i className="fa fa-edit" onClick={e => copyToClipboard('peer')}/></div>
                     <div>RelayId: {formatPeerId(connectionInfo.relayPeerId)} <i className="fa fa-edit" onClick={e => copyToClipboard('relay')}/></div>
                 </div>
+                <AqexButton label="Link" id="link" className="playground-button playground-icon-button"
+                onClick={() => linkAccount() } isSubmitting={isLinking} />
             </Fragment>
             :
             <Fragment>
