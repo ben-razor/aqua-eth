@@ -6,6 +6,7 @@ import FluenceReact from './js/components/FluenceReact';
 import connect from './js/components/Connect';
 import AquaEthReact from './js/components/AquaEthReact';
 import AqexModal from './js/components/AqexModal';
+import AqexButton from './js/components/AqexButton';
 import logo from '../src/images/aqua-eth-2.png';
 
 const TOAST_TIMEOUT = 4000;
@@ -17,6 +18,8 @@ function App(props) {
   const [remoteRelayPeerId, setRemoteRelayPeerId] = useState('');
   const [modalState, setModalState] = useState({ open: false, title: '', content: ''});
   const [linkedEthAccount, setLinkedEthAccount] = useState({ account: null, peerId: null, relayPeerId: null});
+  const [ethLookupEntry, setEthLookupEntry] = useState('');
+  const [lookupAddress, setLookupAddress] = useState('');
 
   const { addToast } = useToasts();
 
@@ -41,6 +44,10 @@ function App(props) {
     setModalState({...modalState, open: false});
   }
 
+  function lookupEthAddress() {
+    setLookupAddress(ethLookupEntry);
+  }
+
   return (
     <Fragment>
       <AqexModal modalState={modalState} setModalState={setModalState} />
@@ -60,6 +67,12 @@ function App(props) {
             <div className="er-remote-panel">
               <div className="er-remote-panel-controls">
                 <h3>Set Remote</h3>
+                <div className="er-form-row">
+                  <div className="er-form-label">Address:</div>
+                  <input type="text" value={ethLookupEntry} onChange={e => setEthLookupEntry(e.target.value)} />
+                  <AqexButton label="Lookup" id="lookupEthAddress" className="playground-button playground-icon-button"
+                  onClick={() => lookupEthAddress() } />
+                </div>
                 <div className="er-form-row">
                   <div className="er-form-label">PeerId:</div>
                   <input type="text" value={remotePeerId} onChange={e => setRemotePeerId(e.target.value)} />
@@ -88,7 +101,9 @@ function App(props) {
               <AquaEthReact connected={connected} connectionInfo={connectionInfo} 
                             remotePeerId={remotePeerId} remoteRelayPeerId={remoteRelayPeerId} toast={toast} 
                             setModalState={setModalState} closeModal={closeModal} 
-                            linkedEthAccount={linkedEthAccount} setLinkedEthAccount={setLinkedEthAccount} />
+                            linkedEthAccount={linkedEthAccount} setLinkedEthAccount={setLinkedEthAccount} 
+                            lookupAddress={lookupAddress} setLookupAddress={setLookupAddress} 
+                            setRemotePeerId={setRemotePeerId} setRemoteRelayPeerId={setRemoteRelayPeerId} />
             </div>
           </Fragment>
         }

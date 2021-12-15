@@ -28,13 +28,16 @@ service EthLookup("eth-lookup"):
     -- by the passed address
     verify(address: string, record: JSONString) -> VerifyResult
 
-func getValue(hostId: string, key: string) -> Record:
+    -- DHT will get multiple records from multiple hosts. Get the most
+    -- recent one.
+    getMostRecentRecord(result: GetValuesResult) -> VerifyResult 
+
+func getValues(hostId: string, key: string) -> GetValuesResult:
     rec: *Record
     on hostId:
         ts <- Peer.timestamp_sec()
         res <- AquaDHT.get_values(key, ts)
-        rec <<- res.result!
-    <- rec!
+    <- res
     
 func putValue(hostId: string, key: string, value: string) -> DhtResult:
     on hostId:
@@ -70,11 +73,15 @@ func getVerifiedEthRecord(peerId: string, relayId: string, address: string, salt
 
     on peerId via relayId:
         hash <- getHash(peerId, relayId, address, salt)
-        record <- getValue(relayId, hash)
+        records <- getValues(relayId, hash)
 
-        verifyRes <- EthLookup.verify(address, record.value)
+        lookupRes <- EthLookup.getMostRecentRecord(records)
 
-        resBox <<- verifyRes
+        if lookupRes.info.success:
+            verifyRes <- EthLookup.verify(address, lookupRes.data)
+            resBox <<- verifyRes
+        else:
+            resBox <<-lookupRes
     
     <- resBox!
 

@@ -53,6 +53,7 @@ class EthLookup {
             }
           }
 
+          /*
           if(success) {
             if(record.peerId !== particle.initPeerId) {
               success = false;
@@ -63,6 +64,7 @@ class EthLookup {
               }
             }
           }
+          */
 
           if(success) {
             try {
@@ -75,8 +77,8 @@ class EthLookup {
               let typesJSON = JSON.stringify(types);
               let valueJSON = JSON.stringify(value);
 
-              let {peerId, relayPeerId }= Fluence.getStatus();
               console.log("R1", domainJSON, typesJSON, valueJSON, sig);
+              let {peerId, relayPeerId }= Fluence.getStatus();
               let res = await verifyTypedData(peerId, relayPeerId, domainJSON, typesJSON, valueJSON, sig);
               console.log("R2");
 
@@ -106,6 +108,27 @@ class EthLookup {
       },
       createHashInput: async function(address, salt) {
         return "verifiedEthAddress:" + address + ":" + salt;
+      },
+      getMostRecentRecord: async function(res) {
+        let { success, reason, message, code } = createSuccessInfo();
+        let newestTimeStamp = 0;
+        let newestRecord = '';
+        let data = {};
+
+        if(res.success) {
+          for(let result of res.result) {      
+            if(result.timestamp_created >= newestTimeStamp) {
+              newestRecord = result.value;
+              newestTimeStamp = result.timestamp_created;
+            }
+          }
+          data = newestRecord;
+        }
+        else {
+          ({ success, reason, message, code } = createErrorInfo('error-lookup-failed'));
+        }
+
+        return result(success, reason, code, message, data);
       }
     });
 

@@ -29,7 +29,7 @@ input[type=text], textarea {
     padding: 0.25em;
     border-radius: 0.5em;
     border: 2px solid grey;
-    width: 100%;
+    flex: 1;
 }
 
 input[type=checkbox] {
@@ -133,7 +133,6 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 .er-fluence-connect {
     display: flex;
     flex-direction: column;
-    justify-content: center;
 }
 
 .er-fluence-connect-panel {
@@ -146,13 +145,14 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 }
 
 .er-form-label {
-    flex: 1 1 10em;
+    flex: 0 1 10em;
     margin-right: 0.5em;
     word-break: break-word;
 }
 
 .er-form-value {
     flex: 2 1 90%;
+    display: flex;
 }
 
 .er-form-label-50 {

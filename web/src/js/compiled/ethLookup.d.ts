@@ -17,6 +17,7 @@ import {
 // Services
 export interface EthLookupDef {
     createHashInput: (address: string, salt: string, callParams: CallParams<'address' | 'salt'>) => string | Promise<string>;
+    getMostRecentRecord: (result: { error: string; result: { peer_id: string; relay_id: string[]; service_id: string[]; set_by: string; timestamp_created: number; value: string; weight: number; }[]; success: boolean; }, callParams: CallParams<'result'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
     verify: (address: string, record: string, callParams: CallParams<'address' | 'record'>) => { data: string; info: { code: number; message: string; reason: string; success: boolean; }; } | Promise<{ data: string; info: { code: number; message: string; reason: string; success: boolean; }; }>;
 }
 export function registerEthLookup(service: EthLookupDef): void;
@@ -37,16 +38,16 @@ export function putVerifiedEthRecord(peerId: string, relayId: string, address: s
 export function putVerifiedEthRecord(peer: FluencePeer, peerId: string, relayId: string, address: string, salt: string, record: string, config?: {ttl?: number}): Promise<PutVerifiedEthRecordResult>;
 
  
-export type GetVerifiedEthRecordResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
-export function getVerifiedEthRecord(peerId: string, relayId: string, address: string, salt: string, config?: {ttl?: number}): Promise<GetVerifiedEthRecordResult>;
-export function getVerifiedEthRecord(peer: FluencePeer, peerId: string, relayId: string, address: string, salt: string, config?: {ttl?: number}): Promise<GetVerifiedEthRecordResult>;
-
- 
-export type GetValueResult = { peer_id: string; relay_id: string[]; service_id: string[]; set_by: string; timestamp_created: number; value: string; weight: number; }
-export function getValue(hostId: string, key: string, config?: {ttl?: number}): Promise<GetValueResult>;
-export function getValue(peer: FluencePeer, hostId: string, key: string, config?: {ttl?: number}): Promise<GetValueResult>;
-
- 
 export type PutValueResult = { error: string; success: boolean; }
 export function putValue(hostId: string, key: string, value: string, config?: {ttl?: number}): Promise<PutValueResult>;
 export function putValue(peer: FluencePeer, hostId: string, key: string, value: string, config?: {ttl?: number}): Promise<PutValueResult>;
+
+ 
+export type GetValuesResult = { error: string; result: { peer_id: string; relay_id: string[]; service_id: string[]; set_by: string; timestamp_created: number; value: string; weight: number; }[]; success: boolean; }
+export function getValues(hostId: string, key: string, config?: {ttl?: number}): Promise<GetValuesResult>;
+export function getValues(peer: FluencePeer, hostId: string, key: string, config?: {ttl?: number}): Promise<GetValuesResult>;
+
+ 
+export type GetVerifiedEthRecordResult = { data: string; info: { code: number; message: string; reason: string; success: boolean; }; }
+export function getVerifiedEthRecord(peerId: string, relayId: string, address: string, salt: string, config?: {ttl?: number}): Promise<GetVerifiedEthRecordResult>;
+export function getVerifiedEthRecord(peer: FluencePeer, peerId: string, relayId: string, address: string, salt: string, config?: {ttl?: number}): Promise<GetVerifiedEthRecordResult>;

@@ -45,6 +45,20 @@ export function registerEthLookup(...args) {
             }
         },
         {
+            "functionName" : "getMostRecentRecord",
+            "argDefs" : [
+                {
+                    "name" : "result",
+                    "argType" : {
+                        "tag" : "primitive"
+                    }
+                }
+            ],
+            "returnType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
             "functionName" : "verify",
             "argDefs" : [
                 {
@@ -338,235 +352,6 @@ export function putVerifiedEthRecord(...args) {
 }
 
 
-export function getVerifiedEthRecord(...args) {
-
-    let script = `
-                        (xor
-                     (seq
-                      (seq
-                       (seq
-                        (seq
-                         (seq
-                          (seq
-                           (seq
-                            (seq
-                             (seq
-                              (seq
-                               (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
-                               (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
-                              )
-                              (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
-                             )
-                             (call %init_peer_id% ("getDataSrv" "address") [] address)
-                            )
-                            (call %init_peer_id% ("getDataSrv" "salt") [] salt)
-                           )
-                           (call -relay- ("op" "noop") [])
-                          )
-                          (call relayId ("op" "noop") [])
-                         )
-                         (xor
-                          (seq
-                           (seq
-                            (seq
-                             (seq
-                              (seq
-                               (call -relay- ("op" "noop") [])
-                               (call relayId ("op" "noop") [])
-                              )
-                              (xor
-                               (seq
-                                (call peerId ("eth-lookup" "createHashInput") [address salt] hashInput)
-                                (xor
-                                 (call relayId ("op" "sha256_string") [hashInput] hash)
-                                 (seq
-                                  (call -relay- ("op" "noop") [])
-                                  (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
-                                 )
-                                )
-                               )
-                               (seq
-                                (seq
-                                 (call -relay- ("op" "noop") [])
-                                 (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
-                                )
-                                (call -relay- ("op" "noop") [])
-                               )
-                              )
-                             )
-                             (xor
-                              (seq
-                               (seq
-                                (call relayId ("peer" "timestamp_sec") [] ts)
-                                (call relayId ("aqua-dht" "get_values") [hash ts] res)
-                               )
-                               (ap res.$.result.[0]! $rec)
-                              )
-                              (seq
-                               (seq
-                                (seq
-                                 (call -relay- ("op" "noop") [])
-                                 (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
-                                )
-                                (call -relay- ("op" "noop") [])
-                               )
-                               (call relayId ("op" "noop") [])
-                              )
-                             )
-                            )
-                            (call peerId ("eth-lookup" "verify") [address $rec.$.[0].value!] verifyRes)
-                           )
-                           (ap verifyRes $resBox)
-                          )
-                          (seq
-                           (seq
-                            (seq
-                             (call relayId ("op" "noop") [])
-                             (call -relay- ("op" "noop") [])
-                            )
-                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 4])
-                           )
-                           (call -relay- ("op" "noop") [])
-                          )
-                         )
-                        )
-                        (call relayId ("op" "noop") [])
-                       )
-                       (call -relay- ("op" "noop") [])
-                      )
-                      (xor
-                       (call %init_peer_id% ("callbackSrv" "response") [$resBox.$.[0]!])
-                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 5])
-                      )
-                     )
-                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 6])
-                    )
-    `
-    return callFunction(
-        args,
-        {
-    "functionName" : "getVerifiedEthRecord",
-    "returnType" : {
-        "tag" : "primitive"
-    },
-    "argDefs" : [
-        {
-            "name" : "peerId",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        },
-        {
-            "name" : "relayId",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        },
-        {
-            "name" : "address",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        },
-        {
-            "name" : "salt",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        }
-    ],
-    "names" : {
-        "relay" : "-relay-",
-        "getDataSrv" : "getDataSrv",
-        "callbackSrv" : "callbackSrv",
-        "responseSrv" : "callbackSrv",
-        "responseFnName" : "response",
-        "errorHandlingSrv" : "errorHandlingSrv",
-        "errorFnName" : "error"
-    }
-},
-        script
-    )
-}
-
-
-export function getValue(...args) {
-
-    let script = `
-                        (xor
-                     (seq
-                      (seq
-                       (seq
-                        (seq
-                         (seq
-                          (seq
-                           (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
-                           (call %init_peer_id% ("getDataSrv" "hostId") [] hostId)
-                          )
-                          (call %init_peer_id% ("getDataSrv" "key") [] key)
-                         )
-                         (call -relay- ("op" "noop") [])
-                        )
-                        (xor
-                         (seq
-                          (seq
-                           (call hostId ("peer" "timestamp_sec") [] ts)
-                           (call hostId ("aqua-dht" "get_values") [key ts] res)
-                          )
-                          (ap res.$.result.[0]! $rec)
-                         )
-                         (seq
-                          (call -relay- ("op" "noop") [])
-                          (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
-                         )
-                        )
-                       )
-                       (call -relay- ("op" "noop") [])
-                      )
-                      (xor
-                       (call %init_peer_id% ("callbackSrv" "response") [$rec.$.[0]!])
-                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
-                      )
-                     )
-                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
-                    )
-    `
-    return callFunction(
-        args,
-        {
-    "functionName" : "getValue",
-    "returnType" : {
-        "tag" : "primitive"
-    },
-    "argDefs" : [
-        {
-            "name" : "hostId",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        },
-        {
-            "name" : "key",
-            "argType" : {
-                "tag" : "primitive"
-            }
-        }
-    ],
-    "names" : {
-        "relay" : "-relay-",
-        "getDataSrv" : "getDataSrv",
-        "callbackSrv" : "callbackSrv",
-        "responseSrv" : "callbackSrv",
-        "responseFnName" : "response",
-        "errorHandlingSrv" : "errorHandlingSrv",
-        "errorFnName" : "error"
-    }
-},
-        script
-    )
-}
-
-
 export function putValue(...args) {
 
     let script = `
@@ -633,6 +418,258 @@ export function putValue(...args) {
         },
         {
             "name" : "value",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function getValues(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (seq
+                          (seq
+                           (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                           (call %init_peer_id% ("getDataSrv" "hostId") [] hostId)
+                          )
+                          (call %init_peer_id% ("getDataSrv" "key") [] key)
+                         )
+                         (call -relay- ("op" "noop") [])
+                        )
+                        (xor
+                         (seq
+                          (call hostId ("peer" "timestamp_sec") [] ts)
+                          (call hostId ("aqua-dht" "get_values") [key ts] res)
+                         )
+                         (seq
+                          (call -relay- ("op" "noop") [])
+                          (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                         )
+                        )
+                       )
+                       (call -relay- ("op" "noop") [])
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [res])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "getValues",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "hostId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "key",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        }
+    ],
+    "names" : {
+        "relay" : "-relay-",
+        "getDataSrv" : "getDataSrv",
+        "callbackSrv" : "callbackSrv",
+        "responseSrv" : "callbackSrv",
+        "responseFnName" : "response",
+        "errorHandlingSrv" : "errorHandlingSrv",
+        "errorFnName" : "error"
+    }
+},
+        script
+    )
+}
+
+
+export function getVerifiedEthRecord(...args) {
+
+    let script = `
+                        (xor
+                     (seq
+                      (seq
+                       (seq
+                        (seq
+                         (seq
+                          (seq
+                           (seq
+                            (seq
+                             (seq
+                              (seq
+                               (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                               (call %init_peer_id% ("getDataSrv" "peerId") [] peerId)
+                              )
+                              (call %init_peer_id% ("getDataSrv" "relayId") [] relayId)
+                             )
+                             (call %init_peer_id% ("getDataSrv" "address") [] address)
+                            )
+                            (call %init_peer_id% ("getDataSrv" "salt") [] salt)
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                          (call relayId ("op" "noop") [])
+                         )
+                         (xor
+                          (seq
+                           (seq
+                            (seq
+                             (seq
+                              (seq
+                               (call -relay- ("op" "noop") [])
+                               (call relayId ("op" "noop") [])
+                              )
+                              (xor
+                               (seq
+                                (call peerId ("eth-lookup" "createHashInput") [address salt] hashInput)
+                                (xor
+                                 (call relayId ("op" "sha256_string") [hashInput] hash)
+                                 (seq
+                                  (call -relay- ("op" "noop") [])
+                                  (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                                 )
+                                )
+                               )
+                               (seq
+                                (seq
+                                 (call -relay- ("op" "noop") [])
+                                 (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                                )
+                                (call -relay- ("op" "noop") [])
+                               )
+                              )
+                             )
+                             (xor
+                              (seq
+                               (call relayId ("peer" "timestamp_sec") [] ts)
+                               (call relayId ("aqua-dht" "get_values") [hash ts] res)
+                              )
+                              (seq
+                               (seq
+                                (seq
+                                 (call -relay- ("op" "noop") [])
+                                 (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                                )
+                                (call -relay- ("op" "noop") [])
+                               )
+                               (call relayId ("op" "noop") [])
+                              )
+                             )
+                            )
+                            (call peerId ("eth-lookup" "getMostRecentRecord") [res] lookupRes)
+                           )
+                           (xor
+                            (match lookupRes.$.info.success! true
+                             (xor
+                              (seq
+                               (call peerId ("eth-lookup" "verify") [address lookupRes.$.data!] verifyRes)
+                               (ap verifyRes $resBox)
+                              )
+                              (seq
+                               (seq
+                                (seq
+                                 (seq
+                                  (call relayId ("op" "noop") [])
+                                  (call -relay- ("op" "noop") [])
+                                 )
+                                 (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 4])
+                                )
+                                (call -relay- ("op" "noop") [])
+                               )
+                               (call relayId ("op" "noop") [])
+                              )
+                             )
+                            )
+                            (seq
+                             (seq
+                              (ap lookupRes $resBox)
+                              (call relayId ("op" "noop") [])
+                             )
+                             (call -relay- ("op" "noop") [])
+                            )
+                           )
+                          )
+                          (seq
+                           (seq
+                            (seq
+                             (call relayId ("op" "noop") [])
+                             (call -relay- ("op" "noop") [])
+                            )
+                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 5])
+                           )
+                           (call -relay- ("op" "noop") [])
+                          )
+                         )
+                        )
+                        (call relayId ("op" "noop") [])
+                       )
+                       (call -relay- ("op" "noop") [])
+                      )
+                      (xor
+                       (call %init_peer_id% ("callbackSrv" "response") [$resBox.$.[0]!])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 6])
+                      )
+                     )
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 7])
+                    )
+    `
+    return callFunction(
+        args,
+        {
+    "functionName" : "getVerifiedEthRecord",
+    "returnType" : {
+        "tag" : "primitive"
+    },
+    "argDefs" : [
+        {
+            "name" : "peerId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "relayId",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "address",
+            "argType" : {
+                "tag" : "primitive"
+            }
+        },
+        {
+            "name" : "salt",
             "argType" : {
                 "tag" : "primitive"
             }
