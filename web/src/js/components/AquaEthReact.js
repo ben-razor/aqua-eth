@@ -1,10 +1,13 @@
 import React, {useState, useEffect, createRef, Fragment} from 'react';
+import { ethers } from 'ethers';
 import { requestAccounts, getChainInfo, getBalance, getBlockNumber,
          getFeeData, getBlock, getTransaction,
          formatUnits, formatEther, parseUnits, parseEther, sendTransaction, 
          signTypedData, verifyTypedData,
          erc20Connect, erc20BalanceOf, erc20Transfer, 
          registerListenerNode} from '../compiled/aquaEth.js';
+import EthLookup, { createTypedPeerIdObj } from '../ethLookupService.js';
+import { putVerifiedEthRecord, getVerifiedEthRecord } from '../compiled/ethLookup.js';
 import AqexButton from './AqexButton';
 import AquaEthService, { getEthereum, createWeb3Provider } from '../aquaEthService.js';
 import ListenerService from '../listenerService.js';
@@ -21,6 +24,7 @@ export default function AquaEthReact(props) {
 
   const [activePanel, setActivePanel] = useState('account');
   const [submitting, setSubmitting] = useState({});
+  const [ownAccounts, setOwnAccounts] = useState();
   const [accounts, setAccounts] = useState();
   const [chainInfo, setChainInfo] = useState();
   const [balanceAccount, setBalanceAccount] = useState('');
@@ -112,6 +116,62 @@ export default function AquaEthReact(props) {
     }
   }
 
+  async function initEthLookup(ethereum) {
+    new EthLookup();
+    ethereum.on('accountsChanged', (accounts) => {
+      setOwnAccounts(accounts);
+    });
+  }
+
+  useEffect(() => {
+    if(ownAccounts) {
+      registerEthLookup(ownAccounts[0]);
+    }
+  }, [ownAccounts]);
+
+  function doEthLookup() {
+    (async() => {
+      let resGet = await getVerifiedEthRecord(connectionInfo.peerId, connectionInfo.relayPeerId, accounts[0], '');
+
+        if(resGet.success) {
+          toast('')
+        }
+        else {
+          handleError(resGet);
+        }
+    })();
+  }
+
+  async function registerEthLookup(ownAccount) {
+    console.log('rel1');
+    let ethRes = getEthereum();
+    if(ethRes.info.success) {
+      let address = ownAccount;
+      let peerId = connectionInfo.peerId;
+      let relayPeerId = connectionInfo.relayPeerId;
+
+      let obj = createTypedPeerIdObj(peerId);
+    console.log('rel2', connectionInfo, peerId, relayPeerId, obj.domain, obj.types, obj.value);
+      let sigRes = await signTypedData(peerId, relayPeerId, JSON.stringify(obj.domain), JSON.stringify(obj.types), JSON.stringify(obj.value));
+    console.log('rel3');
+      if(sigRes.info.success) {
+        let ethRecord = JSON.stringify({ peerId, sig: sigRes.data });
+        let res = await putVerifiedEthRecord(peerId, relayPeerId, address, '', ethRecord);
+    console.log('rel4');
+
+        if(res.info.success) {
+          toast("Eth address lookup record created!");
+        }
+        else {
+          handleError(res);
+        }
+      }
+      else {
+        handleError(sigRes);
+      }
+    }
+  }
+
   useEffect(() => {
     new ListenerService(aquaEthHandler);
 
@@ -119,6 +179,8 @@ export default function AquaEthReact(props) {
     if(ethRes.info.success) {
       let web3Res = createWeb3Provider(ethRes.data.ethereum);
       if(web3Res.info.success) {
+        initEthLookup(ethereum);
+
         new AquaEthService(web3Res.data.provider, web3Res.data.signer, aquaEthHandler);
       }
       else {
