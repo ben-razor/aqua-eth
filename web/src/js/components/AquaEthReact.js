@@ -128,7 +128,6 @@ export default function AquaEthReact(props) {
 
   async function initEthLookup() {
     if(ethereum) {
-      new EthLookup();
       ethereum.on('accountsChanged', (accounts) => {
         setOwnAccounts(accounts);
       });
@@ -214,7 +213,7 @@ export default function AquaEthReact(props) {
       let web3Res = createWeb3Provider(ethRes.data.ethereum);
       if(web3Res.info.success) {
         setWeb3Data(web3Res.data);
-
+        new EthLookup();
         new AquaEthService(web3Res.data.provider, web3Res.data.signer, aquaEthHandler);
       }
       else {
