@@ -271,8 +271,55 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
     background-color: hsl(342deg 70% 43%);
 }
 
+.er-group-tabs {
+    display: flex;
+    border-bottom: 2px solid hsl(342deg 70% 83%);
+    margin: 0.5em 0.5em;
+    user-select: none;
+}
+
+.er-group-tab {
+    padding: 0.4em 1.2em;
+    color: white;
+    background-color: hsl(342deg 0% 43%);
+}
+
+.er-group-tab-active {
+    background-color: hsl(342deg 70% 43%);
+}
+
+.er-group-panel {
+    justify-content: top;
+    box-sizing: border-box;
+    border: 1px solid hsl(0deg, 0%, 70%);
+    border-radius: 0.5em;
+    padding: 0.5em;
+    margin: 0.2em;
+    box-shadow: 2px 0px 4px hsl(0deg, 0%, 85%);
+    background-color: hsl(0deg, 0%, 99%);
+    min-height: 10em;
+}
+
+.er-group-panel-content {
+    margin: 1em;
+}
+
 .er-break-long-word {
     word-break: break-all;
+}
+
+.er-message-log {
+    width: 100%;
+}
+
+.er-message-log th {
+    text-align: left;
+    padding: 0.1em 0.4em;
+}
+
+.er-message-log td {
+    text-align: left;
+    padding: 0.1em 0.4em;
 }
 
 .aqex-modal-panel {
@@ -309,6 +356,18 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 
 .aqex-modal-heading {
     padding: 0;
+}
+
+.er-message-entry-panel {
+    display: flex;
+    width: 70%;
+    padding: 0.5em;
+    margin: 0.25em 0;
+    border: 1px solid hsl(0deg, 0%, 85%);
+}
+
+.er-message-entry {
+    flex: 1;
 }
 
 .er-account-link-panel {

@@ -12,6 +12,7 @@ export default class ListenerService {
         let initPeerId = particle.initPeerId;
 
         try {
+          console.log('PACKET', jsonPacket, jsonPacket.data);
           let data = JSON.parse(jsonPacket.data);
           this._triggerEvent('receiveData', jsonPacket.type, data, true, 'ok', initPeerId);
         }

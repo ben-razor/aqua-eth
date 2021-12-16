@@ -107,7 +107,7 @@ class EthLookup {
           return result(success, reason, code, message, data);
       },
       createHashInput: async function(address, salt) {
-        return "verifiedEthAddress:" + address + ":" + salt;
+        return "verifiedEthAddress:" + address.toLowerCase() + ":" + salt;
       },
       getMostRecentRecord: async function(res) {
         let { success, reason, message, code } = createSuccessInfo();
@@ -115,6 +115,7 @@ class EthLookup {
         let newestRecord = '';
         let data = {};
 
+        console.log('REZ', res);
         if(res.success) {
           for(let result of res.result) {      
             if(result.timestamp_created >= newestTimeStamp) {

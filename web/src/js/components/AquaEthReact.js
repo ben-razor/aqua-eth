@@ -5,7 +5,8 @@ import { requestAccounts, getChainInfo, getBalance, getBlockNumber,
          formatUnits, formatEther, parseUnits, parseEther, sendTransaction, 
          signTypedData, verifyTypedData,
          erc20Connect, erc20BalanceOf, erc20Transfer, 
-         registerListenerNode} from '../compiled/aquaEth.js';
+         registerListenerNode,
+         listenerNodeCallback} from '../compiled/aquaEth.js';
 import EthLookup, { createTypedConnectionObj } from '../ethLookupService.js';
 import { createSuccessInfo, createErrorInfo } from '../serviceHelpers.js';
 import { putVerifiedEthRecord, getVerifiedEthRecord, getHash } from '../compiled/ethLookup.js';
@@ -14,8 +15,11 @@ import AquaEthService, { getEthereum, createWeb3Provider } from '../aquaEthServi
 import ListenerService from '../listenerService.js';
 import { textUI } from '../text.js';
 import connect from './Connect.js';
+import { cloneObj } from '../helpersHTML.js';
+import { ifError } from 'assert';
 
 const BUTTON_TIMEOUT = 10000;
+const MAX_MESSAGES = 20;
 
 export default function AquaEthReact(props) {
   const remotePeerId = props.remotePeerId;
@@ -33,6 +37,7 @@ export default function AquaEthReact(props) {
 
   const [web3Data, setWeb3Data] = useState();
   const [activePanel, setActivePanel] = useState('account');
+  const [activeGroupPanel, setActiveGroupPanel] = useState('messages');
   const [submitting, setSubmitting] = useState({});
   const [ownAccounts, setOwnAccounts] = useState();
   const [accounts, setAccounts] = useState();
@@ -69,12 +74,88 @@ export default function AquaEthReact(props) {
   const [erc20BalanceOfEntry, setErc20BalanceOfEntry] = useState({ contractAddress: '', address: ''});
   const [erc20TransferOutput, setErc20TransferOutput] = useState('');
   const [erc20TransferEntry, setErc20TransferEntry] = useState({ contractAddress: '', to: '', amount: ''});
+
+  const [peers, setPeers] = useState([]);
+  const [newAddressInfo, setNewAddressInfo] = useState();
+  const [addressToPeer, setAddressToPeer] = useState({});
+  const [newMessage, setNewMessage] = useState();
+  const [messageLog, setMessageLog] = useState([]);
+
+  const [messageEntry, setMessageEntry] = useState('');
   
+  function sendMessage() {
+    (async() => {
+      let message = {
+        method: 'receiveData', type: 'message', success: true, reason:'ok', 
+        data: JSON.stringify({ message: messageEntry })
+      };
+
+      await listenerNodeCallback(remotePeerId, remoteRelayPeerId, message);
+    })();
+  }
+
+  function addPeer(peerId, relayId, address) {
+    console.log('add peer')
+    let _peers = peers.filter(x => x.peerId !== peerId);
+
+    _peers.push({ peerId, relayId, address });
+    setPeers(_peers);
+  }
+
+  function addAddress(peerId, address) {
+    if(address) {
+      let _addressToPeer = cloneObj(addressToPeer);
+      _addressToPeer[address] = peerId;
+      console.log('ATP', _addressToPeer);
+      setAddressToPeer(_addressToPeer);
+    }
+  }
+
+  function peerToAddress(peerId) {
+    let address;
+
+    for(let addr of Object.keys(addressToPeer)) {
+      let curPeerId = addressToPeer[addr];
+      if(peerId === curPeerId) {
+        address = addr;
+        break;
+      }
+    }
+
+    return address;
+  }
+
+  useEffect(() => {
+    if(newAddressInfo) {
+      console.log('NAI', newAddressInfo);
+      addAddress(newAddressInfo.peerId, newAddressInfo.address);
+    }
+  }, [newAddressInfo]);
+
+  useEffect(() => {
+  }, [messageLog]);
+
+  useEffect(() => {
+    if(newMessage) {
+      console.log('ml1', messageLog);
+      let _messageLog = cloneObj(messageLog);
+      newMessage.date = (new Date()).toISOString();
+      _messageLog.push(newMessage);
+      console.log('ml2', _messageLog);
+      _messageLog = _messageLog.slice(0, MAX_MESSAGES);
+      console.log('ml3', _messageLog);
+      setMessageLog(_messageLog);
+    }
+  }, [newMessage]);
+
   function aquaEthHandler(msg) {
     if(!msg.success && msg.reason === 'error-no-ethereum') {
       toast(<div>This browser has no ethereum<br />Try MetaMask!</div>);
     }
     else {
+      if(msg.method === 'receiveData') {
+        setNewMessage(cloneObj(msg));
+      }
       if(msg.method === 'requestAccounts') {
         if(msg.success) {
           toast(<div>Ethereum is connected!!<div className="er-break-long-word">{JSON.stringify(msg.data)}</div></div>);
@@ -97,14 +178,14 @@ export default function AquaEthReact(props) {
       else if(msg.type === 'accountsChanged' && msg.success) {
         let accounts = msg.data;
         toast(<div>Received account changed message</div>);
-        console.log('PEERID', msg.initPeerId);
+        console.log('PEERID', msg);
         if(msg.initPeerId === connectionInfo.peerId) {
           setAccounts(accounts);
         }
       }
       else if(msg.type === 'chainChanged' && msg.success) {
         let chainInfo = msg.data;
-        console.log('PEERID', msg.initPeerId);
+        console.log('PEERID', msg);
         if(msg.initPeerId === connectionInfo.peerId) {
           try {
             setChainInfo(chainInfo);
@@ -174,8 +255,8 @@ export default function AquaEthReact(props) {
       if(sigRes.info.success) {
         connect.msg('linking-started');
         let ethRecord = JSON.stringify({ peerId, relayPeerId, sig: sigRes.data });
-        let hash = await getHash(peerId, relayPeerId, address, '');
-        let res = await putVerifiedEthRecord(peerId, relayPeerId, address, '', ethRecord);
+        let hash = await getHash(peerId, relayPeerId, address.toLowerCase(), '');
+        let res = await putVerifiedEthRecord(peerId, relayPeerId, address.toLowerCase(), '', ethRecord);
 
         if(res.info.success) {
           setLinkedEthAccount({ account: ownAccount, peerId, relayPeerId });
@@ -303,6 +384,7 @@ export default function AquaEthReact(props) {
         if(res && res.info.success) {
           if(id === 'requestAccounts') {
             setAccounts(res.data);
+            addPeer(remotePeerId, remoteRelayPeerId);
           }
           else if(id === 'getChainInfo') { setChainInfo(res.data); }
           else if(id === 'getBalance') { setBalance(res.data); }
@@ -621,6 +703,19 @@ export default function AquaEthReact(props) {
       { getTab('chain', 'Chain', activePanel) }
       { getTab('signing', 'Signing', activePanel) }
       { getTab('tokens', 'Tokens', activePanel) }
+      { getTab('group', 'Group', activePanel) }
+    </div>
+  }
+
+  function getGroupTab(id, title, activePanel) {
+    return <div className={"er-group-tab " + (activeGroupPanel === id ? 'er-group-tab-active' : '')}
+                onClick={e => setActiveGroupPanel(id)}>{title}</div>
+  }
+
+  function getGroupTabs(activePanel) {
+    return <div className="er-group-tabs">
+      { getGroupTab('messages', 'Messages', activePanel) }
+      { getGroupTab('peers', 'Peers', activePanel) }
     </div>
   }
 
@@ -854,6 +949,173 @@ export default function AquaEthReact(props) {
     </Fragment>
   }
 
+  function formatId(id, displayedChars=4) {
+    return id.slice(0, displayedChars) + '...' + id.slice(-displayedChars);
+  }
+
+  function formatDate(isoString, type='dateTime') {
+    let parts = isoString.split('T');
+    let d = parts[0];
+    let time = parts[1].slice(0, 8);
+    let output = d;
+
+    if(type === 'time') {
+      output = time;
+    }
+    else if(type === 'dateTime') {
+      output = `${d} ${time}`;
+    }
+
+    return output;
+  }
+
+  function formatMessageData(type, data) {
+    let output = '';
+
+    if(type === 'message') {
+      output = data.message;
+    }
+    else {
+      output = JSON.stringify(data);
+    }
+
+    return output;
+  }
+
+  function formatMessageLogEntry(messageLogEntry) {
+    let id = messageLogEntry.initPeerId;
+    let address = peerToAddress(id);
+    if(address) {
+      id = address;
+    }
+
+    return <tr className="er-message-log-row" key={messageLogEntry.date}>
+      <td>{formatDate(messageLogEntry.date, 'time')}</td>
+      <td>{formatId(id)}</td>
+      <td>{messageLogEntry.type}</td>
+      <td>{messageLogEntry.success.toString()}</td>
+      <td>{messageLogEntry.reason}</td>
+      <td>{formatMessageData(messageLogEntry.type, messageLogEntry.data)}</td>
+    </tr>
+  }
+
+  function formatMessageLog(messageLog) {
+    let content;
+
+    if(messageLog.length) {
+      let rows = [];
+      
+      let reversedMessages = messageLog.slice().reverse();
+      for(let messageLogEntry of reversedMessages) {
+        rows.push(formatMessageLogEntry(messageLogEntry));
+      }
+
+      content = <table className="er-message-log">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Peer</th>
+            <th>Type</th>
+            <th>Success</th>
+            <th>Reason</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows}
+        </tbody>
+      </table>;
+    }
+    else {
+      content = <div className="er-help-panel">
+        <h4>No Messages To Display</h4>
+        <p>No messages have been received from remote peers.</p>
+      </div>
+    }
+
+    return content;
+  }
+
+  function formatPeerEntry(peerEntry) {
+    let displayedChars = 8;
+    console.log(peerEntry);
+    let peerId = peerEntry.peerId || '';
+    let relayPeerId = peerEntry.relayId || '';
+    let address = peerToAddress(peerId);
+    if(!address) {
+      address = 'Not Linked';
+    }
+    else {
+      address = formatId(address, displayedChars);
+    }
+
+    return <tr className="er-message-log-row" key={peerId}>
+      <td>{formatId(peerId, displayedChars)}</td>
+      <td>{formatId(relayPeerId, displayedChars)}</td>
+      <td>{address}</td>
+    </tr>
+  }
+
+  function formatPeers(peers, addressToPeer) {
+    let content;
+
+    if(peers.length) {
+      let rows = [];
+      
+      for(let entry of peers.reverse()) {
+        rows.push(formatPeerEntry(entry));
+      }
+
+      content = <table className="er-message-log">
+        <thead>
+          <tr>
+            <th>Peer Id</th>
+            <th>Relay Id</th>
+            <th>Eth Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows}
+        </tbody>
+      </table>;
+    }
+    else {
+      content = <div className="er-help-panel">
+        <h4>No Peers To Display</h4>
+        <p>No remote peers have been added.</p>
+      </div>
+    }
+
+    return content;
+  }
+
+  function getGroupPanels(activeGroupPanel) {
+    let panelContent;
+
+    if(activeGroupPanel === 'messages') {
+      panelContent = <Fragment>
+        <h3>Messages</h3>
+        <div className="er-message-entry-panel">
+          <input className="er-message-entry" value={messageEntry} onChange={e => setMessageEntry(e.target.value)} />
+          <AqexButton label="Send" id="link" className="playground-button playground-icon-button"
+          onClick={() => sendMessage() } timeout={BUTTON_TIMEOUT} />
+        </div>
+        {formatMessageLog(messageLog)}
+      </Fragment>;
+    }
+    else if(activeGroupPanel === 'peers') {
+      panelContent = <Fragment>
+        <h3>Peers</h3>
+        {formatPeers(peers)}
+      </Fragment>
+    }
+
+    return <div className="er-group-panel">
+      <div>{getGroupTabs(activeGroupPanel)}</div>
+      <div className="er-group-panel-content">{panelContent}</div>
+    </div>
+  }
+
   function getAccountLinkPanel() {
     return <div className="er-account-link-panel">
       <h3>Link Eth Address to this peer</h3>
@@ -887,7 +1149,7 @@ export default function AquaEthReact(props) {
   useEffect(() => {
     if(lookupAddress) {
       (async() => {
-        let res = await getVerifiedEthRecord(connectionInfo.peerId, connectionInfo.relayPeerId, lookupAddress, '');      
+        let res = await getVerifiedEthRecord(connectionInfo.peerId, connectionInfo.relayPeerId, lookupAddress.toLowerCase(), '');      
 
         if(res.info.success) {
           try {
@@ -896,6 +1158,7 @@ export default function AquaEthReact(props) {
             toast(<Fragment><p>Peer and relay retrieved for address {lookupAddress}</p><p>Click <b>Connect</b> to use this remote</p></Fragment>);
             setRemotePeerId(record.peerId);
             setRemoteRelayPeerId(record.relayPeerId);
+            setNewAddressInfo({ peerId: record.peerId, address: lookupAddress })
             connect.msg('lookup-complete');
           }
           catch(e) {
@@ -936,6 +1199,7 @@ export default function AquaEthReact(props) {
         { activePanel === 'chain' && getChainPanels() }
         { activePanel === 'signing' && getSigningPanels() }
         { activePanel === 'tokens' && getTokenPanels() }
+        { activePanel === 'group' && getGroupPanels(activeGroupPanel) }
       </Fragment>
     }
     
