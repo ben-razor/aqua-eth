@@ -20,6 +20,7 @@ function AqexButton(props) {
 
     if(isSubmitting && timeout) {
       timerId = setTimeout(() => {
+
         setIsSubmittingInternal(false);
         if(setUIMsg) {
           setUIMsg({ type: 'ui-button-timeout', data: { id: id } });
@@ -28,7 +29,7 @@ function AqexButton(props) {
     }
   }, [isSubmitting]);
 
-  return <button type="submit" disabled={isSubmitting} className={ className || '' } onClick={onClick}>
+  return <button type="submit" disabled={isSubmitting && isSubmittingInternal} className={ className || '' } onClick={onClick}>
     { isSubmittingInternal ? 
       <i className="fa fa-refresh fa-spin" style={{ 
         marginRight: isSubmitting && !hideLabelDuringSubmit ? '5px' : '',

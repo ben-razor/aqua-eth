@@ -72,7 +72,7 @@ function App(props) {
           <Fragment>
             <div className="er-remote-panel">
               <div className="er-remote-panel-controls">
-                <h3>Set Remote</h3>
+                <h3>Set Active Remote</h3>
                 <div className="er-form-row">
                   <div className="er-form-label">Address:</div>
                   <input type="text" value={ethLookupEntry} onChange={e => setEthLookupEntry(e.target.value)} />

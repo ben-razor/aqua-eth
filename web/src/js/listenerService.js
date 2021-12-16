@@ -9,22 +9,23 @@ export default class ListenerService {
   init() {
     registerListener({
       receiveData: async(jsonPacket, particle) => {
-        console.log('RECEIVE', jsonPacket, particle.initPeerId);
+        let initPeerId = particle.initPeerId;
+
         try {
           let data = JSON.parse(jsonPacket.data);
-          this._triggerEvent('receiveData', jsonPacket.type, data);
+          this._triggerEvent('receiveData', jsonPacket.type, data, true, 'ok', initPeerId);
         }
         catch(e) {
-          this._triggerEvent('receiveData', jsonPacket.type, jsonPacket.data, false, 'error-json-parse');
+          this._triggerEvent('receiveData', jsonPacket.type, jsonPacket.data, false, 'error-json-parse', initPeerId);
           console.log(e);
         }
       }
     });
   }
 
-  _triggerEvent(method, type, data={}, success=true, reason='ok') {
+  _triggerEvent(method, type, data={}, success=true, reason='ok', initPeerId) {
     if(this.eventListener) {
-      this.eventListener({ method, type, success, reason, data });
+      this.eventListener({ method, type, success, reason, data, initPeerId });
     }
   }
 }

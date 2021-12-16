@@ -93,6 +93,9 @@ function FluenceReact(props) {
         else if(id === 'relay') {
             clip(connectionInfo.relayPeerId, toast);
         }
+        else if(id === 'account') {
+            clip(linkedEthAccount.account, toast);
+        }
     }
 
     function formatPeerId(peerId) {
@@ -121,7 +124,10 @@ function FluenceReact(props) {
                 {
                     isLinked(connectionInfo, linkedEthAccount) ?
                     <Fragment>
-                        <div className="er-fluence-connect-item">{linkedEthAccount.account}</div>
+                        <div className="er-fluence-connect-item">
+                           <div className="er-fluence-connect-text">{linkedEthAccount.account}</div>
+                            <i className="fa fa-edit" onClick={e => copyToClipboard('account')}/>
+                        </div>
                     </Fragment>
                     :
                     <Fragment>

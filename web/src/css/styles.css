@@ -312,9 +312,9 @@ textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {
 }
 
 .er-account-link-panel {
-    min-width: 16em;
     min-height: 12em;
     padding: 0 1em;
+    width: 28em;
 }
 
 .er-p-spaced-2 {

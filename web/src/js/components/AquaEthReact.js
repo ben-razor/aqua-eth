@@ -97,14 +97,20 @@ export default function AquaEthReact(props) {
       else if(msg.type === 'accountsChanged' && msg.success) {
         let accounts = msg.data;
         toast(<div>Received account changed message</div>);
-        setAccounts(accounts);
+        console.log('PEERID', msg.initPeerId);
+        if(msg.initPeerId === connectionInfo.peerId) {
+          setAccounts(accounts);
+        }
       }
       else if(msg.type === 'chainChanged' && msg.success) {
         let chainInfo = msg.data;
-        try {
-          setChainInfo(chainInfo);
+        console.log('PEERID', msg.initPeerId);
+        if(msg.initPeerId === connectionInfo.peerId) {
+          try {
+            setChainInfo(chainInfo);
+          }
+          catch(e) { };
         }
-        catch(e) { };
         toast(<div>Received chain changed message</div>);
       }
       else if(msg.type === 'transactionCreated' && msg.success) {
@@ -894,21 +900,18 @@ export default function AquaEthReact(props) {
     connect.addHandler('eth-lookup-linked', (data) => {
       closeModal();
     })
-    connect.addHandler('lookup-eth', (data) => {
-      let address = data.address;
-
-    })
   }, []);
 
   useEffect(() => {
     if(lookupAddress) {
       (async() => {
         let res = await getVerifiedEthRecord(connectionInfo.peerId, connectionInfo.relayPeerId, lookupAddress, '');      
+
         if(res.info.success) {
           try {
             let JSONRecord = res.data;
             let record = JSON.parse(JSONRecord);
-            toast(`Peer and relay retrieved for address ${lookupAddress}`);
+            toast(<Fragment><p>Peer and relay retrieved for address {lookupAddress}</p><p>Click <b>Connect</b> to use this remote</p></Fragment>);
             setRemotePeerId(record.peerId);
             setRemoteRelayPeerId(record.relayPeerId);
             connect.msg('lookup-complete');
