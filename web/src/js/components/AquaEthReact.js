@@ -152,21 +152,6 @@ export default function AquaEthReact(props) {
     }
   }, [ownAccounts]);
 
-  function doEthLookup() {
-    (async() => {
-
-      let hash = await getHash(peerId, relayPeerId, address, '');
-      let resGet = await getVerifiedEthRecord(connectionInfo.peerId, connectionInfo.relayPeerId, accounts[0], '');
-
-        if(resGet.success) {
-          toast('')
-        }
-        else {
-          handleError(resGet);
-        }
-    })();
-  }
-
   async function registerEthLookup(ownAccount) {
     let ethRes = getEthereum();
     if(ethRes.info.success) {
@@ -209,13 +194,13 @@ export default function AquaEthReact(props) {
 
   useEffect(() => {
     new ListenerService(aquaEthHandler);
+    new EthLookup();
 
     let ethRes = getEthereum();
     if(ethRes.info.success) {
       let web3Res = createWeb3Provider(ethRes.data.ethereum);
       if(web3Res.info.success) {
         setWeb3Data(web3Res.data);
-        new EthLookup();
         new AquaEthService(web3Res.data.provider, web3Res.data.signer, aquaEthHandler);
       }
       else {
@@ -223,6 +208,7 @@ export default function AquaEthReact(props) {
       }
     }
     else {
+      new AquaEthService(null, null, aquaEthHandler);
       handleError(ethRes);
     }
   }, []);
@@ -389,10 +375,6 @@ export default function AquaEthReact(props) {
   useEffect(() => {
     setGetBlockEntry({ blockNumber: blockNumber });
   }, [blockNumber]);
-
-  useEffect(() => {
-    console.log(getTransactionEntry);
-  }, [getTransactionEntry]);
 
   function resetFields() {
     setBalanceAccount(accounts[0])

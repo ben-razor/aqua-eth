@@ -50,8 +50,21 @@ function App(props) {
   }
 
   function lookupEthAddress() {
-    setPerformingLookup(true);
-    setLookupAddress(ethLookupEntry);
+    if(ethLookupEntry) {
+      setPerformingLookup(true);
+      setLookupAddress(ethLookupEntry);
+    }
+    else {
+      toast('Lookup address is empty');
+    }
+  }
+
+  function uiMsgHandler(msg) {
+    if(msg.type === 'ui-button-timeout') {
+      if(msg.data.id === 'lookupEthAddress') {
+        toast('Timed out searching for peer linked to Eth Address');
+      }
+    }
   }
 
   return (
@@ -77,7 +90,8 @@ function App(props) {
                   <div className="er-form-label">Address:</div>
                   <input type="text" value={ethLookupEntry} onChange={e => setEthLookupEntry(e.target.value)} />
                   <AqexButton label="Lookup" id="lookupEthAddress" className="playground-button playground-icon-button"
-                  onClick={() => lookupEthAddress() } isSubmitting={performingLookup} timeout={8000} />
+                  onClick={() => lookupEthAddress() } isSubmitting={performingLookup} setIsSubmitting={setPerformingLookup} 
+                  setUIMsg={uiMsgHandler} timeout={8000} />
                 </div>
                 { viewingPeerDetails ?
                 <Fragment>

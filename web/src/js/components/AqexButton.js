@@ -11,6 +11,7 @@ function AqexButton(props) {
   let hideLabelDuringSubmit = props.hideLabelDuringSubmit;
   let setUIMsg = props.setUIMsg;
   const isSubmitting = props.isSubmitting;
+  const setIsSubmitting = props.setIsSubmitting;
   let [isSubmittingInternal, setIsSubmittingInternal] = useState();
 
   useEffect(() => {
@@ -22,6 +23,7 @@ function AqexButton(props) {
       timerId = setTimeout(() => {
 
         setIsSubmittingInternal(false);
+        setIsSubmitting(false);
         if(setUIMsg) {
           setUIMsg({ type: 'ui-button-timeout', data: { id: id } });
         }
