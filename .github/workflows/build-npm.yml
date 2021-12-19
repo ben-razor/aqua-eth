@@ -20,4 +20,6 @@ jobs:
       - name: Install dependencies
         working-directory: ./web
         run: npm install
-      - run: npm run test
+      - name: Run tests
+        working-directory: ./web
+        run: npm run test
