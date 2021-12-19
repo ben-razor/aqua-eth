@@ -11,7 +11,6 @@ import {
     registerService,
     RequestFlowBuilder
 } from '@fluencelabs/fluence/dist/internal/compilerSupport/v2';
-import { Toast } from 'react-bootstrap';
 import AquaEthReact from './AquaEthReact';
 
 export async function attemptConnect(handler) {
