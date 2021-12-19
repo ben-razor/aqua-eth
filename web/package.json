@@ -30,14 +30,21 @@
   "dependencies": {
     "@fluencelabs/fluence": "^0.15.2",
     "@fluencelabs/fluence-network-environment": "^1.0.13",
+    "assert": "^2.0.0",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
     "ethers": "5.5.2",
+    "https-browserify": "^1.0.0",
+    "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-modal": "^3.14.4",
     "react-toast-notifications": "^2.5.1",
-    "stream": "^0.0.2",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "url": "^0.11.0",
     "util": "^0.12.4"
   }
 }
