@@ -1,17 +1,8 @@
-import React, {useState, useEffect, createRef, Fragment} from 'react';
-import { Fluence, FluencePeer } from "@fluencelabs/fluence";
+import React, {useState, useEffect, Fragment} from 'react';
+import { Fluence } from "@fluencelabs/fluence";
 import { krasnodar } from "@fluencelabs/fluence-network-environment";
 import { clip } from '../helpersHTML';
 import connect from './Connect';
-
-import {
-    ResultCodes,
-    CallParams,
-    callFunction, 
-    registerService,
-    RequestFlowBuilder
-} from '@fluencelabs/fluence/dist/internal/compilerSupport/v2';
-import AquaEthReact from './AquaEthReact';
 
 export async function attemptConnect(handler) {
     let data;
