@@ -9,7 +9,8 @@ import { requestAccounts, getChainInfo, getBalance, getBlockNumber,
          erc20Connect, erc20BalanceOf, erc20Transfer, 
          registerListenerNode} from '../compiled/aquaEth.js';
 import { attemptConnect, attemptDisconnect } from '../components/FluenceReact.js';
-import connect from '../components/Connect.js';
+import getConnector from '../components/Connector.js';
+let connector = getConnector();
 
 let peerId;
 let relayPeerId;
@@ -19,7 +20,7 @@ jest.setTimeout(20000);
 function aquaEthHandler(msg) { }
 
 beforeEach(async() => {
-  let data = await attemptConnect(connect);
+  let data = await attemptConnect(connector);
   peerId = data.connectionInfo.peerId;
   relayPeerId = data.connectionInfo.relayPeerId;
   new AquaEthService(null, null, aquaEthHandler);
