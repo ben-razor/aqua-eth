@@ -344,7 +344,7 @@ export default function AquaEthReact(props) {
     for(let row of data) {
       let value = row.value;
 
-      if(typeof value === 'object' || typeof Array.isArray(value)) {
+      if(typeof value === 'object' || Array.isArray(value)) {
         value = JSON.stringify(value);
       }
 
