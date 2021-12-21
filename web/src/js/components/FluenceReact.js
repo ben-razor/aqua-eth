@@ -2,7 +2,8 @@ import React, {useState, useEffect, Fragment} from 'react';
 import { Fluence } from "@fluencelabs/fluence";
 import { krasnodar } from "@fluencelabs/fluence-network-environment";
 import { clip } from '../helpersHTML';
-import connect from './Connect';
+import getConnector from './Connector';
+let connector = getConnector();
 
 export async function attemptConnect(handler) {
     let data;
@@ -51,7 +52,7 @@ function FluenceReact(props) {
     useEffect(() => {
         let timer = setInterval(() => testConnection, 60000);
 
-        connect.addHandler('fluence-test-connection', (data) => {
+        connector.addHandler('fluence-test-connection', (data) => {
             testConnection();
         });
 
@@ -64,7 +65,7 @@ function FluenceReact(props) {
 
             async function connectToHost() {
                 setConnected(false);
-                let data = await attemptConnect(connect);
+                let data = await attemptConnect(connector);
                 setConnected(data.connected);
                 setConnectionInfo({...data.connectionInfo});
                 setConnectedNode(data.node);

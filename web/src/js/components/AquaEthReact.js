@@ -290,14 +290,12 @@ export default function AquaEthReact(props) {
     setGetBlockEntry({ blockNumber: blockNumber });
   }, [blockNumber]);
 
-  useEffect(() => {
-    console.log(getTransactionEntry);
-  }, [getTransactionEntry]);
-
   function resetFields() {
-    setBalanceAccount(accounts[0])
-    setBalance();
-    setGetFeeDataResult();
+    if(accounts) {
+      setBalanceAccount(accounts[0])
+      setBalance();
+      setGetFeeDataResult();
+    }
   }
 
   function setButtonSubmitting(id, sub) {

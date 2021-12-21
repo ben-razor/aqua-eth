@@ -1,4 +1,4 @@
-class Connect {
+class Connector {
   constructor(log=false) {
     this.handlers = {};
     this.log = log;
@@ -24,6 +24,8 @@ class Connect {
   }
 }
 
-const connect = new Connect();
+const connector = new Connector();
 
-export default connect;
+export default function getConnector() {
+  return connector;
+}

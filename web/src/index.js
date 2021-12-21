@@ -3,9 +3,10 @@ import ReactDOM from 'react-dom';
 import './css/styles.css';
 import { ToastProvider, useToasts } from 'react-toast-notifications';
 import FluenceReact from './js/components/FluenceReact';
-import connect from './js/components/Connect';
+import getConnector from './js/components/Connector';
 import AquaEthReact from './js/components/AquaEthReact';
 import logo from '../src/images/aqua-eth-2.png';
+let connector = getConnector();
 
 const TOAST_TIMEOUT = 4000;
 
@@ -26,7 +27,7 @@ function App(props) {
   }
 
   useEffect(() => {
-    connect.addHandler('fluence-connect', (data) => {
+    connector.addHandler('fluence-connect', (data) => {
       setConnected(data.connected);
       setConnectionInfo({...data.connectionInfo});
       setRemotePeerId(data.connectionInfo.peerId);
